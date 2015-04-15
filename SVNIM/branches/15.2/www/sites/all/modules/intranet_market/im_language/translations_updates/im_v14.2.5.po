@@ -1,0 +1,45 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Dmd Assignment
+msgid "Family Name"
+msgstr "Nom"
+
+#Dmd Assignment
+msgid "Assign Director"
+msgstr "Délégation des droits Directeur de Magasin"
+
+#Dmd Assignment
+msgid "DMD Assignment"
+msgstr "Délégation droits DM"
+
+#Dmd Assignment
+msgid "End Date"
+msgstr "Date de fin"
+
+#Dmd Assignment
+msgid "Assigned & Past"
+msgstr "Historique"
+
+#Action and OM workflow
+msgid "Return Publication"
+msgstr "Refuser la publication"
+
+#Questionnaire - Webform 
+msgid "Thank you, your submission has been received."
+msgstr "Vos réponses ont bien été envoyées. Merci pour votre retour."
+
+# Questionnaire : Agenda for the day page.
+msgid "Questionnaire for this action has been already submitted by you"
+msgstr "Vous avez déjà répondu à ce questionnaire. Merci pour vos réponses."

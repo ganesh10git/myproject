@@ -1,0 +1,9 @@
+<?php
+/**
+ * @file
+ *
+ * includes the inc files for the utilities functions to be available everywhere
+ */
+
+module_load_include('inc', 'im_utilities', 'im_utilities_block');
+module_load_include('inc', 'im_utilities', 'im_utilities_features');

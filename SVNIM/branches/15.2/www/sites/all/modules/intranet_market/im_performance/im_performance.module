@@ -1,0 +1,309 @@
+<?php
+
+/**
+ * @file IM performance module file.
+ * @source http://drupal4hu.com/node/260
+ */
+
+/**
+ * Implementation of hook_file_url_alter().
+ * The goal is to rewrite the static files URL to use another domain.
+ * @param $uri the URI to a file for which we need an external URL, or the path to a shipped file
+ */
+function im_performance_file_url_alter(&$uri) {
+  // If it is not an URI or an absolute URL, prefix using static files domain
+  if (strpos($uri, ':') === FALSE && drupal_substr($uri, 0, 2) !== '//') {
+    // Prefix current URL
+    if ($static_files_domain_base_url = _im_performance_get_static_files_domain_base_path()) {
+      $uri = $static_files_domain_base_url . $uri;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_stream_wrappers_alter().
+ * Alters the list of PHP stream wrapper implementations.
+ * The goal is the same as for hook_file_url_alter() but this time to handle URIs like 'public://'.
+ * @param $wrappers
+ */
+function im_performance_stream_wrappers_alter(&$wrappers) {
+  $wrappers['public']['class'] = 'DrupalIMPerformancePublicStreamWrapper';
+}
+
+/**
+ * Custom wrapper for public URIs
+ */
+class DrupalIMPerformancePublicStreamWrapper extends DrupalPublicStreamWrapper {
+  /**
+   * Rewrite URI to use a dedicated domain for static files
+   */
+  function getExternalUrl() {
+    // Try to get base path for static files domain
+    if ($static_files_domain_base_url = _im_performance_get_static_files_domain_base_path()) {
+      // Generate the URL
+      $path = str_replace('\\', '/', $this->getTarget());
+      return $static_files_domain_base_url . self::getDirectoryPath() . '/' . drupal_encode_path($path);
+    }
+
+    // If no domain has been found use the default behaviour
+    return parent::getExternalUrl();
+  }
+}
+
+/**
+ * Implementation of hook_ajax_render_alter().
+ * Alters the commands that are sent to the user through the Ajax framework.
+ * The goal is to use relative paths for js files that must be dynamically loaded after JSON treatment.
+ * When using static domains in src property of script tags, the call to html(<script ...></script>) does not manage to request the javascript file (cf. evalScript()).
+ *
+ * @param $commands
+ */
+function im_performance_ajax_render_alter(&$commands) {
+  foreach ($commands as $key => $command) {
+    // Look for js insertion that will be interpreted dynamically
+    if ($command['command'] == 'insert' && $command['method'] == 'prepend' && $command['selector'] == 'head') {
+      $commands[$key]['data'] = preg_replace('|^(<script.*)(https?://[^/]+)/|', '$1/', $command['data']);
+    }
+  }
+}
+
+/**
+ * Private function that build the base path for a domain dedicated to static files.
+ * @return the computed base path if it exists and NULL otherwise
+ */
+function _im_performance_get_static_files_domain_base_path() {
+  static $static_files_domains;
+  static $static_files_domain_index = 0;
+  static $static_files_domain_base_urls = array();
+
+  // Get static files domain from variables
+  if (!isset($static_files_domains)) {
+    $static_files_domains = variable_get('im_performance_static_files_domain');
+  }
+
+  // If static files domain has been found
+  $result = NULL;
+  if ($static_files_domains) {
+    // Build base URL for static domain
+    if (!isset($static_files_domain_base_urls[$static_files_domain_index])) {
+      global $base_path;
+
+      // Get the port number used for the current request (do not use $_SERVER['SERVER_PORT'] as it is not properly set all the time)
+      $http_host = $_SERVER['HTTP_HOST'];
+      $http_host_info = explode(':', $http_host);
+      $http_port = !isset($http_host_info[1]) ? '' : ':' . $http_host_info[1];
+      $static_files_domain_base_urls[$static_files_domain_index] = '//' . $static_files_domains[$static_files_domain_index] . $http_port . $base_path;
+    }
+
+    // Temporary store result to increment the index
+    $result = $static_files_domain_base_urls[$static_files_domain_index];
+    $static_files_domain_index = ($static_files_domain_index + 1) % count($static_files_domains);
+  }
+
+  return $result;
+}
+
+/**
+ * Implements hook_node_insert().
+ *
+ * Flush corresponding varnish's cache on node creations.
+ */
+function im_performance_node_insert($node) {
+  _im_performance_expire_node($node);
+}
+
+/**
+ * Implements hook_node_update().
+ *
+ * Flush corresponding varnish's cache on node updates.
+ */
+function im_performance_node_update($node) {
+  _im_performance_expire_node($node);
+}
+
+/**
+ * Implements hook_node_delete().
+ *
+ * Flush corresponding varnish's cache on node deletions.
+ */
+function im_performance_node_delete($node) {
+  _im_performance_expire_node($node);
+}
+
+/**
+ * Implements hook_file_insert().
+ *
+ * Flush corresponding varnish's cache on file creations.
+ */
+function im_performance_file_insert($file) {
+  _im_performance_expire_file($file);
+}
+
+/**
+ * Implements hook_file_update().
+ *
+ * Flush corresponding varnish's cache on file updates.
+ */
+function im_performance_file_update($file) {
+  _im_performance_expire_file($file);
+}
+
+/**
+ * Implements hook_file_delete().
+ *
+ * Flush corresponding varnish's cache on file deletions.
+ */
+function im_performance_file_delete($file) {
+  _im_performance_expire_file($file);
+}
+
+/**
+ * Implements hook_path_insert().
+ *
+ * Flush corresponding varnish's cache on path alias creations.
+ */
+function im_performance_path_insert($path) {
+  _im_performance_expire_drupal_path_alias($path);
+}
+
+/**
+ * Implements hook_path_update().
+ *
+ * Flush corresponding varnish's cache on path alias updates.
+ */
+function im_performance_path_update($path) {
+  _im_performance_expire_drupal_path_alias($path);
+}
+
+/**
+ * Implements hook_path_delete().
+ *
+ * Flush corresponding varnish's cache on path alias deletions.
+ */
+function im_performance_path_delete($path) {
+  _im_performance_expire_drupal_path_alias($path);
+}
+
+/**
+ * Expires a node's aliases from varnish.
+ * Note: This function only flushes the technical path of the
+ * node (e.g. '/node/123') because its path alias is managed by paths hooks.
+ * See im_performance_path_insert/update/delete
+ * @param object $node
+ */
+function _im_performance_expire_node($node) {
+  global $base_path;
+  $paths_to_expire = array();
+
+  // Retrieve node's language objet:
+  $languages = language_list();
+  $node_lang_object = isset($languages[$node->language]) ? $languages[$node->language] : NULL;
+
+  // Expire basic path to node:
+  $basic_path = 'node/' . $node->nid;
+  $technical_path = url($basic_path, array('absolute' => FALSE, 'alias' => TRUE, 'language' => $node_lang_object));
+  $paths_to_expire[] = $technical_path;
+
+  // If promoted to front page, expire front page:
+  if ($node->promote == 1) {
+    $paths_to_expire[] = url('', array('absolute' => FALSE, 'alias' => TRUE, 'language' => $node_lang_object));
+    $paths_to_expire[] = url(variable_get('site_frontpage', 'node'), array('absolute' => FALSE, 'alias' => TRUE, 'language' => $node_lang_object));
+  }
+
+  // Expire paths:
+  _im_performance_expire_paths($paths_to_expire);
+}
+
+/**
+ * Expires a file's url from varnish.
+ * @param object $file
+ */
+function _im_performance_expire_file($file) {
+  $paths_to_expire = array();
+
+  // Get original path to flush
+  if (($real_abs_uri = _im_performance_get_real_absolute_uri($file->uri)) !== FALSE) {
+    $paths_to_expire[] = $real_abs_uri;
+  }
+
+  // In case this file is a picture, flush all its image derivatives
+  $styles = image_styles();
+  foreach ($styles as $style) {
+    $image_path = image_style_path($style['name'], $file->uri);
+    if (file_exists($image_path)) {
+      if (($real_abs_uri = _im_performance_get_real_absolute_uri($image_path)) !== FALSE) {
+        $paths_to_expire[] = $real_abs_uri;
+      }
+    }
+  }
+
+  // Expire paths:
+  _im_performance_expire_paths($paths_to_expire);
+}
+
+/**
+ * Expires a drupal path alias object from varnish.
+ * @param array $path: An associative array containing the following keys:
+ *   - source: The internal system path.
+ *   - alias: The URL alias.
+ *   - pid: (optional) Unique path alias identifier.
+ *   - language: (optional) The language of the alias.
+ */
+function _im_performance_expire_drupal_path_alias($path) {
+  // Retrieve path's language objet:
+  $languages = language_list();
+  $path_lang_object = isset($languages[$path['language']]) ? $languages[$path['language']] : NULL;
+
+  // Expire corresponding path alias:
+  $alias_path = url($path['alias'], array('absolute' => FALSE, 'alias' => TRUE, 'language' => $path_lang_object));
+  if ($alias_path != $path['source']) {
+    // Expire paths:
+    _im_performance_expire_paths(array($alias_path));
+  }
+}
+
+/**
+ * Converts a Drupal file uri (e.g. 'public://product-images/product-images/pic_2.jpeg) to
+ * a real absolute file uri (e.g. '/sites/default/files/public/product-images/pic_2.jpeg').
+ *
+ * @param string $drupal_file_uri: A Drupal file uri (like what returns $file->uri).
+ * @return string: The corresponding real absolute uri. Returns FALSE in case the given URI
+ *         could not be parsed.
+ */
+function _im_performance_get_real_absolute_uri($drupal_file_uri) {
+  // Retrieve a full URL
+  $file_url = file_create_url($drupal_file_uri);
+
+  // Extract real absolute uri (we match what is after the first single slash)
+  $matches = array();
+  if (preg_match('#[^/](/.*)#', $file_url, $matches)) {
+    // Match found, return it
+    return $matches[1];
+  }
+  else {
+    // The regexp did not match, that means that given url was not in the
+    // expected format, so return FALSE
+    return FALSE;
+  }
+}
+
+/**
+ * Purge from Varnish paths given in parameter.
+ * Will also purge any derivated paths with parameters.
+ * Example : array('/node/123'); will also purge '/node/123?key=value'.
+ *
+ * @param array $paths: Paths to purge from Varnish.
+ *        Example: array('/node/123', '/en/home');
+ */
+function _im_performance_expire_paths($paths) {
+  $varnish_commands = array();
+  foreach($paths as $path) {
+    // Ban current path, and its derivatives paths (with parameters).
+    // Regexp below has to be double escaped because we have to go through 2 escaping layers: PHP and Varnishadmin.
+    $varnish_commands[] = 'ban.url "^' . $path . '(\\\\?.*)?$"';
+  }
+
+  if (!empty($varnish_commands)) {
+    _varnish_terminal_run($varnish_commands);
+  }
+}

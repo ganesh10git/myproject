@@ -1,0 +1,12 @@
+name = im_features_apachesolr_pages
+description = apachesolr search pages
+core = 7.x
+package = Intranet Market
+dependencies[] = apachesolr_search
+dependencies[] = ctools
+features[apachesolr_search_page][] = action_search
+features[apachesolr_search_page][] = agenda_store_filter_search
+features[apachesolr_search_page][] = om_search
+features[apachesolr_search_page][] = sales_plan_search
+features[ctools][] = apachesolr_search:apachesolr_search_defaults:3
+features[features_api][] = api:2

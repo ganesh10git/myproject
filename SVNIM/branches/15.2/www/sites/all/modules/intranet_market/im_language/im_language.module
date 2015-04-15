@@ -1,0 +1,55 @@
+<?php
+/**
+ * @file
+ */
+include_once './includes/locale.inc';
+
+/**
+ * Get a list of po files located in the folder $folder
+ * of the module.
+ * List only the .po located in subdirectories of $folder folder
+ *
+ * @param string $module_name the module name to look for .po in
+ * @return array of files ordered by language subfolders, empty array if no file found
+ */
+function im_language_list_po_files($folder_path){
+  $result = array();
+  if (is_dir($folder_path)) {
+    $files = new DirectoryIterator($folder_path);
+    foreach ($files as $file) {
+      if ($file->isDir()) {
+        $subfiles = new DirectoryIterator($folder_path . '/' . $file->getFilename());
+        foreach ($subfiles as $subfile) {
+          if (substr($subfile->getFilename(), -3) == '.po') {
+            $result[$file->getFilename()][$subfile->getFilename()] = $subfile->getFilename();
+          }
+        }
+      }
+    }
+  }
+  return $result;
+}
+
+/**
+ * This function imports all po files which are in imported_folders folders
+ *
+ * @param $folders_to_import array of string $imported_folders folders with po files to import.
+ */
+function im_language_import_folders_po($folders_to_import) {
+  foreach ($folders_to_import as $folder) {
+    //From here, $folder = langcode
+    $languages = language_list();
+    if (!isset($languages[$folder])) {
+      locale_add_language($folder, NULL, NULL, LANGUAGE_LTR, '', '', TRUE, TRUE);
+    }
+    $files = new DirectoryIterator(drupal_get_path('module', 'im_language') . '/translations/' . $folder);
+    foreach ($files as $file) {
+      if (substr($file, -3) == '.po') {
+        $f = new stdClass();
+        $f->filename = $file;
+        $f->uri = drupal_get_path('module', 'im_language') . '/translations/' . $folder . '/' . $file;
+        _locale_import_po($f, $folder, LOCALE_IMPORT_OVERWRITE, 'default');
+      }
+    }
+  }
+}

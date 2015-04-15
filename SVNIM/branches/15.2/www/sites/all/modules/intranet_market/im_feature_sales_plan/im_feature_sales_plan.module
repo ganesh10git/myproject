@@ -1,0 +1,25 @@
+<?php
+/**
+ * @file
+ * Code for the IM Feature Sales Plan feature.
+ */
+
+include_once 'im_feature_sales_plan.features.inc';
+
+/**
+ * Implements of hook_form_FORM_ID_alter()
+ * @param array $form
+ * @param array $form_state
+ * @param array $form_id
+ * Fix - FATIM-389
+ */
+function im_feature_sales_plan_form_sales_plan_node_form_alter(&$form, &$form_state, $form_id) {
+	$form['field_sp_order_period']['#after_build'] = array('_im_feature_sales_plan_date_field_manage');
+	$form['field_sp_operation_period']['#after_build'] = array('_im_feature_sales_plan_date_field_manage');
+}
+
+function _im_feature_sales_plan_date_field_manage(&$element) {
+  $element['und'][0]['value']['#title'] = t('From') . ":";
+  $element['und'][0]['value2']['#title'] = t('To') . ":";
+  return $element;
+}

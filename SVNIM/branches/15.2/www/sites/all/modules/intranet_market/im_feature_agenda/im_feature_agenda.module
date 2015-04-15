@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the im_feature_agenda feature.
+ */
+
+include_once 'im_feature_agenda.features.inc';

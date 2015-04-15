@@ -1,0 +1,6 @@
+core = "7.x"
+description = "This module is responsible for stores."
+name = "Intranet market stores"
+package = "Carrefour stores modules"
+project = "im_stores"
+version = "7.x-1.0"

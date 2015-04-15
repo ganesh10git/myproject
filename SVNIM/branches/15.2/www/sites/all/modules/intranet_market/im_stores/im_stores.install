@@ -1,0 +1,146 @@
+<?php
+
+/**
+ * 
+ * Implementation of hook_schema
+ */
+function im_stores_schema() {
+  $schema = array();
+  $schema['store'] = array(
+    'description' => 'This table contains the identification of stores.',
+    'fields' => array(
+      'pve_code' => array(
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Id of Store.'
+      ),
+      'pve_lib' => array(
+        'type' => 'varchar',
+        'length' => 4000,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Name of Store.'
+      ),
+      'ens_code' => array(
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Enseigne code.'
+      ),
+    ),
+    'indexes' => array(
+       'S_PL' => array('pve_lib'),
+       'S_PC' => array('pve_code'),
+       'S_PC_PL' => array('pve_code', 'pve_lib'),
+      )
+	);
+	$schema['store_item_fields'] = array(
+	    'description' => 'This table contains the list of fields and their value for one store.',
+	    'fields' => array(
+	      'pve_code' => array(
+	        'type' => 'varchar',
+	        'length' => 20,
+	        'not null' => TRUE,
+	        'default' => '',
+	        'description' => 'Id of Store.'),
+	      'dit_cod_item' => array(
+	        'type' => 'varchar',
+	        'length' => 20,
+	        'not null' => TRUE,
+	        'default' => '',
+	        'description' => 'Id of Item.'),
+		  'ite_lib_value' => array(
+	        'type' => 'varchar',
+	        'length' => 4000,
+	        'default' => '',
+	        'description' => 'Valeur de l’item.'),	
+		),
+	  'indexes' => array(
+        'SIF_ILV_DCI' => array('dit_cod_item', 'pve_code'),
+        'SIF_ILV_DCI_PC' => array('ite_lib_value', 'dit_cod_item', 'pve_code'),
+        'SIF_DCI' => array('dit_cod_item'),
+      ),
+	);
+	$schema['store_item_fields_desc'] = array(
+	    'description' => 'This table contains the list of fields and their value for one store.',
+	    'fields' => array(
+	      'dit_cod_item' => array(
+	        'type' => 'varchar',
+	        'length' => 20,
+	        'not null' => TRUE,
+	        'default' => '',
+	        'description' => 'Id of Item.'),
+		  'dit_lib' => array(
+	        'type' => 'varchar',
+	        'length' => 60,
+	        'not null' => TRUE,
+	        'default' => '',
+	        'description' => 'Name of Item.'),
+		  'dsd_lib' => array(
+	        'type' => 'varchar',
+	        'length' => 60,
+	        'not null' => TRUE,
+	        'default' => '',
+	        'description' => 'Name of sub domain.'),
+		  'ddo_lib' => array(
+	        'type' => 'varchar',
+	        'length' => 60,
+	        'not null' => TRUE,
+	        'default' => '',
+	        'description' => 'Name of domain - Type of item(Alphanumérique => 1, Numérique => 2, Interface => 3, Date => 4).'),
+	      'dit_idt_type' => array(
+	        'type' => 'int',
+			'length' => 10,
+			'not null' => TRUE,
+			'default' => 0,
+			'description' => 'Specific values for the display of the "Locate Store" button(Liste de choix => 5, Latitude => 20, Longitude => 21).'),
+		),
+	    'indexes' => array(
+          'SIFD_DCI_DL' => array('dit_cod_item', 'dit_lib'),
+          'SIFD_DCI' => array('dit_cod_item'),
+          'SIFD_DL' => array('dit_lib'),
+         ),
+		
+	);
+	return $schema;
+}
+
+/**
+ * Implementation of hook_update_N
+ * Used to add a new field on the store table (The field name is : ens_code).
+ */
+
+function im_stores_update_7300() {
+  db_add_field('store', 'ens_code',
+    array(
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'Enseigne code.'
+    ),
+    array(
+      'indexes' => array(
+        'ens_code' => array('ens_code')
+      ),
+    )
+  );
+}
+
+function im_stores_update_7400() {
+	db_add_index('store', 'S_PL', array('pve_lib'));
+	db_add_index('store', 'S_PC', array('pve_code'));
+	db_add_index('store', 'S_PC_PL', array('pve_code', 'pve_lib'));
+	
+	db_add_index('store_item_fields', 'SIF_ILV_DCI', array('dit_cod_item', 'pve_code'));
+	db_add_index('store_item_fields', 'SIF_ILV_DCI_PC', array('ite_lib_value', 'dit_cod_item', 'pve_code'));
+	db_add_index('store_item_fields', 'SIF_DCI', array('dit_cod_item'));
+	
+	
+	db_add_index('store_item_fields_desc', 'SIFD_DCI_DL', array('dit_cod_item', 'dit_lib'));
+	db_add_index('store_item_fields_desc', 'SIFD_DCI', array('dit_cod_item'));
+	db_add_index('store_item_fields_desc', 'SIFD_DL', array('dit_lib'));
+}

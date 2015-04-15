@@ -1,0 +1,9 @@
+core = "7.x"
+description = "This module is responsible intranet user management."
+name = "Intranet market user"
+package = "Carrefour annuuddi modules"
+project = "im_user"
+version = "7.x-1.0"
+dependencies[] = im_service
+dependencies[] = im_stores
+dependencies[] = im_feature_user

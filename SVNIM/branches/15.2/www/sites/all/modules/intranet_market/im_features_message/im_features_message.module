@@ -1,0 +1,386 @@
+<?php
+/**
+ * @file
+ * Code for the IM features Message feature.
+ */
+
+include_once 'im_features_message.features.inc';
+/**
+ * 
+ * Implements hook_form_FORM_ID_alter().
+ * @param $form
+ * @param $form_state
+ * @param $form_id
+ */
+function im_features_message_form_message_node_form_alter(&$form, &$form_state, $form_id) {
+
+  $form['field_node_archive']['#attributes']['style'] = 'display:none';
+
+  $form['field_message_image']['#states']['visible'] =  array(
+			        ':input[name="field_message_type[und]"]' => array('value' => 'Widget'),
+					
+				);
+  $form['field_description']['#states']['visible'] =  array(
+			        ':input[name="field_message_type[und]"]' => array('value' => 'Widget'),
+					
+				);
+
+  $form['field_description_accueil']['#states']['visible'] =  array(
+			        ':input[name="field_message_type[und]"]' => array('value' => 'Accueil'),
+					
+				);
+				if(!is_numeric(arg(1))){	
+	$msg_publication_to_date  = variable_get('message_publication_to_date', 7);	
+  	$form['field_publication_to_date']['und'][0]['#default_value']['value'] = date('Y-m-d',(strtotime("today +".$msg_publication_to_date.' days')));
+				}
+  return $form; 
+}
+/**
+ * 
+ * Implement Form ID alter 
+ * @param $form
+ * @param $form_state
+ * @param $form_id
+ */
+function im_features_message_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
+	unset($form['field_message_type_value']['#options']['All']);
+}
+/**
+ * Implements hook_image_default_styles().
+ */
+function im_features_message_image_default_styles() {
+  $styles = array();
+
+  // Exported image style: test.
+  $styles['im_message_image'] = array(
+    'name' => 'im_message_image',
+    'label' => 'im_message_image',
+    'effects' => array(
+      1 => array(        
+        'name' => 'image_resize',
+        'data' => array(
+          'width' => 40,
+          'height' => 40,
+        ),
+        'weight' => 1,
+      ),
+    ),
+  );
+
+  return $styles;
+}
+
+/**
+ * Implementation of hook_block_info
+ */
+function im_features_message_block_info() {
+	$blocks['im_message_block'] = array(
+    'info' => t('Messages block'),
+    'weight' => 10,
+    'cache' => DRUPAL_CACHE_GLOBAL,
+    'module' => 'im_features_message',
+  );
+  return $blocks;
+}
+
+/**
+ * Implemetation of hook_block_view
+ */
+function im_features_message_block_view($delta = '') {
+  $block = array();
+  global $user;
+ 
+  switch ($delta) {
+    case 'im_message_block':
+      $block['subject'] = '';
+      $block['content'] = _get_im_messages_block_content();
+      break;
+  }
+  return $block; 
+}
+
+/**
+ * Implementation of _get_im_messages_block_content
+ */
+function _get_im_messages_block_content() {
+  drupal_add_js(drupal_get_path('module', 'im_sales_plan') . '/js/jquery.jcarousel.min.js');
+  drupal_add_css(drupal_get_path('module', 'im_features_message') . '/css/carousel.css');
+  drupal_add_js(drupal_get_path('module', 'im_features_message') . '/js/im_messages.js');
+  //drupal_add_css(drupal_get_path('module', 'im_sales_plan') . '/css/im_sales_plan.css');
+	
+	
+	$query = "SELECT node.nid AS nid, node.created AS node_created
+            FROM {node} node
+            LEFT JOIN {field_data_field_publication_from_date} field_data_field_publication_from_date ON node.nid = field_data_field_publication_from_date.entity_id AND (field_data_field_publication_from_date.entity_type = 'node' AND field_data_field_publication_from_date.deleted = '0')
+            LEFT JOIN {field_data_field_publication_to_date} field_data_field_publication_to_date ON node.nid = field_data_field_publication_to_date.entity_id AND (field_data_field_publication_to_date.entity_type = 'node' AND field_data_field_publication_to_date.deleted = '0') LEFT JOIN {field_data_field_message_type} field_data_field_message_type ON node.nid = field_data_field_message_type.entity_id WHERE (( (node.status = '1') AND (node.type IN  ('message')) AND (TO_CHAR(TO_DATE(field_data_field_publication_from_date.field_publication_from_date_value, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS'), 'YYYY-MM-DD') <= '".date('Y-m-d', time())."') AND (TO_CHAR(TO_DATE(field_data_field_publication_to_date.field_publication_to_date_value, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS'), 'YYYY-MM-DD') >= '".date('Y-m-d', time())."') ) AND (field_data_field_message_type.field_message_type_value = :type))
+            ORDER BY node_created DESC";
+	
+	$res = db_query($query,array(':type' => 'Widget'));
+	
+	$message_info = array();
+  foreach($res as $result) {    
+	  $message_info[] = _get_message_info($result->nid);	  
+  }
+    
+	$output = theme('im_messages_block_template', array('result' => $message_info));
+	return $output;
+}
+
+/**
+ * implementatino of hook_theme
+ */
+function im_features_message_theme($existing, $type, $theme, $path) {
+  return array(
+    'im_messages_block_template' =>  array(
+      'variables' => array('output' => NULL),
+      'template' => 'theme/im_messages_block_template'
+       ),
+	   'im_message_popup' =>  array(
+		'variables' => array('result' => NULL),
+		'template' => 'theme/im_message_popup_template'
+	   ),  
+    );
+}
+/**
+ * 
+ * Implements hook_menu...
+ */
+
+function im_features_message_menu(){
+	$items['message/list/all/%ctools_js/message_info_popup/%'] = array(
+	'page callback' => '_im_features_message_popup_callback',
+	'access callback' => TRUE,
+	'type' => MENU_CALLBACK,
+	'page arguments' => array(3),
+	);
+	return $items;
+}
+/**
+ * 
+ * Function for the popup call back...
+ * @param $js
+ */
+function _im_features_message_popup_callback($js = FALSE) {
+	  global $user;
+	  if (!$js) {
+		return drupal_get_form('message_popup_form');
+	}
+  ctools_include('modal');
+  ctools_include('ajax');
+  $form_state = array(
+    'title' => t('Message Popup'),
+    'ajax' => TRUE,
+  );
+  $form_state['build_info']['args'] = array($node);
+  $output = ctools_modal_form_wrapper('message_popup_form', $form_state);
+  if (!empty($form_state['executed'])) {
+  	$output = array();
+    $output[] = ctools_modal_command_dismiss();
+    $output[] = ctools_ajax_command_reload();
+  }
+  print ajax_render($output);
+  exit;
+}
+/**
+ * 
+ * Bulid the pop-up form
+ * @param $form
+ * @param $form_state
+ */
+function message_popup_form($form, &$form_state) {
+	$msg_id = arg(5);			
+	ctools_include('ajax');
+	ctools_include('modal');
+	if ($msg_id == 0) {
+	  $msg_nid_val = _im_messages_popup_get_nid();		
+	  foreach($msg_nid_val as $ $key => $value){
+	    $nid = $value['nid'];
+		$unread_nodes = get_unread_msg_flag($nid);	 
+		if ($unread_nodes == 1) {
+	      $msg_nids[] = $nid;	
+		}
+	  }
+	  $_SESSION['msg_nid'] = $msg_nids;
+	}
+	    $message_popup_info = array();
+		$msg_val= array();
+		$message_count = 0;	
+		$nid_count = count($_SESSION['msg_nid']);  
+		if (is_numeric(arg(5))) {
+			$msg_id = arg(5);			
+			$msg_nid = isset($_SESSION['msg_nid'][$msg_id]) ? $_SESSION['msg_nid'][$msg_id] : '';
+			$next_msg_id = $msg_id + 1;			 
+		}
+		else {
+		  	$msg_nid = 0;
+		  	$next_msg_id = 1;
+		}		 
+		$form = message_popup_contents($form, $msg_nid);
+		if($msg_id < ($nid_count-1)){  
+			$next_link = ctools_modal_text_button(t('Next'), 'message/list/all/nojs/message_info_popup/'. $next_msg_id, t('Message info popup'), 'ctools-modal-ctools-sample-style');
+			$form['popup_message_next_link-'.$message_count] = array(
+				'#type' => 'item',
+				'#markup' => $next_link,
+				'#prefix' => '<div class="message-popup-next-info">',
+				'#suffix' => '</div>',
+			);
+		}
+		else{
+			$form['submit'] = array(
+				'#type' => 'submit',
+				'#value' => t('Close'),
+				'#prefix' => '<div class="message-popup-submit"><span class="close-pop close">',
+				'#suffix' => '</span></div></div>',
+			);
+			unset($_SESSION['msg_nid']);
+		}
+
+	return $form;
+}
+
+/**
+ * 
+ *Function to enter the pop up content ...
+ * @param $form
+ * @param $nid
+ */
+function message_popup_contents($form, $nid) {
+  global $user;
+  $message_details = node_load($nid);
+  module_load_include('inc', 'node_view_count', '/model/node_view_count.db');
+  node_view_count_db_count_view_insert($nid, $user->uid);
+  $msg_title= isset($message_details->title) ? $message_details->title : ''; 
+  $msg_desc = isset($message_details->field_description_accueil['und'][0]['safe_value']) ? $message_details->field_description_accueil['und'][0]['safe_value'] : '';		
+		   $form['popup_message_title-'.$message_count] = array(
+		     	'#type' => 'item',
+			 	'#markup' => $msg_title,
+				'#prefix' => '<div class="message-popup-wrapper"><div class="message-popup-title">',
+				'#suffix' => '</div>',
+			);			
+			$form['popup_message_content-'.$message_count] = array(
+				'#type' => 'item',
+				'#markup' => $msg_desc,
+				'#prefix' => '<div class="message-popup-description">',
+				'#suffix' => '</div>',
+			);			
+  return $form;	
+}
+
+/**
+ * 
+ * Get the message node info ...
+ * @param $nid
+ */
+function _get_message_info($nid) {
+  global $user;
+  $message_details = node_load($nid);
+  $message_data = array();
+  $message_data['message_nid'] = $nid;
+  if($message_details->field_message_type['und'][0]['value'] == 'Widget'){
+	$message_data['message_desc'] = $body_str = isset($message_details->field_description['und'][0]['safe_value']) ? $message_details->field_description['und'][0]['safe_value'] : '';
+  }
+  elseif($message_details->field_message_type['und'][0]['value'] == 'Accueil'){
+	$message_data['message_title'] = $body_str = isset($message_details->title) ? $message_details->title : ''; 
+	$message_data['message_desc'] = $body_str = isset($message_details->field_description_accueil['und'][0]['safe_value']) ? $message_details->field_description_accueil['und'][0]['safe_value'] : '';
+	
+  }
+  if(!empty($message_details->field_message_image)){
+	$message_data['message_image'] = isset($message_details->field_message_image['und'][0]['uri']) ? $message_details->field_message_image['und'][0]['uri'] : '';
+
+  }
+
+   //cuwa xt-med
+  $message_data['im_cuwa_x1'] = '';
+  $message_data['im_cuwa_x2'] = '';
+  $message_data['im_cuwa_x3'] = '';
+  $message_data['im_cuwa_x4'] = '';
+  $message_data['im_cuwa_x5'] = '';
+  if (isset($_SESSION['ldap_user_role'])) {
+    if($_SESSION['ldap_user_role'] == 'store_director'){
+      $message_data['im_cuwa_x1'] = 1;
+      $message_data['im_cuwa_x2'] = 1;
+    }
+    if($_SESSION['ldap_user_role'] == 'store_manager') {
+      $message_data['im_cuwa_x1'] = 2;
+      $message_data['im_cuwa_x2'] = 1;
+    }
+    if($_SESSION['ldap_user_role'] == 'store_employee') {
+      $message_data['im_cuwa_x1'] = 3;
+      $message_data['im_cuwa_x2'] = 1;
+    }
+    if($_SESSION['ldap_user_role'] == 'salarie_siege') {
+      $message_data['im_cuwa_x2'] = 2;
+    }
+  }
+  if(isset($_SESSION['profil']['store'])) {
+    $message_data['im_cuwa_x3'] = $_SESSION['profil']['store'];
+  }
+  if((arg(4) == '' && arg(1) == '' )||(arg(0)=='agenda' && arg(1) == 'list' && arg(4) != '')) {
+    if (arg(4) != '') {
+      $tid = strstr(arg(4), ",", TRUE);
+      if ($tid) {
+        $message_data['im_cuwa_x5'] = taxonomy_term_load($tid)->name;
+      }
+      else if(arg(4) == 'all'){
+        $message_data['im_cuwa_x5'] = 'multi-departments';
+      }
+    }
+    elseif(arg(4) == '') {
+        $message_data['im_cuwa_x5'] = 'multi-departments';
+    }
+  }
+	return $message_data;
+}
+/**
+ * 
+ * Implements hook_form_alter...
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @param unknown_type $form_id
+ */
+function im_features_message_form_alter(&$form, &$form_state, $form_id) {
+	  if ($form_id == 'message_node_form') {
+	  	 if(!is_numeric(arg(1))){
+  	  	$message_to_date_n_value =  variable_get('message_publication_to_date', 7);
+  	 	 drupal_add_js(drupal_get_path('module', 'im_features_message') . '/js/im_messages_popup.js');
+  	 	
+  	  	drupal_add_js(array('im_custom_message_date' => array('message_to_date' => $message_to_date_n_value)), 'setting');  		
+  		}
+	 }
+}
+/**
+ * 
+ * Function to return the Nids for home page popup ...
+ */
+function _im_messages_popup_get_nid(){
+	  $msg_content = array();
+	   $query = "SELECT node.nid AS nid, node.created AS node_created FROM {node} node
+				LEFT JOIN {field_data_field_publication_from_date} field_data_field_publication_from_date ON node.nid = field_data_field_publication_from_date.entity_id AND (field_data_field_publication_from_date.entity_type = 'node' AND field_data_field_publication_from_date.deleted = '0')
+				LEFT JOIN {field_data_field_publication_to_date} field_data_field_publication_to_date ON node.nid = field_data_field_publication_to_date.entity_id AND (field_data_field_publication_to_date.entity_type = 'node' AND field_data_field_publication_to_date.deleted = '0') LEFT JOIN {field_data_field_message_type} field_data_field_message_type ON node.nid = field_data_field_message_type.entity_id WHERE (( (node.status = '1') AND (node.type IN  ('message')) AND (TO_CHAR(TO_DATE(field_data_field_publication_from_date.field_publication_from_date_value, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS'), 'YYYY-MM-DD') <= '".date('Y-m-d', time())."') AND (TO_CHAR(TO_DATE(field_data_field_publication_to_date.field_publication_to_date_value, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS'), 'YYYY-MM-DD') >= '".date('Y-m-d', time())."') ) AND (field_data_field_message_type.field_message_type_value = :type))
+				ORDER BY node_created DESC";
+		
+	   $res = db_query($query,array(':type'=> 'Accueil'));
+	   $res_count = db_query($query,array(':type'=> 'Accueil'))->rowCount();
+	   $cc = 0;
+	   foreach($res as $result) {
+			$msg_content[$cc]['nid'] = $result->nid;			
+			$cc++;
+		}
+
+	return 	$msg_content;
+}
+/**
+ * 
+ * Function to check the unread message for home page ...
+ * @param $node_id
+ */
+function get_unread_msg_flag($node_id){
+	    global $user;
+		$node = node_load($node_id);
+		$msg_node_view_count = node_view_count_db_count_view_select((object)$node, $user);
+		$unread_count = false;
+		if($msg_node_view_count['0']->expression == 0){
+			$unread_count = true;
+		}
+	return $unread_count;
+}

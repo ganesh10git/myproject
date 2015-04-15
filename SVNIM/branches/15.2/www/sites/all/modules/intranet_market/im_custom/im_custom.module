@@ -1,0 +1,484 @@
+<?php
+
+/**
+ * Implements hook_menu.
+ */
+function im_custom_menu() {
+  $items = array();
+  $items['admin/im/settings'] = array(
+    'title' => t('IM Custom Settings'),
+    'description' => 'Configure IM custom settings.',
+    'page callback' => 'drupal_get_form',
+    'file' => 'im_custom.admin.inc',
+    'page arguments' => array('im_custom_settings_admin_form'),
+    'access callback' => '_im_custom_settings_access',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['access-denied'] = array(
+    'page callback' => '_get_access_denied_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/im/settings/purge/inactiveusers'] = array(
+    'title' => t('Purge Inactive Users'),
+    'page callback' => 'im_custom_user_disable',
+    'access callback' => '_im_custom_settings_access',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/im/purgepolicy/settings'] = array(
+    'title' => t('IM Purge Policy Settings'),
+    'description' => 'Configure IM Purge Policy settings.',
+    'page callback' => 'drupal_get_form',
+    'file' => 'im_purgepolicy.admin.inc',
+    'page arguments' => array('im_purgepolicy_settings_admin_form'),
+    'access callback' => '_im_custom_settings_access',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['check_file_access/%'] = array(
+    'page callback' => '_check_file_access',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['user_sess_info'] = array(
+    'page callback' => '_user_sessioninfo',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+} 
+//** Implemented hook_cron to delete expired contents*/
+  function im_custom_cron(){  
+    $cron_last = variable_get("cron_last_purgecontent");
+    if(date('Ymd', $cron_last) != date("Ymd")){ 
+     im_custom_purge_policy();  
+     variable_set("cron_last_purgecontent", date("Ymd"));
+     }
+  }
+/**
+ * 
+ * Force to modify protocol as https.
+ * @param $path
+ * @param $options
+ * @param $http_response_code
+ */
+function im_custom_drupal_goto_alter(&$path, &$options, &$http_response_code) {
+  //Portal redirection to LDAP should be by the defined protocol(custom settings).
+  if(strpos($path,"LdapWsWeb/login.jsp")===FALSE) {
+    $options['https'] = variable_get('https', FALSE);
+  }
+}
+
+function _get_access_denied_page() {
+ if(request_uri() == "/user/logout") { 
+  drupal_add_js('jQuery(document).ready(function () {
+   window.location.href = location.hostname;
+  });', 'inline');
+ }	
+  if(isset($_SESSION['messages']['warning'])) {
+   unset($_SESSION['messages']['warning']);
+   }
+  return theme('im_access_denied_template', array());
+}
+
+/*
+ * Implementation of hook_theme
+ */
+function im_custom_theme($existing, $type, $theme, $path) {
+  return array(
+    'im_access_denied_template' =>  array(
+	    'template' => 'theme/im_access_denied_template'
+	   ),
+  );
+}
+
+function im_custom_init(){
+
+
+/*
+ * UAT IM - 628 & 607 defect ids has resolved. Login destination issue.
+ */ 
+  $currentrequesturl                  = '';
+ if(!(arg(0) == 'personal-space') && !(arg(0) == 'agenda-detail') && !(arg(0) == 'user_session_info') && !(arg(0) == 'user')) { 
+   $currentrequesturl = ltrim(request_uri(), '/');
+   if(isset($_SESSION['enter_menu_destination']) != $currentrequesturl){
+     $_SESSION['enter_menu_destination'] = $currentrequesturl;
+    } 
+  }	
+//Unset Admin menu for Front office pages. 
+  global $user;
+	if($GLOBALS['theme_key'] == 'im' && $user->uid != '1'){
+    module_invoke('admin_menu', 'suppress');	
+	}
+}
+
+/**
+ * 
+ * Sort user roles alphabatecally.
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @param unknown_type $form_id
+ */
+function im_custom_form_user_admin_account_alter(&$form, &$form_state, $form_id){
+	foreach ($form['options']['operation']['#options'] as $key=>$values){
+		if(is_array($values)){
+			asort($form['options']['operation']['#options'][$key]);
+		}
+	}
+}
+
+/**
+ * Custom Function.
+ * Access permissions to im/settings and im/settings/nvalue page.
+ * 
+ */
+function _im_custom_settings_access(){
+  global $user;
+
+  if(in_array('administrator',$user->roles) || in_array('technical_director',$user->roles) || $user->uid == 1){
+    return TRUE;
+  }
+}
+
+/**
+* Implementation of hook_date_format_types for IM portal
+*/
+function im_custom_date_format_types(){
+  return array(
+  'im_date_format' => t('IM date format'),
+  );
+}
+/**
+* Implements hook_date_formats().
+*/
+function im_custom_date_formats(){
+  $formats = array();
+   $formats[] = array(
+    'type'    => 'im_date_format',
+    'format'  => 'd/m/Y', // 27/06/1991
+    'locales' => array(),
+  );
+    // save the ne date fortmas into variables
+  foreach ($formats as $format) {
+    variable_set('date_format_' . $format['type'], $format['format']);
+  }
+  return $formats;
+}
+
+/**
+ * Implementation of hook_node_view
+ * 
+ */
+function im_custom_node_view($node, $view_mode, $langcode) {
+  if (isset($node->content['field_holiday_jours_sp_ciaux'])) {
+  	foreach ($node->content['field_holiday_jours_sp_ciaux'] as $key=>$value) {
+  		if (is_numeric($key)) {
+  		  if (isset($node->content['field_holiday_jours_sp_ciaux'][$key]['links']['#links']['edit'])) {
+  		  	$node->content['field_holiday_jours_sp_ciaux'][$key]['links']['#links']['edit']['title'] = t($node->content['field_holiday_jours_sp_ciaux'][$key]['links']['#links']['edit']['title']); 
+  		  }
+  		  if (isset($node->content['field_holiday_jours_sp_ciaux'][$key]['links']['#links']['delete'])) {
+  		  	$node->content['field_holiday_jours_sp_ciaux'][$key]['links']['#links']['delete']['title'] = t($node->content['field_holiday_jours_sp_ciaux'][$key]['links']['#links']['delete']['title']); 
+  		  }
+  		}
+  		$node->content['field_holiday_jours_sp_ciaux']['#suffix'] = str_replace('">Add</a>', '">' . t("Add") . '</a>', $node->content['field_holiday_jours_sp_ciaux']['#suffix']); 
+  	}
+  } 
+  if (isset($node->content['field_holiday_period_des_vaccanc'])) {
+  	foreach ($node->content['field_holiday_period_des_vaccanc'] as $key=>$value) {
+  		if (is_numeric($key)) {
+  		  if (isset($node->content['field_holiday_period_des_vaccanc'][$key]['links']['#links']['edit'])) {
+  		  	$node->content['field_holiday_period_des_vaccanc'][$key]['links']['#links']['edit']['title'] = t($node->content['field_holiday_period_des_vaccanc'][$key]['links']['#links']['edit']['title']); 
+  		  }
+  		  if (isset($node->content['field_holiday_period_des_vaccanc'][$key]['links']['#links']['delete'])) {
+  		  	$node->content['field_holiday_period_des_vaccanc'][$key]['links']['#links']['delete']['title'] = t($node->content['field_holiday_period_des_vaccanc'][$key]['links']['#links']['delete']['title']); 
+  		  }
+  		}
+  		$node->content['field_holiday_period_des_vaccanc']['#suffix'] = str_replace('">Add</a>', '">' . t("Add") . '</a>', $node->content['field_holiday_period_des_vaccanc']['#suffix']);
+  	}
+  }
+  
+  
+  // Sales Plan Contebt Type
+  if($node->type == 'sales_plan') { 
+  	if(isset($node->content['field_sp_catalogue'][0]['#file']->uri)) {
+       $node->content['field_sp_catalogue'][0]['#file']->uri = urldecode(file_create_url($node->content['field_sp_catalogue'][0]['#file']->uri));
+  	}
+  	if(isset($node->content['field_sp_help_control'][0]['#file']->uri)) {
+       $node->content['field_sp_help_control'][0]['#file']->uri =urldecode(file_create_url($node->content['field_sp_help_control'][0]['#file']->uri));
+  	}
+  	if(isset($node->content['field_sp_benchmark'][0]['#file']->uri)) {
+       $node->content['field_sp_benchmark'][0]['#file']->uri =urldecode(file_create_url($node->content['field_sp_benchmark'][0]['#file']->uri));
+  	}
+  	if(isset($node->content['field_sp_others'][0]['#file']->uri)) {
+       $node->content['field_sp_others'][0]['#file']->uri =urldecode(file_create_url($node->content['field_sp_others'][0]['#file']->uri));
+  	}
+  	if(isset($node->content['field_sp_image_pros'][0]['#file']->uri)) {
+    $node->content['field_sp_image_pros'][0]['#file']->uri =urldecode(file_create_url($node->content['field_sp_image_pros'][0]['#file']->uri));
+  	}
+  	if(isset($node->content['field_sp_plv'][0]['#file']->uri)) {
+    $node->content['field_sp_plv'][0]['#file']->uri =urldecode(file_create_url($node->content['field_sp_plv'][0]['#file']->uri));
+  	}
+  	if(isset($node->content['field_sp_visual'][0]['#file']->uri)){
+      $node->content['field_sp_visual'][0]['#file']->uri = urldecode(file_create_url($node->content['field_sp_visual'][0]['#file']->uri));
+    }
+  }
+  // Action , Alert, Benchmark, News Content Type
+  if($node->type == 'action' || $node->type == 'alert' || $node->type == 'benchmark' || $node->type == 'news') {
+  	if(isset($node->content['field_agenda_attachments'][0]['#file']->uri)){
+     $node->content['field_agenda_attachments'][0]['#file']->uri = urldecode(file_create_url($node->content['field_agenda_attachments'][0]['#file']->uri));
+  	}
+  }
+  
+  // Application Content Type
+  if($node->type == 'application' && isset($node->content['field_documentation_file_upload'][0]['#file']->uri)) {
+    $node->content['field_documentation_file_upload'][0]['#file']->uri = urldecode(file_create_url($node->content['field_documentation_file_upload'][0]['#file']->uri));
+  }
+   
+  if($node->type == 'holiday' && isset($node->content['field_holiday_pos_file'][0]['#file']->uri)) {
+    $node->content['field_holiday_pos_file'][0]['#file']->uri = urldecode(file_create_url($node->content['field_holiday_pos_file'][0]['#file']->uri)); 
+  } 
+  
+  
+  // Message Content Type
+  if($node->type == 'message' && isset($node->content['field_message_image'][0]['#file']->uri)) {
+   $node->content['field_message_image'][0]['#file']->uri = urldecode(file_create_url($node->content['field_message_image'][0]['#file']->uri));
+  } 
+  
+  // Operational-model
+  if($node->type == 'operational-model' && isset($node->content['field_om_attachments'][0]['#file']->uri)) {
+   $node->content['field_om_attachments'][0]['#file']->uri = urldecode(file_create_url($node->content['field_om_attachments'][0]['#file']->uri));
+  } 
+}
+
+/*
+ * From alter for all the taxonomy add term page -UATIM-260
+ */
+/*function im_custom_form_taxonomy_form_term_alter(&$form, &$form_state, $form_id) {
+  $form['actions']['submit']['#value'] = t("Save term");
+  if (arg(0) == 'taxonomy' && arg(1) == 'term' && is_numeric(arg(2)) && arg(3) == 'edit') {
+    $form['actions']['delete']['#value'] = "Supprimer";
+  }
+}*/
+
+/*
+ * From alter for all the taxonomy edit vocabulary page -UATIM-260
+ */
+/*function im_custom_form_taxonomy_form_vocabulary_alter(&$form, &$form_state, $form_id) {
+  $form['actions']['submit']['#value'] = t("Save vocabulary");
+  $form['actions']['delete']['#value'] = t("Delete vocabulary");
+}*/
+
+/**
+ * Implementation of hook_component_info_alter 
+ */
+function im_custom_webform_component_info_alter(&$components) {
+  // Completely remove the markup component.
+  unset($components['markup']);
+}
+function im_custom_purge_policy(){	
+	 agenda_content_types();	 
+	 wiki_market_content_types();      
+	 sales_plan_content_types(); 
+}
+function agenda_content_types(){	
+	$daysdefore = date('Y-m-d', strtotime(date('Y-m-d'))- (24*3600*30*variable_get('im_agenda_no_of_months_value')));
+	$result = db_query("SELECT DISTINCT n.nid,n.title,ptd.field_publication_to_date_value FROM {node} AS n, {field_data_field_publication_to_date} as ptd WHERE n.nid=ptd.entity_id and n.type IN ('action', 'alert', 'news', 'benchmark') and TO_DATE(ptd.field_publication_to_date_value, 'YYYY-MM-DD') <= :daysdefore",array(':daysdefore' => $daysdefore));
+  $nodeids =array();
+	foreach ($result as $results){
+		$nodeids[] = $results->nid ;
+		$nodeidstring .= $results->nid.'~';
+		$result_preferred_nid = db_query("SELECT field_agenda_preference_nid_value, entity_type FROM {field_data_field_agenda_preference_nid} WHERE entity_id = :pentity_id",array(':pentity_id' => $results->nid));
+		foreach ($result_preferred_nid as $result_preferred_nids){
+			$nodeids[] = $result_preferred_nids->field_agenda_preference_nid_value;
+			$nodeidstring .= $result_preferred_nids->field_agenda_preference_nid_value.'~';
+		}
+	}	
+	$nodeidstring = rtrim($nodeidstring,"~");
+  if(count($nodeids)>0){
+	node_delete_multiple($nodeids);
+	}
+	watchdog('im_custom','Agenda contents and preferred store ids with node ids %nodeidstring are deleted', array('%nodeidstring' => $nodeidstring), WATCHDOG_NOTICE, $link = NULL);
+	return $nodeidstring;
+}
+function wiki_market_content_types(){
+	$daysdefore = date('Y-m-d', strtotime(date('Y-m-d')) - (24*3600*30*variable_get('im_wiki_market_no_of_months_value')));
+	$result = db_query("SELECT DISTINCT n.nid,n.title,ptd.field_om_publication_period_value2 FROM {node} AS n, {field_data_field_om_publication_period} as ptd WHERE n.nid=ptd.entity_id and n.type ='operational_model' and TO_DATE(ptd.field_om_publication_period_value2, 'YYYY-MM-DD') <= :daysdefore",array(':daysdefore' => $daysdefore));
+  foreach ($result as $results){
+		$nodeids[] = $results->nid ;
+		$nodeidstring .= $results->nid.'~';
+	}
+	$nodeidstring = rtrim($nodeidstring,"~");
+	if(count($nodeids)>0){
+	node_delete_multiple($nodeids);
+	}
+	watchdog('im_custom','Wiki Market contents with node ids %nodeidstring are deleted', array('%nodeidstring' => $nodeidstring), WATCHDOG_NOTICE, $link = NULL);
+	return $nodeidstring;
+}
+function sales_plan_content_types(){
+	$daysdefore = date('Y-m-d', strtotime(date('Y-m-d')) - (24*3600*30*variable_get('im_sales_plan_no_of_months_value')));	
+	$result = db_query("SELECT DISTINCT n.nid,n.title,ptd.field_sp_operation_period_value2 FROM {node} AS n, {field_data_field_sp_operation_period} as ptd WHERE n.nid=ptd.entity_id and n.type ='sales_plan' and TO_DATE(ptd.field_sp_operation_period_value2, 'YYYY-MM-DD') <= :daysdefore",array(':daysdefore' => $daysdefore));
+  foreach ($result as $results){
+		$nodeids[] = $results->nid ;
+		$nodeidstring .= $results->nid.'~';
+	}
+	$nodeidstring = rtrim($nodeidstring,"~");
+  if(count($nodeids)>0){
+	node_delete_multiple($nodeids);
+	}
+	watchdog('im_custom','Sales plan contents with node ids %nodeidstring are deleted', array('%nodeidstring' => $nodeidstring), WATCHDOG_NOTICE, $link = NULL);
+  return $nodeidstring;
+}
+function im_custom_user_disable(){	
+  $ladp_id = $_SESSION['ldap_login_key'];  
+  $obj = new imldapSoapService();
+  $ldapUserIds =array();
+  $response = $obj->soapRequest('searchUsers', array('id' => $ladp_id, 'login' => '*', 'attributsType' => 'inetUserStatus', 'attributsValue' => 'inactive'));
+  if ($response->status == "success") {
+   $ldapUserIds[] =$response->data;
+    $msgStatus = 0;
+  }else{
+  	$msgStatus = 1;
+  }
+  $daysdefore = strtotime(date('Y-m-d')) - (24*3600*30*variable_get('im_users_no_of_months_value'));		
+  $result = db_query("SELECT uid,name,status FROM {users} WHERE status=1 and access <= :daysdefore", array(':daysdefore' => $daysdefore));
+	$userName = array();
+	if(count($ldapUserIds[0])>0){
+  foreach ($result as $results){
+		if(in_array($results->name, $ldapUserIds[0])){
+			$uids[] = $results->uid ;	
+			$userName[] = $results->name;		
+			$user_update = db_update('users') 
+		  ->fields(array(
+		    'status' => 0,
+		  ))
+     ->condition('uid', $results->uid, '=')
+     ->execute(); 	
+     watchdog('im_custom','Users with user ids %userName are updated', array('%userName' => $userName), WATCHDOG_NOTICE, $link = NULL);
+		}
+	}
+	}
+	if(count($userName)>0 && $msgStatus==0 ){
+    drupal_set_message(t("Purging of users was successful, @noofusers accounts were frozen. N.B.: To cache reasons, LDAP changes may take several hours before being sent to the Portal.", array('@noofusers' => count($userName))));
+	}
+	if(count($userName)<=0 && $msgStatus==0){
+		$msg = "Purging of users is successful , no account has been blocked. N.B.: For caching purposes, the LDAP changes may take several hours before being sent to the Portal.";
+		drupal_set_message(t($msg), 'warning');
+	}
+	if($msgStatus == 1){
+		$msg = "An error has occurred during the execution of the task. Please try again later or contact technical director.";
+		drupal_set_message(t($msg),'error');
+	}	
+	drupal_goto('admin/config');
+}
+/**
+ * Implementation of _check_file_access
+ */
+function _check_file_access() {	
+ //if ldap token exist check validity.
+  if(isset($_SESSION['ldap_login_key'])) { 
+    $obj = new imldapSoapService();
+    $response = $obj->soapRequest('isAlive', array('id' => $_SESSION['ldap_login_key']));
+    if(isset($response->data)) {
+	  	$file_id = arg(1);
+    	$file_info			= file_load($file_id);
+    	$file_uri 			= urldecode(file_create_url($file_info->uri));
+    	$splitfile			= explode("sites", $file_uri);
+    	$actual_file_path	= DRUPAL_ROOT.'/sites'.$splitfile[1]; 
+    	direct_download($actual_file_path);  
+  }
+    else {
+      drupal_goto(im_user_get_login_url());
+    }
+  }
+  else {
+  	drupal_goto(im_user_get_login_url());
+  }
+}
+
+/**
+ * Function to download the file from Files Directory
+ */
+function direct_download($filePath) {
+	     
+ if(!empty($filePath))  
+  { 
+    $fileInfo        = pathinfo($filePath);
+    $fileName        = $fileInfo['basename']; 
+    $fileExtnesion   = $fileInfo['extension']; 
+    $default_contentType = "application/octet-stream"; 
+    $file_type = file_get_mimetype($filePath);
+    $contentType =  isset($file_type) ? $file_type : $default_contentType;
+    if(file_exists($filePath)) 
+     { 
+     $size = filesize($filePath); 
+     $offset = 0; 
+     $length = $size; 
+     //HEADERS FOR PARTIAL DOWNLOAD FACILITY BEGINS 
+     if(isset($_SERVER['HTTP_RANGE'])) 
+      { 
+       preg_match('/bytes=(\d+)-(\d+)?/', $_SERVER['HTTP_RANGE'], $matches); 
+	   $offset = intval($matches[1]); 
+       $length = intval($matches[2]) - $offset; 
+       $fhandle = fopen($filePath, 'r'); 
+       fseek($fhandle, $offset); // seek to the requested offset, this is 0 if it's not a partial content request 
+       $data = fread($fhandle, $length); 
+       fclose($fhandle); 
+       header('HTTP/1.1 206 Partial Content'); 
+       header('Content-Range: bytes ' . $offset . '-' . ($offset + $length) . '/' . $size); 
+      }//HEADERS FOR PARTIAL DOWNLOAD FACILITY BEGINS 
+       //USUAL HEADERS FOR DOWNLOAD 
+       $fileName = str_replace(' ', '_',$fileName);
+       header("Content-Disposition: attachment;filename=".$fileName); 
+       if (preg_match('/MSIE/i',$_SERVER['HTTP_USER_AGENT'])) {
+         header('Content-Type: application/force-download');
+       } else {
+            header('Content-Type: '.$contentType);
+       }       
+       header("Accept-Ranges: bytes"); 
+       header("Pragma: public"); 
+       header("Expires: -1"); 
+       header("Cache-Control: no-cache"); 
+       header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0"); 
+       header("Content-Length: ".filesize($filePath)); 
+      $chunksize = 8 * (1024 * 1024); //8MB (highest possible fread length) 
+      if ($size > $chunksize) 
+       { 
+        $handle = fopen($_FILES["file"]["tmp_name"], 'rb'); 
+        $buffer = ''; 
+        while (!feof($handle) && (connection_status() === CONNECTION_NORMAL))  
+         { 
+         $buffer = fread($handle, $chunksize); 
+         print $buffer; 
+         ob_flush(); 
+         flush(); 
+         } 
+        if(connection_status() !== CONNECTION_NORMAL) 
+         { 
+          echo "Connection aborted"; 
+         } 
+       fclose($handle); 
+      } 
+      else  
+      { 
+       ob_clean(); 
+       flush(); 
+       readfile($filePath); 
+      } 
+     } 
+     else 
+     { 
+       drupal_goto('');
+      } 
+    } 
+    else 
+    { 
+        echo 'There is no file to download!'; 
+    } 
+}     
+ /*
+  * UATIM_704 - POP up reloading issue while after session expired in the portal has resolved. 
+  */  
+function _user_sessioninfo() {
+ $return_data = array('status' => TRUE, 'myval' => $_SESSION['ldap_login_key']);
+ print drupal_json_output($return_data);
+ exit();
+}

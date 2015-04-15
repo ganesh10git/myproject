@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the IM Features RMP feature.
+ */
+
+include_once 'im_features_rmp.features.inc';

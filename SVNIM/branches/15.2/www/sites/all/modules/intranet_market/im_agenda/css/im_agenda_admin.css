@@ -1,0 +1,97 @@
+@CHARSET "ISO-8859-1";
+/************* Start of CSS for Manage Agenda page *****************/
+.agenda-content-filter-wrapper {	
+  border: 1px solid #222222;
+  float: left;
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 80%;
+}
+.agenda-manage-content-wrapper .container-inline-date {
+	float: left;
+}
+.agenda-manage-content-wrapper .container-inline-date #edit-agenda-date {
+  float: left;
+  height: 18px;
+  padding: 10px;
+}
+.agenda-manage-content-wrapper .container-inline-date label {
+	display: none;
+}
+.agenda-manage-content-wrapper .content-type-filter {
+  border: 1px solid #D7D7D7;
+  float: left;
+  height: 20px;
+  margin-top: 10px;
+  padding-bottom: 7px;
+  padding-left: 5px;
+  padding-right: 5px;
+  width: auto;
+}
+.agenda-manage-content-wrapper .content-type-filter .form-type-checkbox {
+	float: left;
+}
+.agenda-manage-content-wrapper .department-filter {
+	float: left;
+  margin-left: 20px;
+}
+.agenda-manage-content-wrapper .department-filter #edit-agenda-department {
+  width: 200px;
+}
+.agenda-manage-content-wrapper .status-filter {
+  float: left;
+  margin-left: 20px;
+}
+.agenda-manage-content-wrapper .status-filter #edit-agenda-status {
+	width: 200px;
+}
+.agenda-manage-content-wrapper .do-filter {
+	float: left;
+	margin-left: 10px;
+}
+.agenda-manage-content-wrapper .do-filter #edit-agenda-do{
+	width: 200px;
+}
+.agenda-manage-content-wrapper .dr-cf-filter {
+  float: left;
+  margin-left: 15px;
+}
+.agenda-manage-content-wrapper .dr-cf-filter #edit-agenda-dr-cf {	
+  width: 200px;
+}
+.agenda-manage-content-wrapper .role-filter {
+  border: 1px solid #D7D7D7;
+  float: left;
+  margin-left: 15px;
+  margin-top: 9px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.agenda-manage-content-wrapper .role-filter #edit-agenda-roles .form-type-checkbox {
+	float: left;
+}
+.agenda-manage-content-wrapper .search-filter {
+	float: left;
+	margin-left: 10px;
+  padding-left: 5px;
+  padding-right: 15px;
+  width: 215px;
+}
+.agenda-manage-content-wrapper .search-submit {
+	float: left;
+   margin-top: 5px;
+}
+.agenda-manage-content-wrapper .agenda-content-wrapper {
+	float: left;
+  width: 100%;
+}
+.manage-agenda-content {
+	border: 1px solid #222222;
+  float: left;
+  height: 92px;
+  line-height: 23px;
+  margin-left: 10px;
+  padding: 10px;
+  width: 170px;
+}
+/************* End of CSS for Manage Agenda page *****************/

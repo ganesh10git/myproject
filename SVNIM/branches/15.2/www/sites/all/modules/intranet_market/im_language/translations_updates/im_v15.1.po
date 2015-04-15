@@ -1,0 +1,142 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#PLAN DE VENTES
+msgid "Attachment Agenda"
+msgstr "Fichiers joints"
+
+#MANAGE AGENDA
+msgid "No of Stores"
+msgstr "Magasins sélectionnés"
+
+#CREATE AGENDA
+msgid "Agenda date should be within publication period"
+msgstr "La date Agenda doit être comprise dans la période de publication"
+
+#QUESTIONAIRE VALIDATION ERROR MESSAGE
+msgid "Thank you complete the compulsory questions (marked with * ) before sending your answers."
+msgstr "Merci de compléter les questions obligatoires (signalées par un *) avant d'envoyer vos réponses."
+
+#DATE FORMAT IN WEBFORM
+msgid "DD/MM/YY"
+msgstr "JJ/MM/AA"
+
+#DATE FORMAT IN WEBFORM
+msgid "DD/MM/YYYY"
+msgstr "JJ/MM/AAAA"
+
+#Applications page Error message when user tries to add more than 36 applications
+msgid  "Sorry you cannot add more than 36 applications."
+msgstr "Vous ne pouvez pas avoir plus de 36 applications dans vos favoris."
+
+#Create Action
+msgid "Save and Prepare for Regional Moderation"
+msgstr "Enregistrer et préparer à la modération régionale"
+
+#workbench/needs-review
+msgid "Any"
+msgstr "Tous"
+
+#workbench/needs-review
+msgid "- Any -"
+msgstr "- Tous -"
+
+#Action page Error message when user does not choose the display of questionnaire
+msgid "Please select the display format for questionnaire"
+msgstr "Merci de définir l'affichage de votre questionnaire"
+
+#Updating the translation for a button in CKEditor File Browser
+msgid "Insert file"
+msgstr "Insérer"
+
+#Message content contribution
+#node/add/message
+msgid "Create new message"
+msgstr "Créer un nouveau message"
+
+msgid "Type of message"
+msgstr "Type de message" 
+
+msgid "Next"
+msgstr "Suivant"
+
+#Regional moderator profile popup
+msgid "Selection of Regional Profiles"
+msgstr "Sélection des Profils Régionaux"
+
+msgid "Profiles"
+msgstr "Profils"
+
+msgid "Selection"
+msgstr "Sélection"
+
+#Search result page
+msgid "Results to be shown per page"
+msgstr "Résultats à afficher par page"
+
+msgid "@st_span@num_results@end_span result@pural found"
+msgstr "@st_span@num_results@end_span résultat@pural trouvés"
+
+#MMS and DMS
+msgid "Manage MMS"
+msgstr "Gestion fonctions MMS"
+
+msgid "Manage DMS"
+msgstr "Gestion fonctions DMS"
+
+#Purge users success message
+msgid "Purging of users was successful, @noofusers accounts were frozen. N.B.: To cache reasons, LDAP changes may take several hours before being sent to the Portal."
+msgstr "La purge des utilisateurs s'est déroulée avec succès, @noofusers comptes ont été bloqués. N.B.: Pour des raisons de cache, les modifications du LDAP peuvent mettre plusieurs heures avant d'être envoyées sur le Portail."
+
+#Purge users warning message
+msgid "Purging of users is successful , no account has been blocked. N.B.: For caching purposes, the LDAP changes may take several hours before being sent to the Portal."
+msgstr "La purge des utilisateurs s'est déroulée avec succès, aucun compte n'a été bloqué. N.B.: Pour des raisons de cache, les modifications du LDAP peuvent mettre plusieurs heures avant d'être envoyées sur le Portail."
+
+#Purge users error message
+msgid "An error has occurred during the execution of the task. Please try again later or contact technical director."
+msgstr "Une erreur est survenue pendant l'exécution de la tâche. Veuillez réessayer dans un moment ou bien contacter l'administrateur technique."
+
+#From date in RMP
+msgid "Creation Date"
+msgstr "Date de Création"
+
+#To date in RMP
+msgid "Date of last modficiation"
+msgstr "Date de dernière modficiation"
+
+#RMP
+msgid "Create new regional_moderator_profile"
+msgstr "Créer un nouveau profil régional"
+
+msgid "getTraineeDirector"
+msgstr "Fonctions pour le role directeur de magasin stagiaire"
+
+msgid "getmms"
+msgstr "Fonctions pour le role manager de magasin stagiaire"
+
+msgid "getdms"
+msgstr "Recherche des fonctions"
+
+msgid "getmms sunmit"
+msgstr "Recherche des fonctions"
+
+msgid "Please select only one store as the preferred store."
+msgstr "Merci de sélectionner un seul magasin."
+
+msgid "Upload file"
+msgstr "Charger fichier"
+
+#Preferred store error message for DMS and MMS
+msgid "Please select only one store as the preferred store"
+msgstr "Merci de sélectionner un seul magasin"

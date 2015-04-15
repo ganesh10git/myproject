@@ -1,0 +1,67 @@
+/******* USER DASHBOARD BO ************/
+.dashboard_regional_link_active { display: none;}
+.dashboard_regional_link_deactive,
+.dashboard_regional_link_deactive .plus {	
+	opacity: 0.5; 
+	filter:alpha(opacity=50);
+  color: #BBB\9;
+}
+input.content_manager_action_regional{
+  float: left;
+  margin-top: 9px !important;
+}
+.usp_regional_user_ctools {
+  float: left;
+  height: 31px;
+  color: #fff;
+  line-height: 31px;
+  /*padding: 0 10px;
+  width: 160px;*/
+  background: url("../images/blue-button.png") repeat scroll 0 0 green;
+  position: relative;
+}
+.usp_regional_user_ctools span a { 
+  color: #fff;
+  float: left;
+  height: 31px;
+  width: 100%;
+  margin-left: -10px;
+  padding: 0 10px;
+}
+.usp_regional_user_ctools span a:hover { text-decoration: none;}
+.usp_regional_user_ctools span { float: left;  width: 140px;   padding: 0 10px;}
+.usp_regional_user_ctools .plus {
+  font: 700 22px/31px arial;
+  padding: 0 0 0 5px;
+  position: absolute;
+  width: auto;
+}
+.plus { font: bold 22px/31px arial;}
+
+/***********/
+#modalContent .im-popup-content {
+  height: auto !important;
+  min-height: 450px;
+  width: 724px !important;
+}
+#modalContent .ctools-sample-modal-content.im-popup-content .popups-body {
+  background-color: transparent;
+  height: auto !important;
+  padding: 0;
+  width: 724px !important;
+}
+.store-preference-popup-title { margin-bottom: 0px; }
+.store-preference-topsec .topsec-title { margin-top: 13px;}
+#modalContent .im-popups-close a {
+	position: absolute;
+	background: url("../images/pop-close-button.png") no-repeat scroll 0 0 transparent;
+	right: -19px;
+	top: -19px;
+	height: 39px;
+	width: 39px;
+	z-index: 1002;
+	color: #fff;
+	font-size: 1px;
+	line-height: 10px;
+	text-align: center;
+}

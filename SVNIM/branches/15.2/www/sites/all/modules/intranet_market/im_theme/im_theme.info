@@ -1,0 +1,8 @@
+core = 7.x
+description = IM theme module. Configuration of theme (display).
+name = im_theme
+package = Intranet Market
+project = im_theme
+version = 7.x-1.0
+
+dependencies[] = "im_utilities"

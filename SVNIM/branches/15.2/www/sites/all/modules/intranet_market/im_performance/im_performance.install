@@ -1,0 +1,31 @@
+<?php
+/**
+ * @file Install file of module im_performance.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function im_performance_install() {
+  _im_performance_clear_all_cache_tables();
+}
+
+/**
+ * Helper function that clear the content of all
+ * cache tables from the database.
+ */
+function _im_performance_clear_all_cache_tables() {
+  db_query("TRUNCATE {cache};");
+  db_query("TRUNCATE {cache_block};");
+  db_query("TRUNCATE {cache_bootstrap};");
+  db_query("TRUNCATE {cache_field};");
+  db_query("TRUNCATE {cache_filter};");
+  db_query("TRUNCATE {cache_form};");
+  db_query("TRUNCATE {cache_image};");
+  db_query("TRUNCATE {cache_menu};");
+  db_query("TRUNCATE {cache_page};");
+  db_query("TRUNCATE {cache_path};");
+  db_query("TRUNCATE {cache_token};");
+  db_query("TRUNCATE {cache_views};");
+  db_query("TRUNCATE {cache_views_data};");
+}

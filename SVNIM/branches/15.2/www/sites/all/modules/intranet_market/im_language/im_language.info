@@ -1,0 +1,6 @@
+core = "7.x"
+description = "Import languages at the install of portal"
+name = "im_language"
+package = Intranet Market
+project = "im_language"
+version = "7.x-1.0"

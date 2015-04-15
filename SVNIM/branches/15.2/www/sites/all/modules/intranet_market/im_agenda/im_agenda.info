@@ -1,0 +1,10 @@
+name = Intranet Market Agenda
+description = List of Agenda for the week
+package = Intranet Market
+core = 7.x
+
+dependencies[] = im_feature_agenda
+dependencies[] = date_views
+dependencies[] = node_view_count
+dependencies[] = im_user
+dependencies[] = dropdown_checkboxes

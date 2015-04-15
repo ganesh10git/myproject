@@ -1,0 +1,244 @@
+<?php
+/**
+ * @file
+ * Code for the IM Features Directory feature.
+ */
+include_once 'im_features_directory.features.inc';
+
+/**
+ * Implements hook_menu().
+ *
+ */
+function im_features_directory_menu() {
+  $items['annuaire/%'] = array(
+    'page callback' => 'directory_page',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+function im_features_directory_theme() {
+  return array(
+    'theming_directory_page' => array(
+      // We use 'render element' when the item to be passed is a self-describing
+      // render array (it will have #theme_wrappers)
+      'render element' => 'element',
+    ),
+  );
+}
+
+function directory_page($store_id) {
+  if (arg(0)== 'annuaire' && arg(1)== 'all' && arg(2) == '' && isset($_SESSION['user_selected_store']) && is_numeric($_SESSION['user_selected_store'])) {
+    drupal_goto('annuaire/'.$_SESSION['user_selected_store']);
+  }
+  elseif(arg(2) == 'all'){
+    unset($_SESSION['user_selected_store']);
+  }elseif(is_numeric(arg(1))){
+    $_SESSION['user_selected_store'] = arg(1);
+  }
+  $user_image_uri = drupal_get_path("module", "im_features_directory") . '/images/' . 'user.png';
+  $user_image = array(
+    'path' => $user_image_uri,
+    'alt' => "User Image",
+  );
+  $content = array();
+  $directory_store = _im_directory_get_stores(arg(1));
+  $get_dir_cat_query = "SELECT n.nid,td.tid ,td.name AS cat_name,
+    df.field_dir_function_tid,
+    ttd.name AS use_name ,
+    rm.field_taxo_relais_en_magasin_value AS fun_name  
+    FROM {node} n LEFT JOIN {field_data_field_dir_category} dc  
+    ON n.nid=dc.entity_id LEFT JOIN {taxonomy_term_data} td 
+    ON td.tid=dc.field_dir_category_tid  
+    LEFT JOIN {field_data_field_dir_function} df 
+    ON df.entity_id=n.nid LEFT JOIN {taxonomy_term_data} ttd 
+    ON ttd.tid=df.field_dir_function_tid 
+    LEFT JOIN field_data_field_taxo_relais_en_magasin rm 
+    ON rm.entity_id=ttd.tid WHERE n.status=1 AND n.type='directory' 
+    AND ttd.tid IS NOT NULL ORDER BY td.tid DESC,n.created DESC";
+  $get_dir_result = db_query($get_dir_cat_query);
+  foreach ($get_dir_result as $record) {
+  	$cat_names[] = $record->cat_name;
+  	$fun_names[] = $record->fun_name;
+  	$dir_structs[$record->cat_name]['function_name'][$record->fun_name] = $record->use_name;
+  	$dir_structs[$record->cat_name]['nodes'][] = $record->nid;
+  } 
+  $get_login_results = db_query("SELECT sifd.dit_lib,sif.pve_code, sif.dit_cod_item,sif.ite_lib_value 
+      FROM {store_item_fields} sif,{store_item_fields_desc} sifd 
+      WHERE sif.dit_cod_item = sifd.dit_cod_item 
+      AND sifd.ddo_lib = 'Contacts' 
+      AND sifd.dit_lib IN (:params)
+      AND sif.pve_code  IN (:store_id_selected) AND sif.ite_lib_value !=''",
+    array(':params' => $fun_names,':store_id_selected'=> $directory_store));
+    
+  foreach ($get_login_results as $record) {
+	  $logins[] = $record->ite_lib_value;
+  	//$dir_logins[$record->dit_lib] = $record->ite_lib_value;
+  	$map_fn_names[] = $record->dit_lib;
+  }
+  $total_dir = count($logins);
+  $ldap_id = isset($_SESSION['ldap_login_key']) ? $_SESSION['ldap_login_key'] : '';
+  $attribute_types = array('givenName','sn', 'mail','telephoneNumber','mobile');
+  $display_error = FALSE;
+  foreach($attribute_types as $attribute_type){
+    $get_attributes[$attribute_type] = _im_get_users_attribut($ldap_id,$logins,$attribute_type);
+    if($get_attributes[$attribute_type] == 'ERROR'){
+      drupal_set_message(t("One of the Login id is not valid."),'error');
+     
+      if(is_array($logins)){
+    	$login_ids = implode(',',$logins);
+      }
+      drupal_set_message(t('Login IDs are :var ', array(':var' => $login_ids)), 'nuke'); 
+      $display_error = TRUE;
+      break;
+    }
+  }
+  if(!$display_error){
+     	$content['dir_structs'] = $dir_structs;
+   //	$content['dir_logins'] = $dir_logins;
+   for( $i=0; $i<$total_dir; $i++ ){
+ 		  $dir_fn_name = $map_fn_names[$i];
+  	foreach($get_attributes as $key=>$values){
+  		if($key == 'givenName'){
+  		  $dir_firstname[$key] = $values[$i];
+  		}
+  	  if($key == 'sn'){
+  		  $dir_lastname[$key] = $values[$i];
+  		}
+  		if($key == 'mail'){
+  		  $dir_mail[$key] = $values[$i];
+  		}
+  		if($key == 'telephoneNumber'){
+  		  $dir_telephone[$key] = $values[$i];
+  		}
+  		if($key == 'mobile'){
+  		  $dir_mobile[$key] = $values[$i];
+  		}
+  	}
+  	$content['dir_detail'][] = array(
+      'fn_name' => $dir_fn_name,  
+  	  'user_img' => $user_image,
+      'user_name' => isset($dir_firstname['givenName']) ? $dir_firstname['givenName']." ". $dir_lastname['sn'] : '',
+      'user_mail' => isset($dir_mail['mail']) ? $dir_mail['mail'] : '',
+      'telephoneNumber' => isset($dir_telephone['telephoneNumber']) ? $dir_telephone['telephoneNumber'] : '',
+      'mobile' => isset($dir_mobile['mobile']) ? $dir_mobile['mobile'] : '',
+  	);
+  }
+    $content['#theme_wrappers'] = array('theming_directory_page');
+  } 
+  return $content;
+}
+
+function theme_theming_directory_page($variables) {
+	$output = '';
+	//$reponse_error = $variables['element']['reponse_error'];
+	//if(!$reponse_error){
+	$dir_structs = $variables['element']['dir_structs'];
+ // $dir_logins = $variables['element']['dir_logins'];
+  $dir_contacts = $variables['element']['dir_detail'];
+  unset($dir_structs['#children']);
+  unset($dir_structs['#printed']);
+//  unset($dir_logins['#children']);
+ // unset($dir_logins['#printed']);
+  unset($dir_contacts['#children']);
+  unset($dir_contacts['#printed']);
+  foreach($dir_structs as $fn_name => $dir_struct){
+  	$output .= '<div class="im-app-directory ">';
+  	$output .= '<h3>'.$fn_name.'</h3>';
+  	unset($dir_struct['function_name']['#children']);
+  	unset($dir_struct['function_name']['#printed']);
+  	$column_index = 0;
+  	foreach($dir_struct['function_name'] as $dir_fn_name => $dir_fn_use_name){
+  	  foreach ($dir_contacts as $key => $dir_contact) {
+  	    if($dir_contact['fn_name'] == $dir_fn_name){
+  	    	// Fix for UATIM-536
+  	    	if($column_index == 3) {
+		  	    $output .= '<div class = "directory-content count-four">';
+		  	    $column_index = 0;
+  	    	}
+  	    	else {
+  	    		$output .= '<div class = "directory-content">';
+  	    		$column_index ++;
+  	    	}
+  	    $output .= '<div class = "directory-function">'.$dir_fn_use_name.'</div>';
+        $output .= '<div class = "directory-user-img">' . theme('image', $dir_contact['user_img']) . '</div>';
+        $output .= '<div class= "directory-detial-sec">';
+	      $output .= '<div class = "directory-user-name">' . $dir_contact['user_name'] . '</div>';
+        $output .= '<div class = "directory-user-mail">' . $dir_contact['user_mail'] . '</div>';
+        if(!empty($dir_contact['telephoneNumber'] )){
+          $output .= '<div class = "directory-user-bureau"><span>'.t('Bureau').'&nbsp;</span>' . $dir_contact['telephoneNumber'] . '</div>';
+        }
+        if(!empty($dir_contact['mobile'] )){
+          $output .= '<div class = "directory-user-mobile"><span>'.t('Mobile').'&nbsp;</span>' . $dir_contact['mobile'] . '</div>';
+        }
+       $output .= '</div></div>';
+       
+  }
+    }
+  	}
+    $output .= '</div>';
+  }
+//	}
+  return $output;
+}
+
+
+/**
+ * Hook_form_Forrm_Id alter implement for directory_node_form Directory content type.
+ */
+function im_features_directory_form_directory_node_form_alter(&$form, &$form_state, $form_id) {	
+ unset($form['title']);
+}
+
+
+function _im_directory_get_stores($store_arg){
+	global $user;
+    $selected_stores = array();
+    $single_stores = array();
+    $user_details = user_load($user->uid);
+    $selected_stores_array =array();
+    if (isset($user_details->field_user_stores) && !empty($user_details->field_user_stores)) {  
+      $selected_stores_ids = isset($user_details->field_user_stores['und'][0]['value']) ? $user_details->field_user_stores['und'][0]['value'] : '';
+      $selected_stores_array = explode(",", $selected_stores_ids);//Selected store in the user profile
+      $selected_forcast = isset($user_details->field_user_forecast['und'][0]['value']) ? $user_details->field_user_forecast['und'][0]['value'] : '';
+      $store_list =  _get_all_stores(); //get_store_result();//all the store in the db
+    
+    //checking weather user store exit in db or not
+    foreach ($selected_stores_array as $store_id) {
+       if (array_key_exists($store_id, $store_list)) {
+        $selected_stores[$store_id] = $store_list[$store_id];
+      }
+    }
+     reset($selected_stores);
+     $first_key = key($selected_stores);
+     $user_first_store = $first_key;
+     if($store_arg == 'all'){
+       $directory_store = $user_first_store;
+     }
+     else if (is_numeric($store_arg) && array_key_exists($store_arg, $selected_stores)) {
+      $directory_store = $store_arg;
+     }
+     else{
+      drupal_access_denied();
+      exit;
+     }
+  }
+  else {
+    $directory_store = isset($_SESSION['profil']['store'])?  $_SESSION['profil']['store'] : '';
+  }
+  return $directory_store;
+}
+
+function _im_get_users_attribut($ldap_id,$logins,$attribute_type){
+$attribute_value = '';
+  $obj = new imldapSoapService();
+  $objAttribute = $obj->soapRequest('getUsersAttribut', array('id' => $ldap_id, 'logins' => $logins, 'attributsType' => $attribute_type, 'pad'=>''));
+  if($objAttribute->status == 'success') {
+    $attribute_value = $objAttribute->data;
+  }elseif($objAttribute->status == 'failure'){
+  	$attribute_value = "ERROR";
+  }
+  return $attribute_value;
+}

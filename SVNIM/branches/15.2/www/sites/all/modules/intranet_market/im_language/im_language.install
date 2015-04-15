@@ -1,0 +1,305 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_install().
+ */
+function im_language_install() {
+  $imported_folders = array();
+  $imported_folders[0] = 'fr';
+  _im_language_locale_add_language($imported_folders);
+  
+  $folder = 'translations';
+  $folder_path = drupal_get_path('module', 'im_language') . '/' . $folder;
+  
+  $po_files_list = im_language_list_po_files($folder_path);
+  $folders_to_import = array_keys($po_files_list);
+  
+  im_language_import_folders_po($folders_to_import);
+  
+  //To import update .po files from translations_update folder.
+  $update_folder = 'translations_updates';
+  $update_dir = drupal_get_path('module', 'im_language') . '/' . $update_folder;
+  $updated_po_files = array_diff(scandir($update_dir), array('..', '.'));
+  
+  foreach ($updated_po_files as $file) {
+      if (substr($file, -3) == '.po') {
+        $f = new stdClass();
+        $f->filename = $file;
+        $f->uri = drupal_get_path('module', 'im_language') . '/translations_updates/' . $file;
+        _locale_import_po($f, 'fr', LOCALE_IMPORT_OVERWRITE, 'default');
+      }
+  }
+}
+
+function _im_language_import_po_files($filename) {
+//To import update .po files from translations_update folder.
+  $update_folder = 'translations_updates';
+  $file = drupal_get_path('module', 'im_language') . '/' . $update_folder . '/' . $filename . ".po";
+  if (substr($file, -3) == '.po') {
+    $f = new stdClass();
+    $f->filename = $file;
+    $f->uri = $file;
+    _locale_import_po($f, 'fr', LOCALE_IMPORT_OVERWRITE, 'default');
+  }
+}
+
+/**
+* This function creates locale_language, before import.
+* @param array of string $imported_folders folders with po files to import.
+*/
+function _im_language_locale_add_language($imported_folders) {
+  foreach ($imported_folders as $folder) {
+    //From here, $folder = langcode
+    locale_add_language($folder, NULL, NULL, LANGUAGE_LTR, '', '', TRUE, TRUE);
+  }
+}
+
+/**
+ * Implements of hook_update_N
+ * Import the im_sprint3.1.po
+ */
+function im_language_update_7300() {
+  _im_language_import_po_files('im_sprint3.1');
+}
+
+/**
+ * Implements of hook_update_N
+ * Import the im_v14.1.0.po
+ */
+function im_language_update_7301() {
+	//Below Hook_update will be called in later hooks, it is not necessary here.
+  //_im_language_import_po_files('im_v14.1.0');
+}
+
+
+/**
+ * Implements hook_update()
+ * Import the im_vS3.3.po
+ */
+function im_language_update_7302() {
+  _im_language_import_po_files('im_v0S3.3');
+}
+/**
+ * Implements hook_update()
+ * Import the im_vS3.4.po
+ */
+function im_language_update_7303() {
+  _im_language_import_po_files('im_v0S3.4');
+}
+/**
+ * Implements hook_update()
+ * Import the im_vS3.5.po
+ */
+function im_language_update_7304() {
+  _im_language_import_po_files('im_v0S3.5');
+}
+
+/**
+ * Implements hook_update()
+ * Import the im_vS3.6.po
+ */
+function im_language_update_7305() {
+  _im_language_import_po_files('im_v0S3.6');
+}
+
+/**
+ * Implements hook_update()
+ * Import the im_vS4.1.po
+ */
+function im_language_update_7306() {
+  _im_language_import_po_files('im_v0S4.1');
+}
+
+/**
+ * Implements hook_update()
+ * Import the im_vS4.2.po
+ * Lot - 1
+ */
+function im_language_update_7400() {
+  _im_language_import_po_files('im_v0S4.2');
+}
+
+
+/**
+ * Implements hook_update()
+ * Import the im_v14.1.0
+ */
+
+function im_language_update_7401() {
+  _im_language_import_po_files('im_v14.1.0');
+}
+/**
+ * Implements hook_update()
+ * Import the im_v14.1.1
+ */
+function im_language_update_7402() {
+  _im_language_import_po_files('im_v14.1.0');
+}
+
+/**
+ * Implements hook_update()
+ * Import the im_v14.1.1
+ */
+function im_language_update_7403() {
+  _im_language_import_po_files('im_v14.1.0');
+}
+
+/**
+ * Implements hook_update()
+ * Import the im_v14.1.2
+ */
+function im_language_update_7404() {
+  _im_language_import_po_files('im_v14.1.0');
+}
+
+/**
+ * Implements hook_update()
+ * Import the im_v14.1.3
+ */
+function im_language_update_7405() {
+  _im_language_import_po_files('im_v14.1.0');
+}
+
+/**
+ * Implements hook_update()
+ * Import the im_v14.2.0.po
+ * Lot - 2
+ * Translate the Taxonomy vocabulary names to French
+ */
+function im_language_update_7500() {
+  _im_language_import_po_files('im_v14.2.0');
+    // Translate the Directory Category Vocabulary name to French
+  $taxonomy_machine_name = 'directory_category';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vocabulary->name = "Catégorie annuaire";
+  taxonomy_vocabulary_save($vocabulary);
+  drupal_set_message(t("Done the Directory Category Vocabulary name trnaslation to French"));
+  
+  // Translate the Application Category Vocabulary name to French
+  $taxonomy_machine_name = 'application_category';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vocabulary->name = "Catégorie d'application";
+  taxonomy_vocabulary_save($vocabulary);
+  drupal_set_message(t("Done the Application Category Vocabulary name trnaslation to French"));
+  
+  // Translate the Department Vocabulary name to French
+  $taxonomy_machine_name = 'agenda_department';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vocabulary->name = "Rayons";
+  taxonomy_vocabulary_save($vocabulary);
+  drupal_set_message(t("Done the Department Vocabulary name trnaslation to French"));
+  
+  // Translate the Fonctions Vocabulary name to French
+  $taxonomy_machine_name = 'fonctions';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vocabulary->name = "Interlocuteurs";
+  taxonomy_vocabulary_save($vocabulary);
+  drupal_set_message(t("Done the Fonctions name trnaslation to French"));
+  
+  // Translate the Operational Model Domains Vocabulary name to French
+  $taxonomy_machine_name = 'om_domains';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vocabulary->name = "Domaines modèle opérationnel";
+  taxonomy_vocabulary_save($vocabulary);
+  drupal_set_message(t("Done the Operational Model Domains name trnaslation to French"));
+  
+  // Translate the Operational Model Location Vocabulary name to French
+  $taxonomy_machine_name = 'operational_model_location';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vocabulary->name = "Emplacement modèle opérationnel";
+  taxonomy_vocabulary_save($vocabulary);
+  drupal_set_message(t("Done the Operational Model Location name trnaslation to French"));
+  
+  // Translate the Operational Model roles Vocabulary name to French
+  $taxonomy_machine_name = 'om_roles';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vocabulary->name = "Acteur procédure modèle opérationnel";
+  taxonomy_vocabulary_save($vocabulary);
+  drupal_set_message(t("Done the Operational Model roles name trnaslation to French"));
+  
+  // Translate the Regions Vocabulary name to French
+  $taxonomy_machine_name = 'regions';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vocabulary->name = "Régions pour plan de vente";
+  taxonomy_vocabulary_save($vocabulary);
+  drupal_set_message(t("Done the Regions name trnaslation to French"));
+}
+
+
+/**
+ * Implements hook_update()  
+ * Import the im_v14.2.1 - For 14.2.1 LOT2 S3 version
+ */
+function im_language_update_7600() {
+	_im_language_import_po_files('im_v14.2.1');
+}
+
+/**
+ * Implements hook_update()  
+ * Import the im_v14.2.2 - For 14.2.2 LOT2 S3 version
+ */
+function im_language_update_7700() {
+	_im_language_import_po_files('im_v14.2.2');
+}
+
+
+/**
+ * Implements hook_update()  
+ * Import the im_v14.2.3
+ */
+function im_language_update_7710() {
+  _im_language_import_po_files('im_v14.2.3');
+}
+
+/**
+ * Implements hook_update()  
+ * Import the im_v14.2.4
+ */
+function im_language_update_7720() {
+  _im_language_import_po_files('im_v14.2.4');
+}
+
+/**
+ * Implements hook_update()  
+ * Import the im_v14.2.5
+ */
+function im_language_update_7730() {
+  _im_language_import_po_files('im_v14.2.5');
+}
+
+/**
+ * Implements hook_update()  
+ * Import the im_v14.2.8
+ */
+function im_language_update_7740() {
+  _im_language_import_po_files('im_v14.2.8');
+}
+
+/**
+ * Implements hook_update  
+ * Import im_v14.2.9.po file
+ */
+function im_language_update_7800() {
+  _im_language_import_po_files('im_v14.2.9');
+}
+
+/**
+ * Implements hook_update  
+ * Import im_v14.2.10.po file
+ */
+function im_language_update_7801() {
+  _im_language_import_po_files('im_v14.2.10');
+}
+/**
+ * Implements hook_update  
+ * Import im_v15.1.po file
+ */
+function im_language_update_7813() {
+  _im_language_import_po_files('im_v15.1');
+}
+function im_language_update_7814() {
+  _im_language_import_po_files('im_v15.2');
+}

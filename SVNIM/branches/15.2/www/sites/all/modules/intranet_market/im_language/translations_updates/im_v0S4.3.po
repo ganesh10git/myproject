@@ -1,0 +1,73 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-12-20 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Application Back office node creation form
+msgid "Download a file"
+msgstr "Télécharger un fichier"
+
+#Application Back office node creation form
+msgid "Link to the documentation"
+msgstr "Lien vers la documentation"
+
+#Application Back office node creation form
+msgid "Insert link to documentation page"
+msgstr "Insérer lien vers page Documentation"
+
+#Application Back office node creation form
+msgid "Help out Download file"
+msgstr "Télécharger fichier d'aide"
+
+#Application Back office node creation form
+msgid "Help Button"
+msgstr "Bouton d'aide"
+
+#Operational Model
+msgid "Create Operational Model"
+msgstr "Créer une nouvelle procédure"
+
+#Operational Model
+msgid "Edit Draft"
+msgstr "Modifier"
+
+#Operational Model
+msgid "Edit draft"
+msgstr "Modifier"
+
+#Operational Model
+msgid "View draft"
+msgstr "Pévisualisation"
+
+#Operational Model
+msgid "Moderate"
+msgstr "Modération"
+
+#Operational Model
+msgid "Create new operational model"
+msgstr "Créer une nouvelle procédure"
+
+#Operational Model
+msgid "Save as Draft"
+msgstr "Enregistrer"
+
+#Operational Model
+msgid "Archive"
+msgstr "Archiver"
+
+#Operational Model
+msgid "Publish Now"
+msgstr "Publier"
+
+#Agenda homepage
+msgid "MODELE OPERATIONNEL MENU"
+msgstr "MODÈLE OPÉRATIONNEL"

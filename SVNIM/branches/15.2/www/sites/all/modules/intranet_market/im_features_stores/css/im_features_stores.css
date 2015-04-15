@@ -1,0 +1,422 @@
+/************************************************************
+**************** USER PERFERENCE FORM   *********************
+************************************************************/
+.store-preference-popup-title {
+  background-color: #FFFFFF;
+  height: 43px;
+  text-indent: 24px;
+  color: #684E49;
+	font-size: 18px;
+	line-height: 43px;
+	margin-bottom: 15px;
+}
+#user-store-preference {
+  background-color: #F0EBEA;
+  width: 724px;
+  margin: auto;
+}
+.store-preference-topsec {
+  padding: 0 25px;
+  color: #72544F;
+  font-size: 12px;
+}
+.store-preference-topsec  .topsec-title {
+  border-bottom: 1px solid #37211C;
+  color: #37211C;
+  display: inline-block;
+  margin-bottom: 13px;
+  padding: 0 0 5px;
+  width: 100%;
+}
+.dcplus-store-stat{
+}
+.dcplus-store-stat .dc-dr-cf{
+  background-color: #FAF9F9;
+  border: 1px solid #D6C6C4;
+  padding: 10px;
+  width: 424px;
+  float: left;
+}
+.dcplus-store-stat .dc-dr-cf .title {
+	width: 100%;
+	margin-bottom: 10px;
+	display: inline-block;
+}
+.dc-dr-cf .sp-do, .dc-dr-cf .dr-cf {
+  float: left;
+  margin: 0 9px 0 0;
+  width: 192px;
+}
+.dc-dr-cf .form-item label,
+.additional-criteria .form-item label{
+  font-weight: 400;
+  padding-bottom: 4px;
+  padding-left: 0;
+  margin: 0;
+  width: inherit !important;
+  float:none !important;
+}
+.dc-dr-cf .sp-do select,
+.dc-dr-cf .dr-cf select {
+  border: 1px solid #D6C6C4;
+  height: 28px;
+  width: 190px;
+  font-size: 12px;
+}
+.dcplus-store-stat .dc-dr-cf .form-item-usp-do .ajax-progress {
+}
+.dcplus-store-stat .store-status{
+  margin-left: 16px;
+  padding: 10px;
+  width: 188px;
+  background-color: #FAF9F9;
+  border: 1px solid #D6C6C4;
+  float: left;
+  min-height: 122px;
+}
+.dcplus-store-stat .store-status label{
+  font-weight: 400;
+}
+.additional-criteria {
+  background-color: #FAF9F9;
+  border: 1px solid #D6C6C4;
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px;
+  width: 96.6%;
+}
+.store-preference-bottomsec {
+	width: 674px;
+	position: relative;
+  border-top: 1px solid #9A7D78;
+  padding: 0 25px 20px;
+  font-size: 12px;
+  background-color: #FAF9F9;
+  float: left;
+}
+.store-preference-bottomsec .pointer-arrow {
+	position: absolute;
+	background: url(/sites/all/themes/im/css/images/application-sprite.png) no-repeat scroll -228px -191px transparent;
+	top: -6px;
+	height: 6px;
+	left: 85px;
+	width: 18px;
+}
+fieldset#edit-addtional-criteria-set,
+#user-store-preference fieldset.form-wrapper {
+	padding: 0px;
+	margin: 0px;
+	border: 0px none;
+}
+.additional-criteria .fieldset-wrapper {
+  float: left;
+  padding: 5px 0 7px;
+}
+.dc-dr-cf .form-item,
+.additional-criteria .form-item,
+.additional-criteria tr.odd .ajax-new-content .form-item, 
+.additional-criteria tr.even .ajax-new-content .form-item  {
+	margin: 0px;
+}
+.additional-criteria .field-name-field-preferred-criteria {
+  float: left;
+  width: 270px;
+  margin-right: 8px;
+	position: relative;
+}
+.additional-criteria .field-name-field-preferred-criteria label {
+  float: left !important;
+  font-weight: normal;
+  line-height: 28px;
+  margin:0px;
+  width: 65px !important; /** change for popup*/
+}
+.additional-criteria .field-name-field-preferred-criteria input.form-autocomplete {
+  background-position: 100% 8px;
+  border: 1px solid #D6C6C4;
+  height: 26px;
+  width: 200px;
+  padding: 0;
+}
+.additional-criteria .form-item-usp-autocomplete-field input.form-autocomplete.throbbing {
+  background-position: 100% -13px;
+}
+.additional-criteria #autocomplete,
+#autocomplete  {
+  width: 335px !important;
+}
+.additional-criteria .field-name-field-preferred-criteria #autocomplete  {
+  left: 65px !important;
+  top: 28px !important;
+}
+.additional-criteria .field-name-field-preferred-user-operator { 
+  float: left;
+}
+.additional-criteria .field-name-field-preferred-user-operator .form-select,
+.additional-criteria .form-select.type5-select{
+  border: 1px solid #D6C6C4;
+  height: 28px;
+  width: 127px;
+}
+.additional-criteria .form-select.type5-select{
+	margin: 0 10px 10px 10px;
+	float: left;
+	width: 198px;
+	height: 66px;
+}
+.additional-criteria  .field-name-field-preferred-auto-complete  {
+  float: left;
+  margin: 0 10px 0 10px;
+  width: 200px;
+}
+.additional-criteria  .field-name-field-preferred-auto-complete input {
+  border: 1px solid #CCCCCC;
+  height: 26px;
+  padding: 0;
+  width: 198px;
+}
+#user-store-preference .additional-criteria input.field-add-more-submit,
+#user-store-preference .additional-criteria input.field-remove-submit  {
+  background: url("/sites/all/modules/intranet_market/im_agenda/css/images/green-icons.png") no-repeat scroll 0 -394px transparent;
+  height: 22px;
+  width: 22px;
+  margin: 0;
+  font-size: 0px;
+}
+#user-store-preference .additional-criteria input.field-remove-submit {
+  background-position: 0 -486px;
+  float: left;
+	margin-top: 2px;
+}
+#user-store-preference .dc-dr-cf .field-add-more-submit,
+#user-store-preference .dc-dr-cf .field-remove-submit  {
+  background: url("/sites/all/modules/intranet_market/im_agenda/css/images/green-icons.png") no-repeat scroll 0 -394px transparent;
+  font-size: 0px;
+  height: 22px;
+  margin: 0;
+  width: 22px;
+}
+#user-store-preference .dc-dr-cf .field-remove-submit {
+  background-position: 0 -486px;
+  margin: 20px 0 0 0;
+  float: left;
+}
+.store-preference-filter{
+  float: left;
+  margin-left:39%;
+  /*text-align: center;*/
+	width:255px;
+	/*position: absolute;
+	left: 44%; */
+}
+.store-preference-reset{
+  float: right;
+  width:150px;
+} 
+#user-store-preference input.multiselect-processed {
+  background: url("/sites/all/modules/intranet_market/im_agenda/css/images/green-buttons.png") no-repeat scroll 0 -191px transparent;
+  border: 0 none;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight:400;
+  height: 34px;
+  margin: 15px 0 15px 0;
+  text-transform: uppercase;
+  width: 81px;
+  outline: none;
+}
+#user-store-preference .store-preference-reset  input[name=usp_reset] {
+  background: url("/sites/all/modules/intranet_market/im_agenda/css/images/green-icons.png") no-repeat scroll 0 -574px transparent;
+  color: #AE9490;
+  margin-left: 25%;
+  padding: 0 0 0 22px;
+  text-transform: none;
+  width: auto;
+}
+.store-preference-bottomsec .select-stores-options,
+.store-preference-bottomsec .reference-weather-sec{
+  float: left;
+  width: 100%;
+}
+.store-preference-bottomsec .select-stores-options .form-item label {
+	float: none;
+	font-weight: 400;
+	color: #37211c;
+	margin: 5px 0;
+	width: auto;
+}
+.store-preference-bottomsec .multiselect_labels,
+.multiselect_labels .label_unselected,
+.multiselect_labels .label_selected {
+	font-weight: 400;
+ 	margin-bottom: 5px;
+ 	color: #72544f;
+}
+.multiselect_labels .label_unselected,
+.multiselect_labels .label_selected {
+	width: 150px;
+}
+.store-preference-bottomsec .form-item-field-preferred-store-options-und {
+	margin: 0px;
+}
+.store-preference-bottomsec .multiselect_available {
+  width: 285px;
+}
+.store-preference-bottomsec select#field_preferred_store_options {
+  border: 1px solid #D6C6C4;
+  height: 160px;
+  width: 273px;
+  background: none repeat scroll 0 0 transparent;
+}
+.store-preference-bottomsec .multiselect_labels .label_selected {
+	margin: 0 0 0 397px;
+	float: none;
+}
+.store-preference-bottomsec .form-type-multiselect .form-type-select {
+	margin: 0px;
+}
+.store-preference-bottomsec ul.multiselect_btns {
+  margin: 28px 12px 0 0;
+}
+.store-preference-bottomsec li.multiselect_add, .store-preference-bottomsec li.multiselect_remove {
+	width: 101px;
+}
+.store-preference-bottomsec .multiselect_add a {
+  background: url("/sites/all/modules/intranet_market/im_agenda/css/images/green-buttons.png") no-repeat scroll 0 -119px transparent;
+  height: 38px;
+}
+.store-preference-bottomsec .multiselect_remove a  {
+  background: url("/sites/all/modules/intranet_market/im_agenda/css/images/green-buttons.png") no-repeat scroll -147px -119px transparent;
+  height: 38px;
+}
+.store-preference-bottomsec .multiselect_add a:hover,
+.store-preference-bottomsec .multiselect_add a:focus,
+.store-preference-bottomsec .multiselect_add a:active{
+  background-position: 0 -119px;
+}
+.store-preference-bottomsec .multiselect_remove a:hover,
+.store-preference-bottomsec .multiselect_remove a:focus,
+.store-preference-bottomsec .multiselect_remove a:active {
+  background-position: -147px -119px;
+}
+.store-preference-bottomsec select.form-multiselect {
+  color: #72544f;
+}
+.store-preference-bottomsec .reference-weather-sec .form-item {
+  border: 1px solid #D6C6C4;
+  height: 25px;
+  margin: 0;
+  padding: 15px 0;
+}
+.store-preference-bottomsec .reference-weather-sec .form-item label{
+  float: left;
+  font-weight: normal;
+  text-indent: 15px;
+  width: auto;
+}
+.store-preference-bottomsec .reference-weather-sec .form-select {
+  border: 1px solid #D6C6C4;
+  float: left;
+  height: 26px;
+  margin-left: 10px;
+  width: 200px;
+}   
+.user-store-preference-submit-sec {
+  float: left;
+  padding: 12px 0;
+  width: 100%;
+  text-align: right;
+  background-color: #F0EBEA;
+}
+#user-store-preference .user-store-preference-submit-sec input.user-store-cancel,
+#user-store-preference .user-store-preference-submit-sec input.form-submit.user-store-submit,
+#user-store-preference .user-store-preference-submit-sec input.form-submit.user-store-submit:hover,
+#change-user-form-sec .change-user-form-buttons input.form-submit,
+#change-user-form-results .change-user-form-results-buttons  input.form-submit {
+  background: url("/sites/all/modules/intranet_market/im_agenda/css/images/green-buttons.png") no-repeat scroll 0 -251px transparent;
+  border: 0 none;
+  color: #FFFFFF;
+  font-size: 11px;
+  height: 37px;
+  text-transform: uppercase;
+  width: 108px;
+  margin: 0 24px 0 0;
+  outline: none;
+  font-weight: 400;
+}
+.user-store-preference-submit-sec .ctools-close-modal {
+  float: left;
+  line-height: 36px;
+  margin: 0 0 0 475px;
+  text-align: center;
+}
+.user-store-preference-submit-sec .ctools-close-modal:hover {
+  text-decoration: none;
+}
+.user-store-preference-submit-sec {
+  float: left;
+  padding: 12px 0;
+  width: 100%;
+  text-align: right;
+  background-color: #F0EBEA;
+}
+form.im-user-store-preference-result-form,
+#user-store-preference .store-preference-bottomsec .select-stores-checkbox-avl .form-item-preferred-store-checkbox {
+  margin: 0px;
+}
+#user-store-preference .store-preference-bottomsec .select-stores-checkbox-sel .form-item-preferred-store-checkbox {
+  margin: 0px;
+}
+#user-store-preference .store-preference-bottomsec .select-stores-checkbox-avl,
+#user-store-preference .store-preference-bottomsec .select-stores-checkbox-sel {
+	position: absolute;
+	top: 20px;
+	left: 180px;
+	color: #ae9490;
+	font-size: 11px;
+	width: 130px;
+}
+#user-store-preference .store-preference-bottomsec .select-stores-checkbox-sel {
+  left: 578px;
+}
+#user-store-preference .store-preference-bottomsec .select-stores-checkbox-avl label,
+#user-store-preference .store-preference-bottomsec .select-stores-checkbox-sel label{
+	font-weight: 400;
+}
+#user-store-preference  td.field-multiple-drag,
+#user-store-preference .tabledrag-toggle-weight-wrapper,
+.additional-criteria .field-name-field-preferred-user-operator label,
+.additional-criteria  .field-name-field-preferred-auto-complete label, .field-name-field-auto-complete-value-type5 label {
+  display: none;
+}
+ul.info-class li, ul.weather-class li, ul.plan-class li, ul.mail-class li{
+	margin-bottom: 12px;
+}
+#user-store-preference tr.odd, 
+#user-store-preference tr.info,
+#user-store-preference tr.even,
+#user-store-preference thead tr, 
+#user-store-preference thead th {
+  background-color: transparent;
+  border: medium none;
+}
+#user-store-preference td, #user-store-preference th {
+  margin: 0;
+  padding: 0;
+}
+#user-store-preference tbody, #user-store-preference table {
+  border: 0px none;
+}
+
+.field-name-field-preferred-store-options-form .multiselect label div{
+  display: inline;
+}
+
+.store-preference-bottomsec .multiselect_labels .label_selected div{
+  display: inline;
+}
+/* FATIM-637 */
+.user-store-preference-submit-sec #messages{
+	text-align:left;
+}
+	

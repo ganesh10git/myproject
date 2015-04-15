@@ -1,0 +1,793 @@
+<?php
+ /**
+ * @file
+ * im_custom.install
+ */
+
+ /**
+ * Implements hook_install
+ * 
+ */ 
+function im_custom_install() {
+  variable_set('site_frontpage', 'agenda/list/today/all/all');
+  //variable_set('file_public_path', conf_path() . '/files/public');
+  //variable_set('file_private_path', conf_path() . '/files/private');
+  //S3 - Enable Operational model features.
+  _im_custom_enable_module();
+  //S3 - Disable toolbar menu
+  _im_custom_disable_module();
+  //Set default value for Agenda settings - im_agenda_n
+  variable_set('im_admin_n', 18);
+  //Create default Taxonomy term 'All Department'
+  //_im_custom_create_terms();
+  //Set the public/private file system variables
+  variable_set('file_public_path', 'sites/default/files/public');
+  variable_set('file_private_path', 'sites/default/files/private');
+  _im_custom_create_mail();
+  //Set the monday as the default date in the IM portal.
+  variable_set('date_first_day', '1');
+  variable_set('agenda_publication_todate_nvalue','18');
+  variable_set('im_future_action_ndays', '30');
+  //UATIM-120 : Enabling the imce module for the file browse element on the CKEditor.
+  module_enable(array('imce'),TRUE);
+  drupal_set_message(t("Enabled IMCE contributed module"));
+  _im_custom_enable_imce_for_ck_editor();
+  //To set the date format for Long, Medium and Short formats
+  variable_set('date_format_long', 'l, j F, Y - H:i');
+  variable_set('date_format_medium', 'D, d/m/Y - H:i');
+  variable_set('date_format_short', 'd/m/Y - H:i');
+  variable_set('message_publication_to_date', 7);
+  // Apachesolr Setup
+  _im_custom_apachesolr_settings();
+  
+  //Create a new taxonomy term and update the existing term label on the "Location" vocabulary
+  //_im_custom_manage_operational_model_location_taxonomy();
+  
+  //Duplicate mail content for action regional
+  _im_custom_create_duplication_content_mail();
+  module_enable(array('apachesolr_proximity'),TRUE);
+}
+
+/**
+ * Implements hook_update()
+ * Features of Sprint 3 will be installed in this hook_update.
+ */
+function im_custom_update_7300(){
+	//S3 - Enable Operational model and Salesplan features.
+  _im_custom_enable_module();
+  //S3 - Disable toolbar menu
+  _im_custom_disable_module();
+  //SPRINTTWO-61 - Agenda for the Day - Ordering of content.
+  features_rebuild(array('im_feature_agenda' => array('views_default', 'field_base', 'field_instance', 'user_permission')));
+  //IMARKET-113 - Administrative theme : Removing Toolbar menu from FO and giving Admin Menu permission for FO user
+  features_rebuild(array('im_features_permissions' => array('user_permission')));
+  //Set default value for Agenda settings - im_agenda_n
+  variable_set('im_admin_n', 18);
+  //Set the public/private file system variables
+  variable_set('file_public_path', 'sites/default/files/public');
+  variable_set('file_private_path', 'sites/default/files/private');
+  _im_custom_create_mail();
+}
+/*
+ * Enable modules
+ */
+function _im_custom_enable_module() {
+  module_enable(array('admin_menu','im_features_om','im_feature_sales_plan'),TRUE);
+  drupal_set_message(t("Enabled Operational model and Salesplan features"));
+}
+
+/*
+ * Disable modules
+ */
+function _im_custom_disable_module() {
+  //IMARKET-113 - Disabling the toolbar menu
+  module_disable(array('toolbar'),TRUE);
+  drupal_set_message(t("Disabled Toolbar"));
+}
+
+/**
+ * 
+ * Function for creating mail subject and body
+ */
+function _im_custom_create_mail(){
+	//Action email body for content managers with status needs review
+	variable_set('action_mail_subject', t("Portail market : Liste des contenus à valider pour la journée du [current-date:medium]"));
+  variable_set('action_mail_body', t("Bonjour [user:name],
+
+Voici la liste des contenus à valider : 
+
+[content:list]
+
+Vous pouvez utiliser l'URL suivante pour accéder à la liste des contenus à valider :
+[site:url]admin/content 
+
+Cordialement,
+[site:name]"));
+  //Content reject mail content 
+  variable_set('action_mail_reject_subject', t("Portail market : Contenu rejeté"));
+  variable_set('action_mail_reject_body', t("Bonjour [user:field_full_name],
+
+[current-user:field_full_name] n'a pas accepté le contenu intitulé [content:title]
+que vous avez rédigé le [node-created]. Il ne sera donc pas publié pour la raison suivante : 
+
+[content:comment]
+
+Vous pouvez utiliser le lien ci-dessous pour modifier votre contenu :
+[site:url]node/[node:nid] 
+
+Cordialement,
+Le Portail Market"));
+}
+
+/**
+ * Implements hook_update()
+ * Features of Sprint 3 and Sprint 4 will be installed in this hook_update.
+ */
+function im_custom_update_7301(){
+  module_enable(array('im_import','im_features_application','im_features_message','im_feature_manage_content'),TRUE);
+}
+
+/**
+ * Implementation of hook_update()
+ * Features with the changes for the UATIM-5, 12, 13
+ * Deleting content_manager_benchmark
+ */
+function im_custom_update_7302(){
+  //UATIM-5 - Admin user doesn't have access to taxonomies
+  //UATIM-12 - Back office : Dashboard preseneted depending on role
+  //UATIM-13 - Back office : operationnal model
+  //Application fixes
+  //UATIM-23
+  //Rebuild & Revert all enabled features.
+  features_rebuild();
+  features_revert();
+  //Deleting content_manager_news role if present as per UATIM-274
+  $query_result =  db_query("SELECT * FROM {role} WHERE name = 'content_manager_benchmark'")->fetchAssoc();
+  if (!empty($query_result)) {
+    user_role_delete('content_manager_benchmark');
+  }
+}
+
+/**
+ * Implementation of hook_update()
+ * Features Rebuild in S3.3
+ */
+function im_custom_update_7303(){
+  //Rebuild & Revert all enabled features.
+  features_rebuild();
+  features_revert();
+ }
+ /**
+ * Implementation of hook_update()
+ */
+function im_custom_update_7304(){
+ //Set the monday as the default date in the IM portal.
+ variable_set('date_first_day', '1'); 
+}
+/**
+ * Implementation of hook_update()
+ */
+function im_custom_update_7305(){
+  //Rebuild & Revert all enabled features.
+  features_rebuild();
+  features_revert();
+ }
+ 
+/**
+ * Implementation of hook_update()
+ * Lot1 Sprint 4.1 - Rebuild & Revert all enabled features
+ */
+function im_custom_update_7306(){
+  features_rebuild();
+  features_revert();
+    //UATIM -98
+  _im_custom_ckeditor_update();
+ }
+ 
+ /**
+ * Implementation of hook_update()
+ * Lot1 Sprint 4.2 - Rebuild the im features stores.
+ */
+function im_custom_update_7400(){  
+  features_rebuild();
+  features_revert();
+  module_enable(array('im_performance'),TRUE);
+  variable_set('agenda_publication_todate_nvalue','18');
+ }
+ 
+ 
+/**
+ * Implementation of hook_update()
+ * Enable the modules required for v14.2.0 and v14.2.10
+ * 
+ */ 
+function im_custom_update_7500(){
+	//Features Rebuild required for v14.2.0 and v14.2.1
+	//IMARKET-174 : Operational Model - New version workflow   
+  features_rebuild(array('im_features_om' => array('field_base','field_instance')));
+  features_rebuild(array('im_features_permissions' => array('user_permission')));
+  features_rebuild(array('im_feature_user' => array('field_base','field_instance')));
+  
+  //IMARKET-153 and FATIM-554 - Expert role cannot create a new content.
+    //Changed the empty records label "No procedure available" for the Operational model landing page left panel
+  features_rebuild(array('im_feature_manage_content' => array('views_default')));
+  
+  //enabling product guide module
+  module_enable(array('im_product_guide', 'im_features_directory'),TRUE);
+  drupal_set_message(t("Enabled Product guide module"));
+  module_enable(array('im_features_questionnaire','webform', 'form_builder', 'options_element','form_builder_webform','pchart'), TRUE);
+    
+  //OM mail subject and content settings 
+  _im_custom_create_om_mail();
+  
+  //set the om mail trigger value for 15 days
+  variable_set("om_mail_trigger_nvalue","15");
+  
+  //set the om archive mail to 7 days
+  variable_set("om_mail_archive_nvalue","7");
+    /*
+   * UATIM-169 : [SALE PLAN] Order Period not obligate.
+   */
+  //to remove the benchmark zone and delete the field.
+  features_rebuild(array('im_feature_sales_plan' => array('field_base','field_instance')));
+  //UATIM-246 lable change  
+  features_rebuild(array('im_feature_agenda' => array('field_base','field_instance')));  
+}
+
+
+/**
+ * 
+ * Function for creating mail subject and body
+ */
+function _im_custom_create_om_mail(){
+  //Action email body for content managers with status needs review
+  variable_set('om_archive_mail_subject', t("Portail market : procédure vont être archivé"));
+  variable_set('om_archive_mail_body', t("Bonjour [user:field_full_name],
+Procédure suivante vont être archivé : 
+
+[content:list]
+
+Vous pouvez utiliser l'URL suivante pour accéder au contenu : 
+[site:url]admin/im/manage/om?state=archive
+
+Cordialement,
+[site:name]"));
+  //Content reject mail content 
+  variable_set('om_newversion_mail_subject', t("Portail market : Créer une nouvelle version"));
+  variable_set('om_newversion_mail_body', t("Bonjour [user:field_full_name],,
+
+Procédures suivantes vont expirer. S'il vous plaît envisager pour l'examen.
+
+[content:list]
+
+Vous pouvez utiliser l'URL suivante pour accéder au contenu:
+[site:url]admin/im/manage/om?state=published
+
+Cordialement,
+[site:name]"));
+}
+
+ 
+ /**
+ * Change the 'Default language' and Enable spell check from'Advanced' profile. 
+ */
+function _im_custom_ckeditor_update() {
+	//Advanced
+  $result = db_query("SELECT settings FROM {ckeditor_settings} WHERE name = :name", array(':name' => 'Advanced'))->fetchField();
+  $settings = unserialize($result);
+  $settings['lang'] = "fr";
+  $settings['scayt_autoStartup'] = "t";
+  $settings = serialize($settings);
+
+  $update = db_update('ckeditor_settings')
+      ->fields(array(
+        'settings' => $settings,
+      ))
+      ->condition('name', 'Advanced', '=')
+      ->execute();
+      //Full
+        $result = db_query("SELECT settings FROM {ckeditor_settings} WHERE name = :name", array(':name' => 'Full'))->fetchField();
+  $settings = unserialize($result);
+  $settings['lang'] = "fr";
+  $settings['scayt_autoStartup'] = "t";
+  $settings['enter_mode'] = "br";
+  $settings['shift_enter_mode'] = "p";
+  module_load_include('inc', 'ckeditor', 'includes/ckeditor.lib');
+  $plugin_list = ckeditor_load_plugins();
+  //Enable the ocupload for the ckeditor
+  $settings['loadPlugins']['ocupload'] = $plugin_list['ocupload']; 
+  $settings = serialize($settings);
+
+  $update = db_update('ckeditor_settings')
+      ->fields(array(
+        'settings' => $settings,
+      ))
+      ->condition('name', 'Full', '=')
+      ->execute();
+} 
+
+/**
+ * Implementation of hook_update()
+ * hook_update_7501
+ */
+function im_custom_update_7501() {
+  features_rebuild(array('im_features_application' => array('field_instance','views_default')));
+  field_delete_field('field_ldap_document_url');
+  field_delete_field('field_ldap_document_upload_check');
+  features_rebuild(array('im_features_application' => array('field_instance','field_base')));
+}
+
+/*
+ * hook_update for enabling imce module and setting imce profile for Full and Advance option.  hook_update_7502
+ */
+function im_custom_update_7502() {
+  module_enable(array('imce'),TRUE);
+  drupal_set_message(t("Enabled IMCE contributed module"));
+  _im_custom_enable_imce_for_ck_editor();
+  features_rebuild(array('im_features_stores' => array('field_instance','field_base')));
+  //To set the date format for Long, Medium and Short formats.
+  variable_set('date_format_long', 'l, j F, Y - H:i');
+  variable_set('date_format_medium', 'D, d/m/Y - H:i');
+  variable_set('date_format_short', 'd/m/Y - H:i');
+}
+/*
+ * Implementation of hook_update()
+ * hook_update for enabling apachesolr, apachesolr_search, facetapi module and its configuration 
+ * Apachesolr setup. hook_update_7503
+ */
+function im_custom_update_7503() {
+  _im_custom_apachesolr_settings();
+}
+
+/**
+ * Apachesolr setup
+ * Enabling apachesolr, apachesolr_search, facetapit, apachesolr_attachments modules and its configuration
+ */
+function _im_custom_apachesolr_settings() {
+  module_enable(array('apachesolr', 'apachesolr_search', 'facetapi', 'apachesolr_attachments', 'apachesolr_autocomplete', 'im_features_apachesolr_pages', 'im_search'), TRUE);
+  drupal_set_message(t("Installed apachesolr, apachesolr_search, facetapi, apachesolr_attachments, apachesolr_autocomplete, im_features_apachesolr_pages and im_search modules"));
+  //setting the variable for default autocomplete
+  variable_set('apachesolr_autocomplete_widget', 'drupal');
+  variable_set('apachesolr_autocomplete_counts' , FALSE);
+  drupal_set_message(t("Done the apachesolr_autocomplete module settings"));
+  $custom_settings_file_path = DRUPAL_ROOT . '/sites/default/custom_settings.php';
+  if (file_exists($custom_settings_file_path)) {
+    include $custom_settings_file_path;
+    // Update solr environment variable "solr":
+    $update = db_update('apachesolr_environment')
+      ->fields(array('url' => $default_settings_solr['environment']['solr']))
+      ->condition('env_id', 'solr')
+      ->execute();
+  }
+  drupal_set_message(t("Done the Apache solr environment setup with the portal"));
+  variable_set('apachesolr_attachments_tika_path', $default_settings_solr['apachesolr_tika']['apachesolr_attachments_tika_path']);
+  variable_set('apachesolr_attachments_tika_jar', $default_settings_solr['apachesolr_tika']['apachesolr_attachments_tika_jar']);
+  variable_set('apachesolr_attachments_extract_using', 'tika');
+  drupal_set_message(t("Done the apachesolr_attachments tika settings for the content attachment file indexing & search"));
+  // Set the apachesolr search is the default site search option
+  variable_set("search_default_module", "apachesolr_search");
+  variable_set('search_active_modules', array('apachesolr_search' => 'apachesolr_search', 'node' => 0, 'user' => 0));
+  variable_set('search_default_module', 'apachesolr_search');
+  drupal_set_message(t("Done the apachesolr_search module settings"));
+  include_once (drupal_get_path("module", "apachesolr") . "/apachesolr.index.inc");
+  $indexing_content_types = array('alert', 'action', 'benchmark', 'news', 'sales_plan', 'operational_model');
+  apachesolr_index_set_bundles('solr', 'node', $indexing_content_types);
+  $indexing_content_types_files = array('file');
+  apachesolr_index_set_bundles('solr', 'file', $indexing_content_types_files);
+  drupal_set_message(t("Done the alert, action, benchmark, news, sales plan, operational model content types and the file entity to the apachesolr indexing settings"));
+  // Enable the apachesolr autocomplete
+  variable_set('im_autocomplete_activation_status', 1);
+  drupal_set_message(t("Done the apachesolr autocomplete functionality enabling"));
+}
+/**
+ * Enable IMCE setting for ckEditor FULL, ADVANCE, and Basic profile...
+ */
+function _im_custom_enable_imce_for_ck_editor() {
+  if (module_exists('imce')) {
+    _im_custom_filebrowser_settings('Advanced');
+    _im_custom_filebrowser_settings('Full');
+  }
+}
+
+/**
+ * Delete and Insert Settings for IMCE module.
+ * name = Type of profile Basic, Advance, Full. 
+ */
+function _im_custom_filebrowser_settings($name) {
+  $result = db_select('ckeditor_settings', 's')->fields('s', array('settings'))->condition('name', $name, '=')->execute()->fetchAssoc();
+  $unsel_result = unserialize($result['settings']);
+  $unsel_result['filebrowser'] = 'imce';
+  $sel_result = serialize($unsel_result);
+  
+  db_delete('ckeditor_settings')
+      ->condition('name', $name)
+      ->execute();
+  db_insert('ckeditor_settings')
+      ->fields(array(
+        "name" => $name,
+        "settings" => $sel_result
+  ))
+  ->execute();
+}
+
+/**
+ * Implementation of hook_update()
+ * LOT-2 Update hook. 
+ * To Enable the modules - Webform, form_builder_webform, form_builder, options_element,Questionnaire.
+ * Rebuilding Features
+ * Deleting content_manager_news role. hook_update_7504
+ */ 
+function im_custom_update_7504() {
+  //Deleting content_manager_news role if present as per UATIM-274
+  $query_result =  db_query("SELECT * FROM {role} WHERE name = 'content_manager_news'")->fetchAssoc();
+  if (!empty($query_result)) {
+    user_role_delete('content_manager_news');
+  }
+  field_delete_field('field_sp_benchmark');
+  
+  //Updating the Content Rejected Mail text - UATIM-252
+  _im_custom_create_mail();
+}
+
+/**
+ * Implementation of hook_update_N()
+ * To apply the permisison changes done for the Expert role to access the administration theme
+ * Changed the empty records label "No procedure available" for the Operational model landing page left panel 
+ */
+function im_custom_update_7505(){
+  //UATIM-172 - Setting the access-denied path under Default 403 (access denied) page for non registered user login 
+  variable_set('site_403','access-denied');
+  //UATIM-343 - Deleting Salarie Siege role 
+  user_role_delete('salarie_siege');
+}
+
+/**
+ * _im_custom_manage_operational_model_location_taxonomy
+ * Create a new taxonomy term and update the existing term label on the "Location" vocabulary
+ */
+function _im_custom_manage_operational_model_location_taxonomy() {
+  $taxonomy_machine_name = 'operational_model_location';
+  $om_localtion_vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+
+  $om_location_term = new stdClass();
+  $om_location_term->name = "Sécurité";
+  $om_location_term->vid = $om_localtion_vocabulary->vid;
+  $om_location_term->field_om_location_code['und'][0]['value'] = "Securite"; //str_replace("/", "-", str_replace(" ", "_", $value_set[$j]));
+  taxonomy_term_save($om_location_term);
+  drupal_set_message(t("The Sécurité term created on the Operation model location vocabulary"));
+  
+  $location = taxonomy_get_term_by_name("actifsSecuriteMaintenance", "operational_model_location");
+  $key_value = array_keys($location);
+  $location[$key_value[0]]->name = "Actifs Frais Généraux";
+  taxonomy_term_save($location[$key_value[0]]);
+  drupal_set_message(t("Updated the 'actifsSecuriteMaintenance' term name with 'Actifs Frais Généraux' on the Operation model location vocabulary"));
+}
+
+/**
+ * Implementation of hook_update_N()
+ * Version 2 sprint 3 hook_update
+ * Created new role content_manager_action_regional
+ * Added two field is User account page
+ */
+function im_custom_update_7600(){
+  features_rebuild(array('im_features_permissions' => array('user_role', 'user_permission')));
+  features_rebuild(array('im_feature_user' => array('field_base','field_instance')));
+  features_rebuild(array('im_feature_agenda' => array('field_base','field_instance')));
+  module_enable(array('im_cuwa'),TRUE);
+  _im_custom_create_duplication_content_mail();
+  _im_custom_create_mail();
+  //FATIM-560,FATIM-561 Manage Questionnaire link is made accessable to Contibutor,Content manager action,admin,TD
+  //FATIM-563 node edit link field added instead of webform edit changed
+  features_rebuild(array('im_features_questionnaire' => array('views_default')));
+  
+  //FATIM-554 - Expert role cannot create a new content
+  features_rebuild(array('im_feature_manage_content' => array('views_default')));
+}
+
+/**
+ * Implementation of hook_update_N()
+ * Modifies site name as Portail Market
+ * Added send anabel code field in application.
+ */
+function im_custom_update_7700(){
+  variable_set('site_name', 'Portail Market');
+  features_rebuild(array('im_features_application' => array('field_instance','field_base')));
+  //UATIM-425 - Providing the permissions to delete own content and access unpublished content for the Expert role
+  features_rebuild(array('im_features_permissions' => array('user_permission')));
+  module_enable(array('apachesolr_proximity'),TRUE);
+}
+
+
+/**
+ * Implementation of hook_update_N()
+ * Documentation menu lable changed to Wiki Market
+ * Gestion Documentation menu lable changed to Gestion Wiki Market
+ */
+function im_custom_update_7701() {
+  $query = db_update('menu_links')
+         ->fields(array('link_title' => 'Wiki Market'))
+         ->condition('link_path', 'modele-operationnel', '=')
+         ->execute();
+  drupal_set_message(t("Documentation menu lable changed to Wiki Market"));
+  
+  $query = db_update('menu_links')
+         ->fields(array('link_title' => 'Gestion Wiki Market'))
+         ->condition('link_path', 'admin/im/manage/om', '=')
+         ->execute();
+  drupal_set_message(t("Gestion Documentation menu lable changed to Gestion Wiki Market"));
+}
+
+/**
+ * 
+ * Function for creating mail subject and body for the action Regional content duplication
+ * Added send anabel code field in application.
+ */
+function _im_custom_create_duplication_content_mail(){
+  //Action email body for content managers with status needs review
+  variable_set('action_regional_mail_duplication_subject', t("Portail market : List of the Content to be verified and published [current-date:medium]"));
+  variable_set('action_regional_mail_duplication_body', t("Bonjour [user:name],
+
+Click on the content link to publish: 
+
+[content:list]
+
+
+Cordialement,
+[site:name]"));
+}
+/**
+ * Implementation of hook_update_7710()
+ * 
+ */
+function im_custom_update_7710() {
+  //UATIM-441 translation fixes in action content type
+  features_rebuild(array('im_feature_agenda' => array('field_instance','field_base')));
+  
+  //UATIM-487 - Permission for Content Manager Action to create/edit alerts, news and benchmarks
+  features_rebuild(array('im_features_permissions' => array('user_permission')));
+  
+  //UATIM-460 - OM Differences between the procedures list in Front & Back Office
+  features_rebuild(array('im_feature_manage_content' => array('views_default')));
+}
+
+/**
+ * Implementation of hook_update_7720()
+ * IM -14.2.4v
+ */
+function im_custom_update_7720() {
+  features_rebuild(array('im_features_permissions' => array('user_permission')));
+}
+
+/**
+ * Implementation of hook_update_7730()
+ * IM -14.2.5v
+ */
+function im_custom_update_7730() {
+  features_rebuild(array('im_features_permissions' => array('user_permission')));
+}
+
+/**
+ * Implementation of hook_update_7740()
+ * IM -14.2.8v
+ */
+function im_custom_update_7740() {
+  features_rebuild(array('im_features_permissions' => array('user_permission')));
+}
+
+/**
+ * Implementation of hook_update.
+ * Hook update required for IM v14.2.9
+ * -Fix for UATIM-640 [BO] Hide files back office to all users
+ */
+function im_custom_update_7800(){
+	//Set subnav to zero to hide the subdirectories for all users.
+	$profiles = array();
+	include_once (drupal_get_path("module", "imce") . "/inc/imce.core.profiles.inc");
+	$profiles[1] = imce_construct_profile('User-1', 1, 0, 0, 0, '*', '1200x1200', 0, array(array('.', 0, 1, 1, 1, 1, 1)), array(array('Small', '90x90', 'small_', ''), array('Medium', '120x120', 'medium_', ''), array('Large', '180x180', 'large_', '')));
+	variable_set('imce_profiles', $profiles);
+	//add Regional moderator role to access User-1
+	$all_roles = user_roles('TRUE',NULL);
+	foreach($all_roles as $key => $value){
+		if($value != 'visitor' && $value != 'authenticated user' ){
+			$set_role[$key] = array('weight'=>0,'public_pid'=>1,'private_pid'=>0);
+		}
+	}
+	$set_role[DRUPAL_ANONYMOUS_RID] = array('weight'=>12,'public_pid'=>0,'private_pid'=>0);
+	$set_role[DRUPAL_AUTHENTICATED_RID] = array('weight'=>11,'public_pid'=>0,'private_pid'=>0);
+	variable_set('imce_roles_profiles', $set_role);
+	
+	//Fix for UATIM-559 - Permission to create new version for the OM Manager
+	features_rebuild(array('im_features_permissions' => array('user_permission')));
+	
+	//Fix for UATIM-611 - changing the Type5 widget to Multiselect
+	features_rebuild(array('im_features_stores' => array('field_base','field_instance')));
+	
+	//Fix for UATIM - 634 - Delete the existing view for Directory page.
+	features_rebuild(array('im_features_directory' => array('views_default')));
+}
+
+/**
+ * 
+ * Implementation of hook_update.
+ * This hook update will be used to deploy 14.2.10 version changes
+ */
+function im_custom_update_7801(){
+  if (module_exists('facetapi')) {
+    module_disable(array('facetapi'));
+    drupal_uninstall_modules(array('facetapi'));
+  }
+}
+
+/**
+ * Add Index for node_view count tables Nid column
+ * This hook update is required to add index for the node view count table nid column
+ * 
+ */
+function im_custom_update_7802(){
+  if (module_exists('node_view_count')) {
+    if (!db_index_exists('node_view_count', 'nid')) {
+      db_add_index('node_view_count', 'nid', array('nid'));
+    }
+	}
+}
+
+/**
+ * 
+ * Implementation of hook_update.
+ * This hook update will be used to deploy 15.1.1 to enable Autosave module
+ */
+function im_custom_update_7900(){
+  module_enable(array('autosave'),TRUE);
+  //Enable the Auto Save for Action content type
+  variable_set('autosave_action', 1);
+  //Set the autosave period to 30s
+  variable_set('autosave_period', 30);
+}
+
+/**
+ * 
+ * Implementation of hook_update.
+ * This hook update will be used to deploy 15.1.3 to set the variables for Purge policy and rebuild the features to enable the new fields
+ */
+function im_custom_update_7906(){
+//re-build features 
+ features_rebuild(array('im_features_message' => array('field_base','field_instance')));
+ features_rebuild(array('im_features_user' => array('field_base','field_instance')));
+ features_rebuild(array('im_feature_agenda' => array('field_base', 'field_instance')));
+ //Default no of months for Purge policy
+ variable_set('im_agenda_no_of_months_value', 18);
+ variable_set('im_wiki_market_no_of_months_value', 18);
+ variable_set('im_sales_plan_no_of_months_value', 18);
+ variable_set('im_users_no_of_months_value', 18);
+  //Default no of months for Message content type
+ variable_set('message_publication_to_date', 7); 
+ //Enable the Auto Save for Alert content type
+  variable_set('autosave_alert', 1);
+ //Enable the Auto Save for News content type
+  variable_set('autosave_news', 1);
+ //Enable the Auto Save for Benchmark content type
+  variable_set('autosave_benchmark', 1);
+}
+/**
+ * 
+ * Implementation of update function to modify the ckeditor profile for UATIM-761
+ */
+function _im_custom_ckeditor_full_profile_update() {
+  $result = db_query("SELECT settings FROM {ckeditor_settings} WHERE name = :name", array(':name' => 'Full'))->fetchField();
+  $settings = unserialize($result);
+  $settings['enter_mode'] = "br";
+  $settings['shift_enter_mode'] = "p";
+  $settings['filebrowser'] = "none";   
+  module_load_include('inc', 'ckeditor', 'includes/ckeditor.lib');
+  $plugin_list = ckeditor_load_plugins();
+  //Enable the ocupload for the ckeditor
+  $settings['loadPlugins']['ocupload'] = $plugin_list['ocupload']; 
+  $settings = serialize($settings);
+  $update = db_update('ckeditor_settings')
+      ->fields(array(
+        'settings' => $settings,
+      ))
+      ->condition('name', 'Full', '=')
+      ->execute();
+}
+/**
+ * 
+ * Function to set permission for the oneclickupload ...
+ */
+function _im_custom_assign_roles_oneclickupload() {
+   $user_roles = user_roles();
+   $template =1;
+   foreach ($user_roles as $rid => $enabled) {
+  	if ($rid !=1 ) {  	 
+  	  user_role_change_permissions($rid, array('upload files use template ' . $template => $enabled));	
+  	}    
+  }	
+}
+ /**
+ * 
+ * Implementation of hook_update.
+ * This hook update will be used to deploy 15.1.4.
+ */
+function im_custom_update_7909(){
+  module_enable(array('ocupload', 'im_features_rmp','im_rmp'),TRUE);
+  features_rebuild(array('im_features_user' => array('field_base','field_instance')));
+  features_rebuild(array('im_feature_agenda' => array('field_base', 'field_instance')));
+  _im_custom_ckeditor_full_profile_update();
+  //Permission for the oneclick upload
+  _im_custom_assign_roles_oneclickupload();
+  //Enable the Auto Save for Sales Plan content type
+  variable_set('autosave_sales_plan', 1);
+	//Enable the Auto Save for Operational Model content type
+  variable_set('autosave_operational_model', 1);
+  features_rebuild();
+  features_revert();
+}
+
+function delete_im_rmp_field() {
+	$fields_to_delete = array(
+			'field_action_regional_profiles',
+	);
+	foreach ($fields_to_delete as $field_name) {
+		if (field_info_field($field_name)) {
+			field_delete_field($field_name);
+			watchdog('module_name', 'Deleted the :field_name field from all content type instances.', array(':field_name' => $field_name));	
+		}
+		else {
+			watchdog('module_name', 'The :field_name field does not exist.', array(':field_name' => $field_name));
+		}
+	}
+	
+	/**
+	 * The fields aren't really deleted until the purge function runs, ordinarily
+	 * during cron.  Count the number of fields we need to purge, and add five in
+	 * case a few other miscellaneous fields are in there somehow.
+	 */
+	field_purge_batch(count($fields_to_delete) + 5);
+}
+
+/**
+ *
+ * Implementation of hook_update.
+ * This hook update will be used to deploy 15.1.4.
+ */
+function im_custom_update_7911(){
+	delete_im_rmp_field();
+	features_rebuild(array('im_feature_agenda' => array('field_base','field_instance')));
+	_im_custom_ckeditor_full_profile_imce_update();
+	//Remove the regional profiles from Apache solr indexing.
+	module_load_include('inc', 'apachesolr', 'apachesolr.index');
+	$env_id = apachesolr_default_environment();
+	apachesolr_index_delete_bundles($env_id, 'node', array('regional_profiles'));
+	entity_info_cache_clear();
+    cache_clear_all('apachesolr:environments', 'cache_apachesolr');
+}
+/**
+ * 
+ * Implementation of update function to modify the ckeditor profile to enable imce.
+ */
+function _im_custom_ckeditor_full_profile_imce_update() {
+  $result = db_query("SELECT settings FROM {ckeditor_settings} WHERE name = :name", array(':name' => 'Full'))->fetchField();
+  $settings = unserialize($result);  
+  $settings['filebrowser'] = "imce"; 
+  $settings = serialize($settings);
+  $update = db_update('ckeditor_settings')
+      ->fields(array(
+        'settings' => $settings,
+      ))
+      ->condition('name', 'Full', '=')
+      ->execute();
+}
+/**
+ * Disable and uninstall 'ocupload MODULE'.
+ */
+function im_custom_update_7912() {
+  if (module_exists('ocupload')) {
+    module_disable(array('ocupload'));
+    drupal_uninstall_modules(array('ocupload'));
+  }
+}
+
+function im_custom_update_7913() {
+	features_rebuild(array('im_features_application' => array('field_base','field_instance')));
+	features_rebuild(array('im_features_questionnaire' => array('field_instance')));
+}

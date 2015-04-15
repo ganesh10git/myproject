@@ -1,0 +1,449 @@
+<?php
+
+/**
+ * @file
+ * Module file for im_blocks.
+ */
+/**
+ * Implementation of hook_block_info
+ */
+function im_blocks_block_info() {
+  $blocks['im_header_block'] = array(
+    'info' => t('Intranet market header block'),
+    'weight' => 10,
+    'cache' => DRUPAL_CACHE_GLOBAL,
+    'module' => 'im_blocks',
+  );
+  return $blocks;
+}
+
+/**
+ * Implemetation of hook_block_view
+ */
+function im_blocks_block_view($delta = '') {
+  $block = array();
+  global $user;
+  if ($user->uid){
+  switch ($delta) {
+    case 'im_header_block':
+      $block['subject'] = '';
+      $block['content'] = _get_im_header_block_content();
+      break;
+  }
+  return $block;
+  }
+}
+
+/**
+ * Implementation of _get_im_header_block_content
+ */
+function _get_im_header_block_content() {
+  	/* Search block rendering */
+  	$block_search = module_invoke('search','block_view','search'); 
+  	$search_block = render($block_search['content']);
+  //UATIM-374 fixes logo is not clickable.
+  	drupal_add_js('jQuery(document).ready(function () { jQuery(".menu-depth-1 a.header_nav_menu1").click(function(){return false;}); jQuery("..menu-depth-1 a.header_nav_menu1").bind("contextmenu", function(e) { return false;});});', 'inline');
+  	/* Header left menu */
+    module_invoke('nice_menus','block_views',1);
+    $nice_menu_block = module_invoke('nice_menus','block_view',1);
+    $left_menu_list = array();
+    /*if(is_array($nice_menu_block['content'])) {
+      $menu = $nice_menu_block['content']['#markup'];
+      $menu = explode('</ul></li></ul>', $menu);
+      //$menu[0] = $menu[0] .'</ul></li>'.im_blocks_application_headermenu().'</ul>';
+      $menu[0] = $menu[0] . im_blocks_application_headermenu() . '</ul></li></ul>';
+     // $menu[0] = $menu[0] . '</ul></li></ul>'.im_blocks_application_headermenu();
+      $nice_menu_block['content']['#markup'] = $menu[0];
+      $left_menu_list['portail_menu'] = render($nice_menu_block['content']);
+    }*/
+     $left_menu_list['portail_menu'] = render($nice_menu_block['content']);
+     $left_menu_list['my_apps'] = im_blocks_application_headermenu();
+    /* Header right menu */
+    $right_menu_class = "";
+    $right_menu = array();
+    if($_GET['q']== 'modele-operationnel' || $_GET['q']=='plan-de-ventes' ||$_GET['q']== 'guide-produits' ||$_GET['q']== 'applications'||$_GET['q']== 'annuaire' || arg(0) == 'sales-plan') {
+      $right_menu['class'] = $_GET['q'];
+      if(arg(0) == 'sales-plan'){
+        $right_menu['class'] = 'plan-de-ventes';
+      }
+    }
+  	else { 
+  		$right_menu['class'] = "accueil";
+  	}
+  	$output = '';
+	$path = " ";
+  	$setvar = current_path();
+    $output = explode('/',$setvar);
+    $path  = $output[0];
+    //To match the link path in the menu_links tables.
+    if($path == 'sales-plan'){
+      $path = 'sales-plan/now/all';
+    }
+    if($path == null){
+    	$path ='accueil';
+    }
+    $right_menu['title'] ='';
+    $current_menu_title = db_select('menu_links','m')
+        ->fields('m',array('link_title'))
+        ->condition('m.link_path',$path, '=')
+        ->condition('m.menu_name','market-portail','=')
+        ->execute()
+        ->fetchField();
+        if ($current_menu_title == "Modele Operationnel" || $current_menu_title == "Modèle opérationnel" || $current_menu_title == "Modèle Opérationnel") {
+          $current_menu_title = "Modele Operationnel Menu";
+        }
+        $current_menu_title = strtoupper($current_menu_title);
+        if($current_menu_title != ''){
+          $right_menu['title'] = t($current_menu_title);
+          
+        }
+        else {
+        	//Fix for UATIM-580
+        	if($path == 'annuaire') {
+        		$right_menu['title'] = "ANNUAIRE";
+        	}
+        	else {
+        		$right_menu['title'] = "AGENDA";
+        	}
+        }
+    
+	/* Carrefour logo to display dynamically */
+	$logo_path = "";
+    $logo = theme_get_setting('logo_path');
+    if($logo){
+    	$url = file_create_url('public://');
+       	$url = parse_url($url);
+		$path = $url['path'];
+    	$logo_path = str_replace("public://",$path,theme_get_setting('logo_path'));    		
+    }else{
+    	$logo_path = "/".drupal_get_path('module','im_blocks')."/images/menu-logo.png";
+    }
+	drupal_add_css(
+	 	'.im-header-left ul.nice-menu-down li.menuparent a.header_nav_menu1 {
+	    background-image:url('.$logo_path.');}',
+	    array(
+	    	'group' => CSS_THEME,
+	        'type' => 'inline',
+	    )
+	 );
+       
+    $output = theme('im_header_block_template', array('left_menu_list' => $left_menu_list,'search_block' => $search_block,'right_menu' => $right_menu));
+  	return $output;
+}
+
+/**
+ * Implementation of hook_theme
+ */
+function im_blocks_theme($existing, $type, $theme, $path) {
+  return array(
+    'im_header_block_template' =>  array(
+      'variables' => array('output' => NULL),
+      'template' => 'theme/im_header_block_template'
+       )
+    );
+}
+/**
+ * 
+ * hook_form_form_id_alter for the search box in header block.
+ */
+function im_blocks_form_search_block_form_alter(&$form, &$form_state, $form_id) {
+  $form['actions']['submit']['#type'] = 'image_button';
+  $form['actions']['submit']['#src'] = drupal_get_path('theme', 'im') . '/css/images/search-button.png';
+  $form['actions']['submit']['#value'] = '';
+  $form['actions']['submit']['#id'] = 'im-search-form-submit-header';
+}
+/**
+ * 
+ * hook_Themename_form_alter for the search box in header block.
+ */
+
+function im_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'search_block_form') {
+    // HTML5 placeholder attribute
+   $form['search_block_form']['#attributes']['placeholder'] = t('Enter your search');
+  }
+}
+ function _im_blocks_create_market_portal_menu() {
+  $menu = array();
+  $menu['menu_name'] = "market-portail";
+  $menu['title'] = "M";
+  $menu['description'] = "Market Portail Menu";
+  menu_save($menu);
+    $pitem = array(
+      'link_path' => '<front>',
+      'link_title' => t('Market Portail Menu'),
+      'options' => array(
+         'attributes' => array(
+         'class' => array(
+            0 => 'header_nav_menu1',
+        ),
+      ),
+      ),
+      'menu_name' => 'market-portail',
+    );
+   menu_link_save($pitem);
+  $path = '<front>';
+  $menu_name = 'market-portail';
+  $mlid = db_select('menu_links', 'm')
+          ->fields('m', array('mlid'))
+          ->condition('m.link_path', $path, '=')
+          ->condition('m.menu_name', $menu_name, '=')
+          ->execute()
+          ->fetchField();
+  $items = array(
+    $item = array(
+      'menu_name' => 'market-portail',
+      'plid' => $mlid,
+      'link_path' => '<front>',
+      'link_title' => t('Accueil'),
+      'external' => 0,
+      'weight' => 1,
+     'options' => array(
+        'attributes' => array(
+      'title' => '',
+      'class' => array(
+      0 => 'header_nav_menu2',
+      ),
+     ),
+   ),
+    ),
+    $item = array(
+      'menu_name' => 'market-portail',
+      'plid' => $mlid,
+      'link_path' => 'modele-operationnel',
+      'link_title' => t('Wiki Market'),
+    'router_path' => 'modele-operationnel',
+      'weight' => 2,
+      'options' => array(
+         'attributes' => array(
+        'title' => '',
+        'class' => array(
+         0 => 'header_nav_menu3',
+        ),
+      ),
+    ),
+    ),
+        $item = array(
+      'menu_name' => 'market-portail',
+      'link_path' => 'sales-plan/now/all',
+      'link_title' => t('Plan de ventes'),
+      'plid' => $mlid,
+        'weight' => 3,
+      'options' => array(
+      'attributes' => array(
+        'title' => '',
+        'class' => array(
+        0 => 'header_nav_menu4',
+        ),
+      ),
+    ),
+    ),
+/*    $item = array(
+    'menu_name' => 'market-portail',
+      'link_path' => 'guide-produits',
+      'link_title' => t('Guide Produits'),
+      'plid' => $mlid,
+      'weight' => 4,
+      'options' => array(
+    'attributes' => array(
+        'title' => '',
+        'class' => array(
+        0 => 'header_nav_menu5',
+        ),
+      ),
+    ),
+    ),*/
+    $item = array(
+     'menu_name' => 'market-portail',
+      'link_path' => 'applications',
+      'link_title' => t('Applications'),
+      'plid' => $mlid,
+      'weight' => 5,
+    'options' => array(
+     'attributes' => array(
+        'title' => '',
+        'class' => array(
+          0 => 'header_nav_menu6',
+        ),
+      ),
+    ),
+    ),
+    $item = array(
+    'menu_name' => 'market-portail',
+      'link_path' => 'annuaire/all',
+    'router_path' => 'annuaire',
+      'link_title' => t('Annuaire'),
+      'plid' => $mlid,
+       'weight' => 6,
+        'options' => array(
+     'attributes' => array(
+        'title' => '',
+        'class' => array(
+          0 => 'header_nav_menu7',
+        ),
+      ),
+    )
+    ),
+  );
+  foreach ($items as $links) {
+    menu_link_save($links);
+  }
+ }
+ /**
+  *function to add the my application content in header block.
+  */
+function im_blocks_application_headermenu(){
+	include_once drupal_get_path('module', 'im_user') . '/im_user.profile.inc';
+  global $user;
+  global $base_url;
+  $user_apps = '';
+  $user_apps_list = array();
+  $my_apps_col_1 = array();
+  $my_apps_col_2 = array();
+  $my_apps_col_3 = array();
+  $title = '';
+  //$title = '<div class = "app-sub-menu-title">'.t("Applications").'</div>';
+  $output = '';
+    $type = 'div';
+  $userProfile = user_load($user->uid);
+  if(!empty($userProfile->field_user_apps['und'][0]['value'])){
+    $user_apps = $userProfile->field_user_apps['und'][0]['value'];
+    $user_apps_list = explode(',',$user_apps);
+    $my_app_nodes = array();
+    foreach($user_apps_list as $my_app){
+    	$query = new EntityFieldQuery();
+      $entities = $query->entityCondition('entity_type', 'node')
+        ->propertyCondition('type', 'application')
+        ->propertyCondition('title', $my_app)
+        ->propertyCondition('status', 1)
+        ->execute();
+      if (!empty($entities['node'])) {
+        $my_app_nodes[] = node_load(array_shift(array_keys($entities['node'])));
+      }
+    }
+    foreach($my_app_nodes as $key => $my_app_node){
+      $my_app_url = _im_block_get_app_url($my_app_node, $userProfile);
+      //$my_apps[] = '<a href="'.$my_app_url.'" target="_blank">'.$my_app_node->title.'</a>';
+      if($key < 12){
+        $my_apps_col_1[] = '<a href="'.$my_app_url.'" target="_blank">'.$my_app_node->title.'</a>';
+      }elseif($key < 24){
+        $my_apps_col_2[] = '<a href="'.$my_app_url.'" target="_blank">'.$my_app_node->title.'</a>';
+      }elseif($key < 36){
+        $my_apps_col_3[] = '<a href="'.$my_app_url.'" target="_blank">'.$my_app_node->title.'</a>';
+      }
+    }
+    if(isset($my_apps_col_1)){
+    	 $attributes = array( 'id' => 'my-application-menu-id','class' => 'my-application-menu-class apps-submenu-col-1');
+    	$output .= '<div class = "app-sub-menu-title">'.t("Applications").'</div>'; 
+      $output .= '<div id="my-apps-col-1">'.theme_item_list(array('items' => $my_apps_col_1, 'title' => $title, 'type' => $type, 'attributes' => $attributes)).'</div>';
+    }
+    if(isset($my_apps_col_2)){
+    	 $attributes = array( 'class' => 'my-application-menu-class apps-submenu-col-2');
+    	 //$title = '';
+      $output .= '<div id="my-apps-col-2">'.theme_item_list(array('items' => $my_apps_col_2, 'title' => $title, 'type' => $type, 'attributes' => $attributes)).'</div>';
+    }
+    if(isset($my_apps_col_3)){
+    	 $attributes = array( 'class' => 'my-application-menu-class apps-submenu-col-3');
+    	 //$title = '';
+      $output .= '<div id="my-apps-col-3">'.theme_item_list(array('items' => $my_apps_col_3, 'title' => $title, 'type' => $type, 'attributes' => $attributes)).'</div>';
+    }
+    //$output = theme_item_list(array('items' => $my_apps, 'title' => $title, 'type' => $type, 'attributes' => $attributes));
+    //$output .= theme_item_list(array('items' => $my_apps, 'title' => $title, 'type' => $type, 'attributes' => $attributes));
+  }
+   return $output;
+}
+
+function im_blocks_menu_alter(&$items){
+ $items['applications/no'] = array(
+         'title' => 'Applications',
+            'page callback' => '<front>',
+            'access callback' => TRUE,
+  'type' => MENU_CALLBACK
+  );
+  return $items;
+}
+/**
+ * 
+ * Function to get the anabel code for the user.
+ * @param object $user
+ */
+function _im_block_get_anabel_code($user){
+  if (strstr($user->field_user_stores['und'][0]['value'],',')) {
+    $explode_store_field = explode(",", $user->field_user_stores['und'][0]['value']);
+    $first_prefered_store = $explode_store_field[0];
+  }
+  else {
+    $first_prefered_store = $user->field_user_stores['und'][0]['value'];
+  }
+  $query = "SELECT ite_lib_value FROM store_item_fields WHERE pve_code =:store_id AND dit_cod_item = 'anabel'";
+  if($_SESSION['user_selected_store']=='all'){
+    $result = db_query($query,array(':store_id' => $first_prefered_store))->fetchall();
+  }
+  else {
+    $result = db_query($query,array(':store_id' => $_SESSION['user_selected_store']))->fetchall();
+  }
+  $query_string = '?anabel='.$result[0]->ite_lib_value;
+  return $query_string;
+}
+
+/**
+ * 
+ * Function to retieve ldap url from user profile.
+ * @param object $node
+ */
+function _im_block_get_ldap_url($my_app_node){
+	$ldap_url = '';
+  if(isset($my_app_node->field_ldap_sso_redirect['und']) && $my_app_node->field_ldap_sso_redirect['und'][0]['value'] != '-none-' ){
+    $app_name = $my_app_node->field_ldap_sso_redirect['und'][0]['value'];
+    if (isset($_SESSION['ldap_login_key'])) {
+      $app_names ='';
+      $ladp_id = $_SESSION['ldap_login_key'];
+      $obj = new imldapSoapService();
+      $profile = $obj->soapRequest('getProfil', array('id' => $ladp_id));
+      if(isset($profile) && !empty($profile)){
+        $profile = simplexml_load_string($profile->data);
+        foreach($profile->app as $key => $value){
+          if(strcmp(trim($app_name), trim($value->name)) == 0){
+            $ldap_url = $value->url;
+          }
+        }
+      }
+    }
+    else{
+    	$ldap_url = '';
+    }
+  }
+	return $ldap_url;
+}
+
+function _im_block_get_app_url($my_app_node,$userProfile ){
+      $query_string = '';
+      if (isset($my_app_node->field_app_send_anabel_code['und'])) {
+        if ($my_app_node->field_app_send_anabel_code['und']['0']['value'] == 1) {
+          if (isset($userProfile->field_user_stores['und'][0]['value'])) {
+            $anabel_code = _im_block_get_anabel_code($userProfile);
+          }
+        }
+        else{
+          $anabel_code = FALSE;
+        }
+      }
+      else{
+        $anabel_code = FALSE;
+      }
+      if(isset($my_app_node->field_app_url['und'][0]['value']) && !empty($my_app_node->field_app_url['und'][0]['value'])){
+      	$my_app_url = $my_app_node->field_app_url['und'][0]['value'];
+      	if(!empty($anabel_code)){
+      		$my_app_url = $my_app_url.$anabel_code;
+      	}
+      }
+      else{
+      	$ldap_url = _im_block_get_ldap_url($my_app_node);
+      	$my_app_url = (string) $ldap_url;
+      	if(!empty($anabel_code)){
+      		$my_app_url = $my_app_url.str_replace('?', '&', $anabel_code);
+      	}
+      	$my_app_url = parse_url($my_app_url, PHP_URL_SCHEME) === null ? 'http://' . $my_app_url : $my_app_url;
+      }
+      return $my_app_url;
+}

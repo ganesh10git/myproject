@@ -1,0 +1,97 @@
+<?php
+/**
+ * @file
+ * Module file for im_service.
+ */
+class imldapSoapService{
+  private $url;
+  private $settings;
+  const success = 'success';
+  const failure = 'failure';
+
+  function __construct() {
+    $this->settings = variable_get('annuuddi_settings', '');
+  }
+  
+  function soapRequestError($message) {
+    $response = new stdClass;
+    $response->status = imldapSoapService::failure;
+    $response->message = $message;
+    $response->code = -999;
+    return $response;
+  }
+  
+  function is_cachable_service($methodName) {
+  	include drupal_get_path('module', 'im_service') . '/im_service.methods.inc';
+  	if(in_array($methodName, $cachable_methods)) {
+  	  return TRUE;
+  	}
+  	return FALSE;
+  }
+  
+  function get_cached_response($methodName) {
+  	if(isset($_SESSION[$methodName]) && $_SESSION[$methodName]) {
+  	  return $_SESSION[$methodName];
+  	}
+  	return FALSE;
+  }
+  
+  function soapRequest($methodName, $arg) {
+  	 //First Check with Cache
+  	 if($cached_response = $this->get_cached_response($methodName)) {
+  	 	$resObj = new stdClass;
+  	 	$resObj->data = $cached_response;
+  	 	$resObj->status = imldapSoapService::success;
+  	 	return $resObj; 
+  	 }
+  	 //IF no cache, make SOAP request.
+  	 try {
+      if (class_exists('SoapClient')) {
+      	include drupal_get_path('module', 'im_service') . '/im_service.methods.inc';
+      	foreach ($service_methods as $service_index => $method_array) {
+      	  if(in_array($methodName, $method_array)) {
+      		$this->url = $this->settings[$service_index];
+      		break;
+      	  }
+      	}
+      	$options = array('location' => $this->url,  'trace' => 1);
+      	$client = @new SoapClient($this->url, $options);
+      	try {
+          $result = $client->__soapCall($methodName,  array($methodName => $arg));
+          $response = new stdClass;
+          //$response->data = $result->return;
+          $response->data = isset($result->return) ? $result->return : '';
+          if($this->is_cachable_service($methodName)) {
+          	$_SESSION[$methodName] = $response->data; 
+          }
+          $response->status = imldapSoapService::success;
+          return $response;
+        } catch (Exception $e) {
+          if (isset($e->faultstring)) {
+            return $this->soapRequestError($e->faultstring);
+          } else {
+            return $this->soapRequestError($e->getMessage());
+          }
+        }
+      }
+      else {
+        return $this->soapRequestError('SoapClient not Exist');
+      }
+    } catch (Exception $e) {
+      if (isset($e->faultstring)) {
+        return $this->soapRequestError($e->faultstring);
+      } else {
+        return $this->soapRequestError($e->getMessage());
+      }
+    }
+  }
+}
+/*
+$obj = new imldapSoapService();
+$response = $obj->soapRequest('login', array('user' => 'FRDIR001', 'password' => 'FRDIR001'));
+print_r($response);
+exit;
+$conf['annuuddi_settings'] = array(
+  'service_url' => 'https://annuuddi.fr.carrefour.com/LdapWs/LdapWsAuthImpl?wsdl',
+);
+*/

@@ -1,0 +1,226 @@
+<?php
+/**
+ * @file
+ * Module file for im_widgets.
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+function im_widgets_block_info() {
+  $blocks['im_widget_bar'] = array(
+    'info' => t('Widget block'),
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'cache' => DRUPAL_NO_CACHE,
+    'module' => 'im_widgets',
+    'pages' => '<front>
+agenda/*
+agenda-day/*',
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function im_widgets_block_view($delta = '') {
+  $block = array();
+  global $user;
+  global $base_url;
+  if ($user->uid) {
+  switch ($delta) {
+    case 'im_widget_bar':
+    	drupal_add_js(array('image_path' => $base_url . "/" . drupal_get_path('module', 'im_widgets')), 'setting');
+      $block['content'] = array(
+          '#markup' => _im_widgets(),
+          '#attached' => array(
+             'css' => array(drupal_get_path('module', 'im_widgets') . '/css/im_widgets.css',),
+             'js' => array(drupal_get_path('module', 'im_widgets') . '/js/im_widgets.js',),),
+      );
+      break;
+    default:
+      break;
+  }
+  return $block;
+  }
+}
+
+function _im_widgets() {
+  $output = array();
+  $output = arrow_image();
+  $output .= information_info();
+  $message_block = module_invoke('im_features_message', 'block_view', 'im_message_block');
+  $output .= $message_block['content'];
+  $output .= widget_info();
+  //$output .= plan_info();
+ //UATIM -240 Hide this temporarily until development started for Mail Integration
+ // $output .= mail_info();
+  return $output;
+}
+function arrow_image() {
+  $arrow_expand_path = '';
+  $arrow_expand_path = drupal_get_path('module', 'im_widgets') . '/images/arrow_expand.png';
+  $arrow_expand_image_path = array('path' => $arrow_expand_path, 'attributes' => array('class' => 'widget_teaser'));
+  $arrow_img[0] = theme('image', $arrow_expand_image_path);
+
+  $arrow_collapse_path = drupal_get_path('module', 'im_widgets') . '/images/arrow_collapse.png';
+  $arrow_collapse_image_path = array('path' => $arrow_collapse_path, 'attributes' => array('class' => 'widget_detail','style'=>'display: none'));
+  $arrow_img[1] = theme('image', $arrow_collapse_image_path);
+  $attributes = array(
+    'class' => 'arrow-class',
+  );
+  $arrow_item =array();
+  $type = 'ul';
+  foreach ($arrow_img as $arrow_imgs) {
+    $arrow_item[] = $arrow_imgs;
+  }
+  $arrow_widget = theme_item_list(array('items' => $arrow_item, 'title' => '', 'type' => $type, 'attributes' => $attributes));
+  return $arrow_widget;
+}
+function information_info() {
+	$count_of_messages = '';
+  //Find number of messages  
+  $query = "SELECT node.nid AS nid, node.created AS node_created
+            FROM {node} node
+            LEFT JOIN {field_data_field_publication_from_date} field_data_field_publication_from_date ON node.nid = field_data_field_publication_from_date.entity_id AND (field_data_field_publication_from_date.entity_type = 'node' AND field_data_field_publication_from_date.deleted = '0')
+            LEFT JOIN {field_data_field_publication_to_date} field_data_field_publication_to_date ON node.nid = field_data_field_publication_to_date.entity_id AND (field_data_field_publication_to_date.entity_type = 'node' AND field_data_field_publication_to_date.deleted = '0') LEFT JOIN {field_data_field_message_type} field_data_field_message_type ON node.nid = field_data_field_message_type.entity_id WHERE (( (node.status = '1') AND (node.type IN  ('message')) AND (TO_CHAR(TO_DATE(field_data_field_publication_from_date.field_publication_from_date_value, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS'), 'YYYY-MM-DD') <= '".date('Y-m-d', time())."') AND (TO_CHAR(TO_DATE(field_data_field_publication_to_date.field_publication_to_date_value, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS'), 'YYYY-MM-DD') >= '".date('Y-m-d', time())."') ) AND (field_data_field_message_type.field_message_type_value = 'Widget'))
+            ORDER BY node_created DESC";
+  
+  $res = db_query($query);
+  
+  if($res->rowCount() > 0){
+    $count_of_messages = $res->rowCount();
+  }
+  if(isset($count_of_messages)) {
+    $count_of_messages = $count_of_messages;
+  }
+  else {
+    $count_of_messages = 0;
+  }
+  /*if($result > 0){
+    $info_teaser[0] = '<div class="message_count">' . $result . '</div>';
+  }
+  $teaser_path = drupal_get_path('module', 'im_widgets') . '/images/info_teaser.png';
+  $info_teaser_path = array('path' => $teaser_path, 'attributes' => array('class' => 'widget_teaser'));
+  $info_teaser[1] = theme('image', $info_teaser_path);
+  
+  $detailimg_path = drupal_get_path('module', 'im_widgets') . '/images/info_detail.png';
+  $info_detailimg_path = array('path' => $detailimg_path, 'attributes' => array('class' => 'widget_detail','style'=>'display: none'));
+  $info_teaser[2] = theme('image', $info_detailimg_path);
+  $attributes = array(
+    'class' => 'info-class',
+  );
+  
+  $info_item =array();
+  $type = 'ul';
+  foreach ($info_teaser as $info_teasers) {
+    $info_item[] = $info_teasers;
+  }
+  $info_widget = theme_item_list(array('items' => $info_item, 'title' => '', 'type' => $type, 'attributes' => $attributes));*/
+  
+
+$info_widget = '<div class="widget_teaser message-widget-teaser">
+               		 <div class="message-widget-teaser-count">
+               		 		<span class="value">'.$count_of_messages.'</span>
+               		 </div>
+               		 <span class="shape"></span>
+           		     <p class="title"> '. t('Infos') .' </p>
+                </div>';
+  
+  return $info_widget;
+}
+function widget_info() {
+  $teaser_path = drupal_get_path('module', 'im_widgets') . '/images/weather_teaser.png';
+  $weather_teaser_path = array('path' => $teaser_path, 'attributes' => array('class' => 'widget_teaser'));
+  $widget_teaser[0] = theme('image', $weather_teaser_path);
+
+  /*$detailimg_path = drupal_get_path('module', 'im_widgets') . '/images/weather_detail.png';
+  $weather_detailimg_path = array('path' => $detailimg_path, 'attributes' => array('class' => 'widget_detail', 'style'=>'display: none'));
+  $widget_teaser[1]=theme('image', $weather_detailimg_path);*/
+  
+  include_once drupal_get_path('module', 'im_widgets') . '/includes/im_widgets_weather.inc';
+  $weather_details = get_weather_details();
+  $saint_result = db_query("SELECT saint_of_the_day AS saint_day FROM {saint_day_data} WHERE saint_date = :date",array(':date' => date('F-j')));
+  $saintObj = $saint_result->fetchObject();
+  $weather_details['saint_of_the_day'] ='';
+  if(isset( $saintObj->saint_day)){
+    $weather_details['saint_of_the_day'] = $saintObj->saint_day;
+  }
+  
+  $widget_teaser[1] = theme('weather_details_template', $weather_details);
+  
+  $attributes = array(
+        'class' => 'weather-class',
+  );
+  $widget_item =array();
+  $type = 'ul';
+  foreach ($widget_teaser as $widget_teasers) {
+    $widget_item[] = $widget_teasers;
+  }
+  $weather_widget = theme_item_list(array('items' => $widget_item, 'title' => '', 'type' => $type, 'attributes' => $attributes));
+  return $weather_widget;
+}
+
+/*
+ * Implementation of hook_theme
+ */
+function im_widgets_theme($existing, $type, $theme, $path) {
+  return array(
+    'weather_details_template' =>  array(
+	    'template' => 'theme/weather_details_template'
+	   ),
+    'sales_plan_details_template' =>  array(
+      'template' => 'theme/sales_plan_details_template'
+    ),
+  );
+}
+
+/**
+ * 
+ * Sales Plan Right side bar
+ */
+function plan_info() {
+  $teaser_path = drupal_get_path('module', 'im_widgets') . '/images/plan_teaser.png';
+  $plan_teaser_path = array('path' => $teaser_path, 'attributes' => array('class' => 'widget_teaser'));
+  $plan_teaser[0] = theme('image', $plan_teaser_path);
+
+  include_once drupal_get_path('module', 'im_widgets') . '/includes/im_widgets_sales_plan.inc';
+  //Get this week sales plan data
+  $sales_plan_details = get_sales_plan_details();
+  
+  $plan_teaser[1] = theme('sales_plan_details_template', array('sales_plan_details' => $sales_plan_details));
+  
+  $attributes = array(
+    'class' => 'plan-class',
+  );
+  $plan_item =array();
+  $type = 'ul';
+  foreach ($plan_teaser as $plan_teasers) {
+    $plan_item[] = $plan_teasers;
+  }
+  $plan_widget = theme_item_list(array('items' => $plan_item, 'title' => '', 'type' => $type, 'attributes' => $attributes));
+  
+  return $plan_widget;
+}
+
+function mail_info() {
+  $teaser_path = drupal_get_path('module', 'im_widgets') . '/images/mail_teaser.png';
+  $mail_teaser_path = array('path' => $teaser_path, 'attributes' => array('class' => 'widget_teaser'));
+  $mail_teaser[0] = theme('image', $mail_teaser_path);
+
+  $detailimg_path = drupal_get_path('module', 'im_widgets') . '/images/mail_detail.png';
+  $mail_detailimg_path = array('path' => $detailimg_path, 'attributes' => array('class' => 'widget_detail', 'style'=>'display: none'));
+  $mail_teaser[1] = theme('image', $mail_detailimg_path);
+  $attributes = array(
+    'class' => 'mail-class',
+  );
+  $mail_item =array();
+  $type = 'ul';
+  foreach ($mail_teaser as $mail_teasers) {
+    $mail_item[] = $mail_teasers;
+  }
+  $mail_widget = theme_item_list(array('items' => $mail_item, 'title' => '', 'type' => $type, 'attributes' => $attributes));
+  return $mail_widget;
+}

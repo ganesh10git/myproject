@@ -1,0 +1,775 @@
+@CHARSET "ISO-8859-1";
+/*==================================================*/
+#im-holiday .im-holiday-calender-year {
+	float: left;
+	width:100%;
+}
+#im-holiday div.form-item {
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+#im-holiday  .holiday-vacation-period fieldset, 
+#im-holiday  .holiday-vacation-period legend {
+	padding: 0px;
+	margin: 0px;
+}
+#im-holiday .field-multiple-table td.field-multiple-drag {
+  display: none;
+}
+#im-holiday .im-holiday-date, #im-holiday .im-holiday-pos-file { 
+	width: 40%;
+	float: left;
+}
+#im-holiday .im-holiday-pos-file .description{ 
+	margin-left: 74px;
+}
+#im-holiday .date-padding {
+  padding: 0px;
+}
+#im-holiday .im-holiday-calender-year .form-item-field-holiday-calender-year-date label {
+	display: none;
+}
+#im-holiday .im-holiday-calender-year .form-item-field-holiday-calender-year-date input.form-text {
+	height: 20px;
+}
+#im-holiday .im-holiday-calender-year .form-item-field-holiday-calender-year label {
+	line-height: 24px !important;
+}
+#im-holiday .im-holiday-calender-year .form-item-field-holiday-calender-year label,
+#im-holiday .im-holiday-calender-year .field-name-field-holiday-pos-file-form label {
+	float: left;
+	margin:0 15px 0 0;
+	line-height: 35px;
+}
+#im-holiday .im-holiday-pos-file .form-managed-file {
+  padding-top: 5px;
+}
+#im-holiday .im-holiday-pos-file .form-managed-file input#edit-field-holiday-pos-file-und-0-upload {
+  border: 1px solid #CCCCCC;
+  height: 26px;
+}
+#im-holiday .holiday-vacation-period {
+	float: left;
+	width:100%;
+	position: relative;
+}
+#im-holiday .holiday-vacation-period .im-holiday-zone-title {
+  float: left;
+  padding-left: 18%;
+  padding-top: 10px;
+  width: 82%;
+}
+#im-holiday .holiday-vacation-period .im-holiday-zone-title span {
+  float: left;
+  width: 32%;
+  position: relative;
+}
+#im-holiday .holiday-vacation-period .im-holiday-zone-title span h4.zone-a,
+#im-holiday .holiday-vacation-period .im-holiday-zone-title span h4.zone-b,
+#im-holiday .holiday-vacation-period .im-holiday-zone-title span h4.zone-c {
+  background-color: #EEEAF2;
+  border-radius: 10px 10px 10px 10px;
+  box-shadow: 1px 2px 2px -1px;
+  left: 95px;
+  margin: 0;
+  padding: 5px 0;
+  position: relative;
+  text-align: center;
+  top: 2px;
+  width: 100px;
+  z-index: 10;
+}
+#im-holiday .holiday-vacation-period .im-holiday-zone-title span h4.zone-b {
+  background-color: #EBF1DF;
+}
+#im-holiday .holiday-vacation-period .im-holiday-zone-title span h4.zone-c {
+  background-color: #DBEEF3;
+}	
+#im-holiday .holiday-vacation-period  table.field-multiple-table tbody {
+	padding-top: 25px;
+}
+#im-holiday .holiday-vacation-period  tr.odd, #im-holiday .holiday-vacation-period tr.info, 
+#im-holiday .holiday-vacation-period tr.even, #im-holiday .special-holiday-days  tr.odd, 
+#im-holiday .special-holiday-days tr.info, #im-holiday .special-holiday-days tr.even {
+	background-color: transparent;
+}
+#im-holiday .holiday-vacation-period .field-widget-text-textfield,
+#im-holiday .holiday-vacation-period .field-type-datetime {
+	float: left;
+	width: 26%
+}
+#im-holiday .holiday-vacation-period .field-widget-text-textfield { width: 18%; }
+#im-holiday .holiday-vacation-period .field-widget-text-textfield input.text-full {
+  height: 30px;
+  text-align: right;
+  width: 208px;
+	margin-top: 7px;
+}
+#im-holiday .holiday-vacation-period label{
+	font-weight: 400;
+	float: left;
+  margin-right: 3px;
+}
+#im-holiday .holiday-vacation-period table.field-multiple-table td {
+	border-bottom: 1px solid #aaa;
+}
+#im-holiday .holiday-vacation-period td, #im-holiday .holiday-vacation-period th,
+#im-holiday .special-holiday-days td, #im-holiday .special-holiday-days th  {
+	padding: 0px 7px;
+}
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-a fieldset.form-wrapper legend,
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-b fieldset.form-wrapper legend, 
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-c fieldset.form-wrapper legend  {
+  display: none;
+}
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-a fieldset.form-wrapper .fieldset-wrapper,
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-b fieldset.form-wrapper .fieldset-wrapper,
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-c fieldset.form-wrapper .fieldset-wrapper {
+  background-color: #EEEAF2;
+  float: left;
+  width: 94%;
+  padding: 7px 0 7px 10px;
+}
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-b fieldset.form-wrapper .fieldset-wrapper {
+	background-color: #EBF1DF; 
+}
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-c fieldset.form-wrapper .fieldset-wrapper {
+	background-color: #DBEEF3; 
+}
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-a fieldset .fieldset-wrapper .start-date-wrapper, 
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-a fieldset .fieldset-wrapper .end-date-wrapper,
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-b fieldset .fieldset-wrapper .start-date-wrapper, 
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-b fieldset .fieldset-wrapper .end-date-wrapper,
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-c fieldset .fieldset-wrapper .start-date-wrapper, 
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-c fieldset .fieldset-wrapper .end-date-wrapper{
+  float: left;
+  width: 50%;
+  clear: none;
+}
+#im-holiday .holiday-vacation-period input.hasDatepicker {
+  clear: none;
+  float: left;
+  width: 85px;
+  height: 30px;
+}
+#im-holiday .holiday-vacation-period img.ui-datepicker-trigger,
+#im-holiday .special-holiday-days img.ui-datepicker-trigger {
+  float: left;
+}
+#im-holiday .holiday-vacation-period fieldset .fieldset-wrapper .description {
+  display: none;
+}
+#im-holiday .holiday-vacation-period .remove-holiday {
+  margin-top: 9px;
+}
+#im-holiday .holiday-vacation-period .add-holiday {
+  float: right;
+  font-size: 17px;
+  margin: 8px 27px 6px 0;
+  padding: 0 3px;
+}
+#im-holiday .special-holiday-days { 
+	display: inline-block;
+	width: 100%;
+	position: relative;
+}
+#im-holiday .special-holiday-days .field-name-field-holiday-special-name input.text-full {
+  height: 30px;
+  width: 250px;
+  float: left;
+  margin: 8px 0;
+}
+#im-holiday .special-holiday-days fieldset.form-wrapper {
+	padding: 0px;
+	float: left;
+	margin-bottom: 8px;
+}
+#im-holiday .special-holiday-days fieldset.form-wrapper legend,
+#im-holiday .special-holiday-days fieldset .fieldset-wrapper label,
+#im-holiday .special-holiday-days fieldset .fieldset-wrapper .description {
+	display: none;
+}
+#im-holiday .special-holiday-days fieldset .fieldset-wrapper {
+	padding: 0px;
+	margin-top: 8px;
+	width: 140px;
+}
+#im-holiday .special-holiday-days fieldset .fieldset-wrapper input.hasDatepicker {
+  float: left;
+  height: 30px;
+  margin-left: 10px;
+  width: 90px;
+}
+#im-holiday .special-holiday-days .remove-special-holiday {
+	margin-top: 10px;
+}
+#im-holiday .special-holiday-days .field-name-field-holiday-jours-sp-ciaux-form input.add-special-holiday {
+  font-size: 17px;
+  margin: 6px 0 0 396px;
+  padding: 0 3px;
+}
+@media screen and (-webkit-min-device-pixel-ratio:0) { /** Chrome Hack**/
+	#im-holiday .holiday-vacation-period .add-holiday {
+		margin-right: 33px;
+	}
+}
+/*=============================================================*/
+/***************** Sales Plan Page + Carosuel *****************/
+/*============================================================*/
+.sales-plan-wrapper {
+}
+#sales-calendar {
+  background: url("images/sales-plan-pointer.png") no-repeat scroll 30px bottom #FAF9F9;
+  float: left;
+  padding: 0 30px;
+  width: 964px;
+  position: relative;
+}
+.sp-holiday-wrapper {
+	padding-bottom: 30px;
+	display: inline-block;
+}
+.sp-holiday-navigator {
+	height: 50px;
+	border-bottom: 1px solid #9A7D78;
+	margin-bottom: 15px;
+	font-size: 12px;
+}
+.sp-holiday-navigator .form-item, .sp-holiday-navigator .form-actions {
+  margin: 0px;
+  float: left;
+}
+.sp-holiday-navigator .sp-color-identifiers {
+  float: right;
+  padding-right: 16px;
+  padding-top: 23px;
+  font-size: 11px;
+}
+.sp-holiday-navigator .sp-special-day-id, 
+.sp-holiday-navigator .sp-past-day-id,
+.sp-holiday-navigator .sp-ongoing-day-id, 
+.sp-holiday-navigator .sp-future-day-id {
+	float: left;
+	width: auto;
+	padding: 0 10px;
+	margin-right: 10px;
+	height: 16px;
+	line-height: 16px;
+}
+.sp-holiday-navigator .sp-special-day-id {
+  background: url("images/carousel-sprite.png") no-repeat scroll 0 -65px transparent;
+  color: #AE9490;
+  height: 16px;
+  padding-left: 20px;
+}
+.sp-holiday-navigator .sp-past-day-id {
+	color: #9a7d78;
+	background-color: #ebe2e0
+}
+.sp-holiday-navigator .sp-ongoing-day-id,
+.sp-holiday-navigator .sp-future-day-id  {
+	color: #fff;
+	background-color: #ca279c
+}
+.sp-holiday-navigator .sp-future-day-id  {
+	background-color: #4cbce0
+}
+.sp-holiday-navigator .form-item-sp-nothern-region select {
+  background: none repeat scroll 0 0 transparent;
+  border: 0 none;
+  color: #AE9490;
+  height: 18px;
+  width: auto;
+  margin-top: 18px;
+}
+.sp-header-file-download-link {
+	margin: 19px 0 0 30px;
+	float: left;
+}
+.sp-header-file-download-link a {
+	color: #AE9490;
+	background: url("../../im_agenda/css/images/green-icons.png") no-repeat scroll 0 -302px transparent;
+	padding-left: 26px;
+	height: 19px;
+	display: inherit;
+}
+.sp-header-file-download-link a:hover, .sp-header-file-download-link a:focus {
+	color: #B0DA19;
+	text-decoration: none;
+}
+.sp-holiday-navigator .sp_year_link {
+  background: url("images/carousel-sprite.png") no-repeat scroll 0 0 transparent;
+  color: #FFFFFF;
+  float: left;
+  font-size: 11px;
+  height: 23px;
+  line-height: 20px;
+  margin: 17px 48px 0 0;
+  padding-left: 24px;
+  width: 60px;
+}
+.sp-holiday-calendar .sp-holiday-title-left {
+  float: left;
+  width: 134px;
+  padding-top: 45px;
+  text-align: right;
+  color: #72544F;
+  font-size: 11px;
+  border-right: 1px solid #EBE2E0;
+}
+.sp-holiday-calendar .sp-holiday-title-left .school-holidays {
+  border-top: 1px solid #E0D4D2;
+  height: 45px;
+  width: 100%;
+}
+.sp-holiday-calendar .sp-holiday-title-left .school-holidays-label{
+  float: left;
+  line-height: 45px;
+  padding-left: 13px;
+}
+.sp-holiday-calendar .sp-holiday-title-left .regions {
+  float: right;
+  font-size: 8px;
+  padding-top: 15px;
+  padding-right: 8px;
+}
+.sp-holiday-calendar .sp-holiday-title-left .national, 
+.sp-holiday-calendar .sp-holiday-title-left .regional, 
+.sp-holiday-calendar .sp-holiday-title-left .non-food {
+  border-top: 1px solid #E0D4D2;
+  line-height: 18px;
+  text-transform: uppercase;
+  min-height: 20px;
+  padding: 3px 25px 0 0;
+}
+.sp-holiday-calendar .sp-holiday-title-left .non-food {
+  border-bottom: 1px solid #E0D4D2;
+  min-height: 20px;
+}
+.sp-jcarousel-exterior {
+	float: left;
+	width: 829px;
+}
+.sp-jcarousel-exterior ul li .week-header {
+  background-color: #EBE2E0;
+  font-size: 11px;
+  line-height: 18px;
+  height: 18px;
+  width: 160px;
+  text-transform: capitalize;
+}
+.sp-jcarousel-exterior ul li .week-header .month-title,
+.sp-jcarousel-exterior ul li .week-header .week-title {
+  display: inline;
+  color: #72544f;
+  padding-left: 7px;
+}
+.sp-jcarousel-exterior ul li .week-header .week-title {
+  padding-left: 42px;
+}
+.sp-jcarousel-exterior ul li .day-title-wrapper,
+.sp-jcarousel-exterior ul li .date-wrapper {
+  border-bottom: 1px solid #E0D4D2;
+  height: 13px;
+  width: 100%;
+  font-size: 9px;
+  color: #72544f;
+}
+.sp-jcarousel-exterior ul li .day-title-wrapper .day-title,
+.sp-jcarousel-exterior ul li .date-wrapper .day-date {
+  float: left;
+  line-height: 13px;
+  text-align: center;
+  width: 14.28%;
+  text-transform: uppercase;
+}
+.sp-jcarousel-exterior ul li .date-wrapper .day-date.today,
+.sp-jcarousel-exterior ul li .day-title-wrapper	.day-title.today,
+.sp-jcarousel-exterior ul li .special-day-wrapper .special-holiday.today,
+.sp-jcarousel-exterior ul li .region-a-wrapper .zone-a.today,
+.sp-jcarousel-exterior ul li .region-b-wrapper .zone-b.today,
+.sp-jcarousel-exterior ul li .region-c-wrapper .zone-c.today,
+.sp-jcarousel-exterior ul li .region-a-wrapper .zone-a.selected.today,
+.sp-jcarousel-exterior ul li .region-b-wrapper .zone-b.selected.today,
+.sp-jcarousel-exterior ul li .region-c-wrapper .zone-c.selected.today,
+.pn-national-wrapper .pn-national-today,
+.pn-regional-wrapper .pn-regional-today, 
+.pn-non-food-wrapper .pn-non-alimenaire-today {
+	background-color: #ebe2e0;
+}
+.pn-national-wrapper .pn-national-today,
+.pn-regional-wrapper .pn-regional-today, 
+.pn-non-food-wrapper .pn-non-alimenaire-today  {
+	width: 14.28%;
+	position: absolute;
+	z-index: 1;
+	top: 0;
+}
+.sp-jcarousel-exterior ul li .region-a-wrapper,
+.sp-jcarousel-exterior ul li .region-b-wrapper,
+.sp-jcarousel-exterior ul li .region-c-wrapper, 
+.sp-jcarousel-exterior ul li .special-day-wrapper {
+	width: 100%;
+	height: 7px;
+}
+.sp-jcarousel-exterior ul li .special-day-wrapper {
+	height: 20px;
+	position: relative;
+}
+.sp-jcarousel-exterior ul li .region-c-wrapper {
+	height: 11px;
+}
+.sp-jcarousel-exterior ul li .special-day-wrapper .special-holiday {
+  float: left;
+  height: 20px;
+  width: 14.28%;
+}
+.sp-jcarousel-exterior ul li .special-day-wrapper .special-holiday.selected  {
+  background: url("images/carousel-sprite.png") no-repeat scroll 4px -63px transparent
+}
+.sp-jcarousel-exterior ul li .special-day-wrapper .special-holiday.today.selected  {
+  background-color: #ebe2e0;
+}
+.sp-jcarousel-exterior ul li .special-day-wrapper .special-holiday-title {
+	position: absolute;
+	background-color: rgb(255, 255, 255);
+	border: 1px solid rgb(204, 204, 204);
+	text-align: center;
+	min-width: 148px;
+	max-width: 148px;
+	padding: 6px;
+	font-size: 11px;
+	color: rgb(114, 84, 79);
+	top: 18px;
+	z-index: 10;
+	box-shadow: rgb(102, 102, 102) 3px 3px 4px;
+}
+.sp-jcarousel-exterior ul li .region-a-wrapper .zone-a,
+.sp-jcarousel-exterior ul li .region-b-wrapper .zone-b,
+.sp-jcarousel-exterior ul li .region-c-wrapper .zone-c  {
+	float: left;
+  height: 3px;
+  width: 14.28%;
+  padding-bottom: 4px;
+}
+.sp-jcarousel-exterior ul li .region-c-wrapper .zone-c  {
+  padding-bottom: 8px;
+}
+.sp-jcarousel-exterior ul li .region-a-wrapper .zone-a.selected  {
+  background: url("images/zone-a-bg.png") repeat-x scroll 0 0 transparent;
+}
+.sp-jcarousel-exterior ul li .region-b-wrapper .zone-b.selected {
+	background: url("images/zone-b-bg.png") repeat-x scroll 0 0 transparent;
+}
+.sp-jcarousel-exterior ul li .region-c-wrapper .zone-c.selected {
+	background: url("images/zone-c-bg.png") repeat-x scroll 0 0 transparent;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper {
+	border-top: 1px solid #E0D4D2;
+	min-height: 20px;	
+	padding-top: 3px;
+	position: relative;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire {
+  position: relative;
+  min-height: 20px;	
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title {
+  font-size: 11px;
+  line-height: 16px;
+  position: absolute;
+  text-align: center;
+  z-index: 2;
+  height: 16px;
+  overflow: hidden;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.past ,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.past ,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.past  {
+	background-color: #EBE2E0;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.ongoing,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.ongoing,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.ongoing {
+	background-color: #CA279C;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.future,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.future,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.future {
+	background-color: #4CBCE0;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.past.active-title,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.past.active-title,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.past.active-title  {
+	background-color: #AF9B97;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.ongoing.active-title,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.ongoing.active-title,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.ongoing.active-title  {
+	background-color: #af0a81;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.future.active-title,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.future.active-title,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.future.active-title {
+	background-color: #0796c1;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title a,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title a,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title a,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.past.active-title a,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.past.active-title a,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.past.active-title a {
+ 	color: #fff;
+ 	display: inherit;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.past a,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.past a,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.past a {
+  color: #9a7d78;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title a:hover,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title a:hover,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title a:hover,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title a:focus,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title a:focus,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title a:focus {
+	text-decoration: none;
+	outline: none;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.Tue,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.Tue,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.Tue,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national-today.Tue,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional-today.Tue,
+.sp-jcarousel-exterior ul li .plan-de-vente	.pn-non-food-wrapper .pn-non-alimenaire-today.Tue {
+	left: 14.28%;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.Wed,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.Wed,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.Wed,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national-today.Wed,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional-today.Wed,
+.sp-jcarousel-exterior ul li .plan-de-vente	.pn-non-food-wrapper .pn-non-alimenaire-today.Wed {
+	left: 28.56%;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.Thu,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.Thu,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.Thu,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national-today.Thu,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional-today.Thu,
+.sp-jcarousel-exterior ul li .plan-de-vente	.pn-non-food-wrapper .pn-non-alimenaire-today.Thu {
+	left: 42.84%;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.Fri,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.Fri,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.Fri,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national-today.Fri,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional-today.Fri,
+.sp-jcarousel-exterior ul li .plan-de-vente	.pn-non-food-wrapper .pn-non-alimenaire-today.Fri {
+	left: 57.12%;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.Sat,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.Sat,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.Sat,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national-today.Sat,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional-today.Sat,
+.sp-jcarousel-exterior ul li .plan-de-vente	.pn-non-food-wrapper .pn-non-alimenaire-today.Sat {
+	left: 71.4%;
+}
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national .national-title.Sun,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional .regional-title.Sun,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-non-food-wrapper .pn-non-alimenaire .non-alimentare-title.Sun,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-national-wrapper .pn-national-today.Sun,
+.sp-jcarousel-exterior ul li .plan-de-vente .pn-regional-wrapper .pn-regional-today.Sun,
+.sp-jcarousel-exterior ul li .plan-de-vente	.pn-non-food-wrapper .pn-non-alimenaire-today.Sun {
+	left: 85.68%;
+}
+
+/*=============================================================*/
+/****************** CSS For the Sales Plan Content Display *******************/
+#sales-content {
+	width: 1024px;
+}
+.sales-plan-content-wrapper {
+	float: left;
+	background: #ebe2e0;
+	border-top: 1px solid #9A7D78;
+	padding: 0 30px 30px;
+	position: relative;
+	width: 964px;
+}
+.sales-plan-content-wrapper  #sales-img {
+	width: 140px;
+  height: 166px;
+}
+.sales-plan-content-wrapper .sales-image {
+  width: 125px;
+  display: table-cell;
+  vertical-align: top;
+}
+.sales-plan-content-wrapper .sales-image .file-link {
+  text-align: center;
+  width: 125px;
+  margin-right: 20px;
+  border: 1px solid #9A7D78;
+  padding: 5px;
+}
+.sales-plan-content-wrapper .sales-title {
+  background-color: #AE9490;
+  color: #FFFFFF;
+  font-size: 16px;
+  padding: 10px 5px;
+  position: relative;
+  text-align:left;
+  /* width: 719px; */
+}
+.sales-plan-content-wrapper .sales-data {  float: left; width: 100%; }
+.sales-plan-content-wrapper .sales-data .sales-data-right-content {
+	display: table;
+	width: 100%;
+}
+.sales-plan-content-wrapper .sales-data .sales-data-right-content .sales-date-description {
+	display: table-cell;
+	width: 100%;
+	vertical-align: top;
+}
+.sales-plan-content-wrapper .sales-date-range {
+	color: #684E49;
+	font-size: 12px;
+	margin-bottom: 15px;
+}
+.sales-date-range .label {
+	font-weight: 700;
+}
+.sales-data .sales-description {
+	display: inline;
+	width: 300px;
+	color: #9A7D78;
+	font-size: 11px;
+	text-align: justify;
+}
+.sales-data .sales-attachments {
+  display: table-cell;
+	max-width: 470px;
+	padding-left: 30px;
+	min-width: 235px;
+}
+.sales-data .sales-attachments .sales-attachments-left-set {
+	float: left;
+	font-size: 12px;
+	color: #9A7D78;
+}
+.sales-data .sales-attachments .sales-aide,
+.sales-data .sales-attachments .sales-plv,
+.sales-data .sales-attachments .sales-benchmark,
+.sales-data .sales-attachments .sales-visuel,
+.sales-data .sales-attachments .sales-catalogue,
+.sales-data .sales-attachments .sales-autre  {
+	float: left;
+	background: #ffffff;
+	width: 325px;
+	padding: 10px;
+	margin: 0 0 15px 0;
+	box-shadow: 1px 1px 2px #AAAAAA;
+}
+.sales-attachments .attachment-title {
+	border-bottom: 1px solid #9A7D78;
+	color: #72544F;
+	padding-bottom: 3px;
+	font-size: 12px;
+}
+.sales-attachments .file-link {
+	background: url("../../im_agenda/css/images/green-icons.png") no-repeat scroll 0 -301px transparent;
+	padding-left: 30px;
+	line-height: 15px;
+	padding-bottom: 5px;
+}
+.sales-attachments .file-link a {
+	color: #9A7D78;
+  font-size: 12px;
+}
+.sales-attachments .attachment-body {
+	padding-top: 10px;
+}
+/****************** End of CSS For the Sales Plan Content Display *******************/
+.sp-watermark-confidentiel {
+	position: absolute;
+  font-size: 0px; 
+  background: url("images/confidentiel.png") no-repeat scroll 0 0 transparent; 
+  top: 156px; 
+  left: 3px; 
+  width: 25px; 
+  height: 100px; 
+}
+#spinner {
+	background: url("images/gif-load.gif");
+  height: 32px;
+  width: 32px;
+  z-index: 999999;
+}
+/**** IE8 HACK for BO Holiday page ****/
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-a fieldset .fieldset-wrapper .start-date-wrapper .form-item .date-padding .form-item, 
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-a fieldset .fieldset-wrapper .end-date-wrapper .form-item .date-padding .form-item,
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-b fieldset .fieldset-wrapper .start-date-wrapper .form-item .date-padding .form-item, 
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-b fieldset .fieldset-wrapper .end-date-wrapper .form-item .date-padding .form-item,
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-c fieldset .fieldset-wrapper .start-date-wrapper .form-item .date-padding .form-item,
+#im-holiday .holiday-vacation-period .field-name-field-holiday-zone-c fieldset .fieldset-wrapper .end-date-wrapper .form-item .date-padding .form-item {
+  width: 135px;
+}
+#im-holiday .holiday-vacation-period input.hasDatepicker,
+#im-holiday .special-holiday-days fieldset .fieldset-wrapper input.hasDatepicker {
+  width: 76px\9;
+  height: 19px\9;
+  margin-right: 1px;
+}
+#im-holiday .holiday-vacation-period .add-holiday {
+  margin-right: 32px\9;
+}
+#im-holiday .special-holiday-days fieldset .fieldset-wrapper .date-no-float .form-item .date-padding .form-item {
+	width: 125px\9;
+}
+#im-holiday .holiday-vacation-period .field-widget-text-textfield INPUT.text-full { height: 19px\9; width: 185px; }
+#clipboard  {
+  float: right;
+  margin: 10px 0;
+  color: #684E49;
+  font-weight: bold;
+  font-size: 11px;
+}
+a#clipboard:hover, a#clipboard:focus{
+color:#B0DA19;
+}
+
+.white_content {
+display: none;
+position: absolute;
+top: 0%;
+left: 18%;
+width: 54%;
+height: 117px;
+padding: 16px;
+border: 5px solid #AE9490;
+background-color: white;
+z-index: 1002;
+overflow: hidden;
+}
+.sp_link{
+font-weight: bold;
+}
+.spl_link_close{
+float:right;
+}
+.spl_link_ok{
+ margin-left:50%;
+}
+.sp_heading{
+font-weight: bold;
+font-style: italic;
+text-decoration: underline;
+}

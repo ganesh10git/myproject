@@ -1,0 +1,6 @@
+name = Intranet Market Import
+description = Intranet Market Import (Domain, Subdomain, Macro and Procedures)
+package = Intranet Market
+core = 7.x
+
+dependencies[] = im_agenda

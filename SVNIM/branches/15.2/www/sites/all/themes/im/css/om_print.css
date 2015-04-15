@@ -1,0 +1,62 @@
+/************************************/
+#header, 
+.go_top_link,
+#skip-link,
+#messages,
+#operation-model-locations,
+.om-left-content,
+.white-boxes a.om-print {   display: none !important;  }
+
+.om-cont-holder p,
+.om-cont-holder ol,
+.om-cont-holder ol li,
+.om-cont-holder ul,
+.om-cont-holder ul li,
+.white-boxes .om-right-block,
+.white-boxes .om-right-block .om-right-title,
+.white-boxes .om-right-block .om-right-content {
+  font-size: 18px !important;
+  /*color: #333 !important;*/
+  line-height: 22px;
+}
+/*
+.om-cont-holder a, .om-cont-holder ol li a, .om-cont-holder ul li a,.om-cont-holder h1,.om-cont-holder h2,.om-cont-holder h3,.om-cont-holder h4   {
+  color: #333 !important;
+}
+*/
+.white-boxes .om-right-block { border: 1px solid #ccc; }
+
+.om-right-sec { width: 100%; }
+.om-cont-holder h1 {  
+  font-size: 20px;
+  padding: 8px 0; 
+  color: #AC8E89; 
+  border-bottom: 3px solid #856D69; 
+  border-top: 3px solid #856D69; 
+  background-color: #fff;
+}
+
+.om-cont-holder h2 {
+ font-size: 18px;
+}
+
+.om-cont-holder h3 {
+ font-size: 16px;
+}
+
+.om-cont-holder h4 {
+ font-size: 16px;
+}
+blockquote {
+	margin: 1em 35px;
+	border-left-width: 5px !important;
+	border-color: #CCCCCC;
+	border-style: solid;
+	border-width: 0;
+	padding: 12px 0px 12px 15px;
+}
+blockquote p, ul li blockquote ul li{
+	font: italic 14px georgia;
+}
+ul li blockquote ul { margin:0px; }
+.white-boxes { padding-top: 50px;}

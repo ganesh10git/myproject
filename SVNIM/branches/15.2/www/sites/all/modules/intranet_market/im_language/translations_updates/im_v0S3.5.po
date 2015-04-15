@@ -1,0 +1,46 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-12-20 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#user store preference form
+#user store preference form
+msgid "Select all"
+msgstr "Tout Sélectionner"
+
+#application landing page
+msgid "Add"
+msgstr "Ajouter"
+
+#application landing page
+msgid "Remove"
+msgstr "Supprimer"
+
+#sales plan landing page
+msgid "Special days"
+msgstr "Jours particuliers"
+
+#sales plan landing page
+msgid "Future"
+msgstr "A venir"
+
+#sales plan landing page
+msgid "YEAR N"
+msgstr "ANNÉE N"
+
+#sales plan landing page
+msgid "YEAR N-1"
+msgstr "ANNÉE N-1"
+
+#headerbar 
+msgid "SALES PLAN"
+msgstr "PLAN DE VENTES"

@@ -1,0 +1,1405 @@
+<?php
+/**
+ * @file
+ * Code for the IM Features Operational model feature.
+ * drupal_set_message($form_id);  // print form ID to messages
+ * drupal_set_message('<pre>'.print_r($form, TRUE).'</pre>');  // print array to messages.
+ */
+
+include_once 'im_features_om.features.inc';
+include_once drupal_get_path('module', 'im_user') . '/im_user.profile.inc';
+/**
+* Implements hook_menu().
+*/
+function im_features_om_menu() {
+  $items = array();
+  $items['node/add/operational-model/set_reference_procedure'] = array(
+    'page callback' => '_im_features_om_set_reference_procedure',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,  
+  );
+  $items['node/add/operational-model/get_subdomain'] = array(
+    'page callback' => '_im_features_om_get_subdomain',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,  
+  );
+  $items['node/add/operational-model/get_macro'] = array(
+    'page callback' => '_im_features_om_get_macro',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,  
+  );
+  $items['node/add/operational-model/set_proper_macro'] = array(
+    'page callback' => '_im_features_om_set_proper_macro',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,  
+  );
+  $items['node/operational-model/%/print-preview'] = array(
+    'page callback' => '_im_features_om_node_print_preview',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,  
+  );
+  $items["node/%node/add"] = array(
+    'title' => t('Create New Content'),
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'workbench_create_content',
+    'page arguments' => array(1),
+    //'access arguments' => array('access content'),
+    'access callback' => 'has_create_content_permission',
+    'weight' => 50,
+  );
+  $items['admin/im/settings/om-email'] = array(
+    'title' => t('Operational Model Email Configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('om_mail_config_form'),
+    'access callback' => TRUE,
+  );
+  $items['modele-operationnel'] = array(
+    'title' => 'Model operationnel',
+    'page callback' => '_im_features_om_landing_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['omsearchautocomplete/%/%'] = array(
+  'page callback' => '_procedure_search_autocompletes',
+  'access callback' => TRUE,
+  'page arguments' => array(1,2),
+  'type' => MENU_CALLBACK,  
+  'weight' => 1,
+  );
+  return $items;
+}
+
+function has_create_content_permission(){
+  $node = node_load(arg(1));
+  return(user_access('create '.$node->type.' content'));
+}
+
+function _im_features_om_set_reference_procedure() {
+  $values = _im_get_reference_code($_POST['domain'], $_POST['subdomain']);
+  print $values;
+}
+
+/**
+ * This function is used to replace the subdomain values from the domain values
+ */
+function _im_features_om_get_subdomain() {
+  $subdomain_options = _im_get_next_terms($_POST['domain']);
+  $array_keys = array_keys($subdomain_options);
+  $array_values = $subdomain_options;
+  print implode("***", $array_keys) . "#####" . implode("***", $array_values);
+}
+
+/**
+ * This function is used to replace the macro values from the subdomain values
+ */
+function _im_features_om_get_macro() {
+  $macro_options = _im_get_next_terms($_POST['subdomain'], TRUE);
+  $array_keys = array_keys($macro_options);
+  $array_values = $macro_options;
+  print implode("***", $array_keys) . "#####" . implode("***", $array_values);
+}
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Form alter to fulfil requirement
+ * 
+ */
+
+function im_features_om_form_alter(&$form, &$form_state, $form_id) {
+	if($form_id == 'operational_model_node_form'){
+  //$form['#attached']['css'][] = drupal_get_path('module', 'multiselect') .'/multiselect.css';  
+  //$form['#attached']['js'][] = drupal_get_path('module', 'multiselect') .'/multiselect.js';
+  $form['#attached']['js'][] = drupal_get_path('module', 'im_features_om') .'/js/om_multiselect.js';
+  $domain_options = _im_get_domain_terms();
+  $default_domain = key(_im_get_domain_terms());
+  $selected_domain = $default_domain;
+  $form['field_om_domain']['#attributes']['style'] = 'display:none';
+  $form['field_om_subdomain']['#attributes']['style'] = 'display:none';
+  $form['field_om_macro_activity']['#attributes']['style'] = 'display:none';
+   
+  if (arg(0) == "node" && is_numeric(arg(1)) && arg(2) == 'edit') {
+    $default_domain = $form['#node']->field_om_domain['und'][0]['tid'];
+  }
+  if(isset($form_state['input']['field_om_domain_custom'])){
+    $form['field_om_domain_custom']['und'] =  $form_state['input']['field_om_domain_custom'];
+    $default_domain = $form_state['input']['field_om_domain_custom'];
+  }
+  $form['field_om_domain_custom'] = array(
+    '#type' => 'select',
+    '#title' => t('Domain'),
+    '#options' => $domain_options,
+    '#default_value' => $default_domain,
+    '#attributes' => array('class' => array('enabled-for-ajax-domain enabled-for-ajax-domain-custom-field')),
+    '#required' => TRUE, 
+  );
+ //$form_state['no_cache'] = TRUE;
+  if (!empty($form_state['values']['field_om_domain_custom'])) {
+     $subdomain_options = _im_get_next_terms($form_state['values']['field_om_domain_custom']);
+  }
+  else {
+    $subdomain_options = _im_get_next_terms(key($domain_options));
+	  if (arg(0) == "node" && is_numeric(arg(1)) && arg(2) == 'edit') {
+	    $subdomain_options = _im_get_next_terms($form['#node']->field_om_domain['und'][0]['tid']);
+	  }
+  }
+  $default_subdomain = key($subdomain_options);
+  if (arg(0) == "node" && is_numeric(arg(1)) && arg(2) == 'edit') {
+    $default_subdomain = $form['#node']->field_om_subdomain['und'][0]['tid'];
+  }
+	  if(isset($form_state['input']['field_om_subdomain_custom'])){
+	  	$subdomain_options = _im_get_next_terms($default_domain);
+    $form['field_om_subdomain_custom']['und'] =  $form_state['input']['field_om_subdomain_custom'];
+    $default_subdomain = $form_state['input']['field_om_subdomain_custom'];
+  }
+  $form['field_om_subdomain_custom'] = array(
+    '#type' => 'select',
+    '#title' => t('Subdomain'),
+    '#options' => $subdomain_options,
+    '#default_value' => $default_subdomain,
+    '#prefix' => '<div id="subdomain-wrapper">',
+	  '#suffix' => '</div>',
+	  '#attributes' => array('class' => array('enabled-for-ajax enabled-for-ajax-subdomain enabled-for-ajax-subdomain-custom')),
+  );
+  if (!empty($form_state['values']['field_om_subdomain_custom'])) {
+    $selected_subdomain = _im_get_next_terms($form_state['values']['field_om_subdomain_custom'], TRUE);
+  }
+  else {
+    $selected_subdomain = _im_get_next_terms(key($subdomain_options), TRUE);
+    if (arg(0) == "node" && is_numeric(arg(1)) && arg(2) == 'edit') {
+      $selected_subdomain = _im_get_next_terms($form['#node']->field_om_subdomain['und'][0]['tid'], TRUE);
+    }
+  }
+  $default_macro = key($selected_subdomain);
+  if (arg(0) == "node" && is_numeric(arg(1)) && arg(2) == 'edit') {
+  	if (!empty($form['#node']->field_om_macro_activity['und'][0]['tid'])) {
+      $default_macro = $form['#node']->field_om_macro_activity['und'][0]['tid'];
+  	}
+  }
+	 if(isset($form_state['input']['field_om_macro_activity_custom'])){
+	  	$selected_subdomain = _im_get_next_terms($default_subdomain, TRUE);
+    $form['field_om_macro_activity_custom']['und'] =  $form_state['input']['field_om_macro_activity_custom'];
+    $default_macro = $form_state['input']['field_om_macro_activity_custom'];
+  }
+  $form['field_om_macro_activity_custom'] = array(
+    '#type' => 'select',
+    '#title' => t('Macro Activity'),
+    '#options' => $selected_subdomain,
+    '#default_value' => $default_macro,
+    '#prefix' => '<div id="macro-wrapper">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('enabled-for-ajax')),
+  );
+  //Experts field updated to operational model
+  $expert_options = '';
+  if (is_numeric(arg(1)) && arg(2) == 'edit') {
+    $experts = array();
+    $experts = _im_get_users_with_role('expert');
+    if(sizeof($form['field_om_experts'][LANGUAGE_NONE]['#entity']->field_om_experts) > 0){
+      $expert_validations = $form['field_om_experts'][LANGUAGE_NONE]['#entity']->field_om_experts['und'];
+    }
+    if(empty($expert_validations)){
+      $expert_options = array();
+    }
+    else{
+      foreach ($expert_validations as $key=>$value) {
+        if(!empty($experts[$value['value']])){
+          $expert_options[$value['value']] = $experts[$value['value']];
+        }
+      }
+      drupal_add_js(array('experts'=>$expert_options), 'setting');
+    }
+    $form['field_om_experts']['und']['#options'] = $experts;
+  }
+  else {
+    drupal_add_js(array('expert'=>''), 'setting');
+    $form['field_om_experts']['und']['#options'] = _im_get_users_with_role('expert');
+    
+    $experts_autosave = _im_get_users_with_role('expert');   
+    foreach ($experts_autosave as $key=>$value) {    
+          $expert_options_autosave[] = $value;       
+    }    
+    drupal_add_js(array('expert_options'=> $expert_options_autosave), 'setting');
+  }
+  
+  $tmp = key($subdomain_options);
+  if (!empty($selected_domain) && !empty($tmp)) {
+    $form['field_om_version']['und'][0]['#disabled'] = TRUE;
+	if (empty($_POST['field_om_domain_custom']) && empty($_POST['field_om_subdomain_custom'])) {
+	  $reference_code = _im_get_reference_code($default_domain, $default_subdomain);
+	  if (is_numeric(arg(1)) && arg(2) == 'edit') {
+	    $reference_code = isset($form_state['node']->field_om_reference_procedure['und'][0]['value']) ? $form_state['node']->field_om_reference_procedure['und'][0]['value'] : $reference_code;
+	  }
+	}
+	else {
+	  $reference_code = _im_get_reference_code($default_domain, $default_subdomain);
+	}
+	//$reference_code = isset($form_state['node']->field_om_reference_procedure['und'][0]['value']) ? $form_state['node']->field_om_reference_procedure['und'][0]['value'] : $reference_code;
+    $form['field_om_reference_procedure_code'] = array(
+    '#type' => 'item',
+    '#title' => t("Reference Procedure"),
+    '#markup' => $reference_code,
+    '#weight' => 4,
+    '#prefix' => '<div id="reference-wrapper">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('enabled-for-ajax')),
+  );
+  //Creation details
+  global $user;
+  $status = '';
+  if(isset($form['#node']->nid)){
+    $author = _im_user_get_data($form['#node']->uid);
+    $status = _im_om_node_status($form['#node']->nid);    
+    $default_name = $author['full_name'];
+    $created_time = date('d/m/Y', $form['#node']->created);
+    $modified_time = date('d/m/Y', $form['#node']->changed);
+  }else{
+    $author = _im_user_get_data($user->uid);
+    $default_name = $author['full_name'];
+    $created_time = date('d/m/Y');
+    $modified_time = date('d/m/Y');
+  }
+  if($default_name==NULL) {
+  	$default_name = 'Anonymous';
+  }
+  $form['om_created_by'] = array(
+    '#type' => 'item',
+    '#title' => t('Created by'),
+    '#markup' => $default_name,
+    '#weight' => -7,
+  );
+  $form['om_created_date'] = array(
+    '#type' => 'item',
+    '#title' => t('Created Date'),
+    '#markup' => $created_time,
+    '#weight' => -6,
+  );
+  $form['om_status'] = array(
+    '#type' => 'item',
+    '#title' => t('Status'),
+    '#markup' => t($status),
+    '#weight' => -5,
+  );
+  $form['om_last_modified_date'] = array(
+    '#type' => 'item',
+    '#title' => t('Last Modification Date'),
+    '#markup' => $modified_time,
+    '#weight' => -5,
+  );
+  
+  //Dynamically fetching status magasin options.
+  $form['field_om_status']['und']['#options'] = _get_status_magasin_options();
+  $status_default = array();
+  $count = 0;
+  if (isset($form_state['node']->field_om_status['und'][$count]['value'])) {
+    foreach($form_state['node']->field_om_status['und'] as $keys=>$values){
+      $status_default_value = $values['value'];
+      $status_default[$status_default_value] = $status_default_value;
+    }
+  }
+  if (!empty($status_default) && count($status_default) > 0) {
+    $form['field_om_status']['und']['#default_value'] = $status_default;
+  }
+  
+  }
+  else {
+    global $base_url;
+    $clickhere_link = l(t("Click here"), $base_url . "/admin/structure/taxonomy/om_domains/add",array('attributes' => array('target'=>'_blank')));
+    //drupal_set_message(decode_entities(t("Please create domain, subdomain and macro - @clickhere. Without these the operation model content won't create.", array("@clickhere" => $clickhere_link))), "warning");
+  }
+  $form['field_node_archive']['#attributes']['style'] = 'display:none';
+  $form['field_draft_status']['#attributes']['style'] = 'display:none';
+  $form['field_om_reference_procedure']['#attributes']['style'] = 'display:none';
+  $form['field_parent_nid']['#attributes']['style'] = 'display:none';
+  //$form['field_om_macro_activity']['und']['#options'] = _im_get_next_terms($form_state['values']['field_om_subdomain']['und'][0]['tid']);
+  $form['field_om_experts']['und']['#title'] = t("Expert Validation");
+  $form['field_om_access']['und']['#options'] = array(t("Yes"), t("No"));
+  $form['field_om_domain_custom']['#validated'] = TRUE;
+  $form['field_om_subdomain_custom']['#validated'] = TRUE;
+  $form['field_om_macro_activity_custom']['#validated'] = TRUE;
+  $form['field_om_attachments']['#validated'] = TRUE;
+  /*if(isset($form_state['node']->field_om_publication_period['und'][0]['value'])){
+  	$form['field_om_publication_period']['und'][0]['#default_value']['value'] = date('d-m-Y', strtotime($form_state['node']->field_om_publication_period['und'][0]['value']));
+  }*/  ;  
+  //to display the n value of months for publication to period.
+  if(!isset($form_state['node']->field_om_publication_period['und'][0]['value2'])){
+  	$effective_to_date = '';
+  	$publication_value2_n = variable_get('im_admin_n', 0);
+  	$curr_date = date('Y-m-d H:i:s');
+  	$date_to_publish = new DateTime($curr_date);
+  	$interval = new DateInterval('P' . $publication_value2_n . 'M');
+  	$date_to_publish->add($interval);
+  	$effective_to_date = $date_to_publish->format('Y-m-d H:i:s');  
+  	//alter the fields to display the pubglication to date.
+  	$form['field_om_publication_period']['und'][0]['#default_value']['value2'] = $effective_to_date;
+  	$form['field_om_publication_period']['und'][0]['#date_items']['value2'] = $effective_to_date;
+  }/*else{
+  	$form['field_om_publication_period']['und'][0]['#default_value']['value2'] = date('d-m-Y', strtotime($form_state['node']->field_om_publication_period['und'][0]['value2'])); 
+  }*/
+  $form['#validate'][] = 'im_features_om_validate';
+  
+  global $user;
+  $manager_role = 0;
+  foreach($user->roles as $roles){
+  	if(strpos($roles, 'manager') !== false){
+  		$manager_role = 1;
+  	}else{
+  		$manager_role = 0;
+  	}
+  }
+ }
+}
+
+function im_features_om_validate($form, &$form_state) {
+  foreach ($form_state['values']['field_om_experts']['und'] as $key=>$values){
+    $expert_options[$values['value']] = $values['value'];
+  }
+  drupal_add_js(array('expert'=>$expert_options), 'setting');
+  $errors = form_get_errors();
+  form_clear_error();
+  if ($errors) {
+    foreach ($errors as $name => $error_message) {
+      if ($error_message == 'An illegal choice has been detected. Please contact the site administrator.' || $error_message == "Un choix interdit a Ã©tÃ© dÃ©tectÃ©. Veuillez contacter l'administrateur du site.") {
+        unset($errors[$name]);
+      }
+    }
+    foreach ($errors as $name => $error) {
+      form_set_error($name, $error);
+      $removed_messages[] = $error;
+    }
+  }   
+}
+/**
+ * Function to retrieve users with role 'expert'
+ * 
+ */
+function _im_get_users_with_role($role) {
+      $uids = array();
+      $users = array();
+      $select_options = array();
+      $role_obj = user_role_load_by_name($role);
+      if($role_obj){
+        $result = db_select('users_roles', 'ur')
+          ->fields('ur')
+          ->condition('ur.rid', $role_obj->rid, '=')
+          ->execute();
+        foreach ($result as $record) {
+          $uids[] = $record->uid;
+        };
+      }
+      if(!empty($uids)){
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'user')
+          ->propertyCondition('uid', $uids, 'IN');
+        $entities = $query->execute();
+        if (!empty($entities)) {
+          $users = entity_load('user', array_keys($entities['user']));
+        }
+      }
+      foreach($users as $terms){
+      	$field_full_name = trim($terms->field_full_name['und'][0]['value']);
+        $select_options[$field_full_name] = isset($field_full_name)? $field_full_name : ''; 
+      }
+      //To sort the expert in alphabetical order
+      ksort($select_options);
+      return $select_options;
+}
+/**
+ * Function to retrieve all domains from OM taxonomy.
+ * 
+ */
+function _im_get_domain_terms(){
+  $taxonomy_machine_name = 'om_domains';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vid = $vocabulary->vid;
+  $all_terms = taxonomy_get_tree($vid, $parent = 0, NULL, $load_entities = TRUE);
+  $domain_terms = array();
+  foreach($all_terms as $all_term){
+    if ($all_term->depth == '0'){
+      $domain_terms[$all_term->tid] = $all_term->name;
+    }
+  }
+  return $domain_terms;
+}
+function _im_get_next_terms($level1_tid, $macro_flag = FALSE){
+  $taxonomy_machine_name = 'om_domains';
+  $vocabulary = taxonomy_vocabulary_machine_name_load($taxonomy_machine_name);
+  $vid = $vocabulary->vid;
+  $all_child_terms = taxonomy_get_children($level1_tid, $vid);
+  $next_options = array();
+  if ($macro_flag == TRUE) {
+  	$next_options = array('0' => t('OM None'));
+  }
+  //$next_options['_none'] = '- None -';
+  foreach($all_child_terms as $terms){
+   $next_options[$terms->tid] = $terms->name; 
+  } 
+ if (isset($next_options)) {
+    return $next_options;
+  }
+  else {
+    return array();
+  }
+}
+
+function _im_get_reference_code($domain, $subdomain){
+  if (is_array($domain)) {
+    $domain = array_keys($domain);
+    $domain = $domain[0];
+  }
+  if (is_array($subdomain)) {
+    $subdomain = array_keys($subdomain);
+    $subdomain = $subdomain[0];
+  }
+  $domain_code = '';
+  $subdomain_code = '';
+  $terms = taxonomy_term_load_multiple($tids = array($domain, $subdomain), $conditions = array());
+  foreach($terms as $term){   
+    if($term->tid == $domain ){
+      if(!empty($term->field_taxo_om_code)){
+        $domain_code = isset($term->field_taxo_om_code)? $term->field_taxo_om_code[LANGUAGE_NONE][0]['value']:'';
+      }
+      else{
+        $domain_code = '';
+      }
+    }
+    if($term->tid == $subdomain ){
+      if(!empty($term->field_taxo_om_code)){
+        $subdomain_code = isset($term->field_taxo_om_code)? $term->field_taxo_om_code[LANGUAGE_NONE][0]['value']:'';
+      }
+      else{
+        $subdomain_code = '';
+      }
+    }
+  }
+  $reference_code = $domain_code.'/'.$subdomain_code.'/';
+  return $reference_code;
+}
+
+function om_subdomain_ajax_callback($form, $form_state) {
+  return $form['field_om_subdomain_custom'];
+}
+
+function om_macro_ajax_callback($form, $form_state) {
+  //return $form['field_om_macro_activity_custom'];
+  $selected_domain = $form_state['values']['field_om_domain_custom'];
+  $selected_subdomain = _im_get_next_terms($form_state['values']['field_om_subdomain_custom'], TRUE);
+  $default_macro = key($selected_subdomain);
+  if (arg(0) == "node" && is_numeric(arg(1)) && arg(2) == 'edit') {
+    $default_macro = $form['#node']->field_om_macro_activity['und'][0]['tid'];
+  }
+  $form['field_om_macro_activity_custom']['#options'] = $selected_subdomain;
+  $form['field_om_macro_activity_custom']['#default_value'] = $default_macro;
+  
+  $reference_code = isset($form_state['values']['field_om_subdomain']) ? _im_get_reference_code($selected_domain, $form_state['values']['field_om_subdomain_custom']) : '';
+  $form['field_om_reference_procedure_code']['#markup'] = $reference_code;
+  //$_SESSION['field_om_reference_procedure_code'] = $reference_code;
+  return array(
+    '#type' => 'ajax',
+    '#commands' => array(
+      ajax_command_replace("#macro-wrapper", render($form['field_om_macro_activity_custom'])),
+      ajax_command_replace("#reference-wrapper", render($form['field_om_reference_procedure_code']))
+    )
+  );
+}
+
+/**
+ * 
+ * Implements hook_node_view($node, $view_mode, $langcode)
+ * @param object $node
+ * @param string $view_mode
+ * @param string $langcode
+ */
+function im_features_om_node_view($node, $view_mode, $langcode){
+  if($node->type == 'operational_model') {
+  //To theme operational model detailed view
+  drupal_add_css(drupal_get_path('module', 'im_features_om') . '/css/om.css');
+  //To add jquery for left side menu and show content
+  drupal_add_js(drupal_get_path('module', 'im_features_om') . '/js/om.js');
+  drupal_add_js(drupal_get_path('module', 'im_features_om') . '/js/jquery.printElement.min.js');
+  drupal_add_css(drupal_get_path('theme', 'im') . '/css/om_print.css', array('media' => 'print'));
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter()
+**/
+function im_features_om_theme_registry_alter(&$theme_registry) {
+  $mod_path = drupal_get_path('module', 'im_features_om');
+  $theme_registry_copy = $theme_registry;       // munge on a copy
+  _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'adaptive_theme', $mod_path);
+  $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
+  $hooks = array('node');
+  foreach ($hooks as $h) {
+    _im_features_om_insert_after_first_element($theme_registry[$h]['theme paths'], $mod_path);
+  }
+}
+
+/**
+ * Helper function for re-ordering arrays (needed by theme_registry_alter)
+*/
+function _im_features_om_insert_after_first_element(&$a, $element) {
+  if(is_array($a)) {
+    $first_element = array_shift($a);
+    array_unshift($a, $first_element, $element);
+  }
+}
+
+/**
+ * Implementation of hook_node_presave().
+ * Update Unpublish duration based on Publication start date.
+ * 
+ */
+function im_features_om_node_presave($node) {
+  if ($node->type == "operational_model") {
+  	//if ($node->field_om_domain_custom > 0)
+  	if(isset($node->field_om_domain_custom))
+  		$node->field_om_domain['und'][0]['tid'] = $node->field_om_domain_custom;
+  	//if ($node->field_om_subdomain_custom > 0)
+  	if(isset($node->field_om_subdomain_custom))
+  		$node->field_om_subdomain['und'][0]['tid'] = $node->field_om_subdomain_custom;
+  	//if (isset($node->field_om_macro_activity_custom))
+  	if(isset($node->field_om_macro_activity_custom))
+  		$node->field_om_macro_activity['und'][0]['tid'] = $node->field_om_macro_activity_custom;
+
+    if(isset($node->original->field_om_ref_number['und'][0]['value'])){
+ 	   $node->field_om_ref_number['und'][0]['value'] = $node->original->field_om_ref_number['und'][0]['value'];
+    }  		
+
+    /*if(isset($_SESSION['field_om_reference_procedure_code'])){
+      $node->field_om_reference_procedure['und'][0]['value'] = $_SESSION['field_om_reference_procedure_code'] . $node->field_om_ref_number['und'][0]['value'];
+    }
+    else {*/
+      $domain_options = _im_get_domain_terms();  
+      $selected_domain = $node->field_om_domain['und'][0]['tid'];
+      $subdomain_options =_im_get_next_terms($selected_domain);
+      $selected_subdomain = $node->field_om_subdomain['und'][0]['tid'];
+      
+      $reference_code = _im_get_reference_code($selected_domain, $selected_subdomain);
+      //$_SESSION['field_om_reference_procedure_code'] = $reference_code;
+      $node->field_om_reference_procedure['und'][0]['value'] = $reference_code . $node->field_om_ref_number['und'][0]['value'];
+    //}
+  }
+  if(($node->type == "operational_model" || $node->type == "action") && (isset($node->original->status) && $node->original->status == 0) && $node->status == 1){
+	$node->field_draft_status['und'][0]['value'] = 0;
+	$node->field_node_archive['und'][0]['value'] = 0;
+  }
+  if(($node->type == "operational_model" || $node->type == "action") && (isset($node->original->status) && $node->original->status == 1) && $node->status == 0){
+	$node->field_draft_status['und'][0]['value'] = 0;
+	$node->field_node_archive['und'][0]['value'] = 1;
+  }
+}
+
+/**
+ * 
+ * function to retreive magasin status options from store tables.
+ */
+function _get_status_magasin_options(){
+  $status_options = array();
+  //select from store item field table. 
+  $result = db_query("SELECT DISTINCT sif.ite_lib_value FROM {store_item_fields} sif WHERE sif.dit_cod_item = 'statut'");
+  $status_opts = array();
+  
+  if($result){
+    while($record = $result->fetchObject()) {
+      $status_opts[$record->ite_lib_value] = $record->ite_lib_value;
+    }
+    return $status_opts;
+  }
+  else{
+    return NULL;
+  }
+}
+
+/**
+ * 
+ * function to retreive magasin status options from store tables.
+ * Used this function without selecting the store while creating the agenda nodes
+ */
+function _get_status_magasin_options_in_node_save_mode(){
+  $status_options = array();
+  //select from store item field table. 
+  $result = db_query("SELECT DISTINCT sif.ite_lib_value FROM {store_item_fields} sif WHERE sif.dit_cod_item = 'statut'");
+  $status_opts = array();
+  
+  if($result){
+    while($record = $result->fetchObject()) {
+      $status_opts[]['value'] = $record->ite_lib_value;
+    }
+    return $status_opts;
+  }
+  else{
+    return NULL;
+  }
+}
+
+/**
+* Implements hook_date_combo_process_alter().
+*/
+function im_features_om_date_combo_process_alter(&$element, $form_state, $context) {
+  if (in_array($element['#field_name'], array('field_om_publication_period', 'field_sp_operation_period', 'field_sp_order_period'))) {
+    $element['value']['#title']= t('From') . ":";
+    $element['value2']['#title']= t('To') . ":";
+  }
+}
+
+function im_features_om_page_alter(&$page) {
+  //if (arg(2) == 'operational-model' || (arg(0) == "node" && is_numeric(arg(1)) && arg(2) == "edit")) {
+  	$array = array();
+    if(isset($_SESSION['messages']['error'])) {
+      foreach ($_SESSION['messages']['error'] as $key=>$value) {
+        if($_SESSION['messages']['error'][$key] == 'An illegal choice has been detected. Please contact the site administrator.' || $_SESSION['messages']['error'][$key] == "Un choix interdit a Ã©tÃ© dÃ©tectÃ©. Veuillez contacter l'administrateur du site.") {
+          unset($_SESSION['messages']['error'][$key]);
+        }
+        else {
+        	$array[] = $_SESSION['messages']['error'][$key];
+        }
+      }
+      unset($_SESSION['messages']['error']);
+      if (count($array) > 0) {
+        $_SESSION['messages']['error'] = $array;
+      }
+     }
+  //}
+}
+
+function _im_features_om_set_proper_macro() {
+  if (!empty($_GET['subdomain'])) {
+    return _im_get_next_terms($_GET['subdomain']);
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function im_features_om_menu_alter(&$items) {
+  // Override the node view menu item title.
+  $items['node/%node/add']['title callback'] = 'workbench_create_content_title';
+  $items['node/%node/add']['title arguments'] = array(1);
+}
+/**
+ * 
+ * Function callback to redirect o the node add page in views
+ */
+function workbench_create_content($node) {
+  //sales plan and operation_model redirection.
+  if ($node->type == 'operational_model') {
+    $type = 'operational-model';
+  }
+  elseif ($node->type == 'sales_plan') {
+    $type = 'sales-plan';
+  }
+  elseif ($node->type == 'regional_moderator_profile') {
+    $type = 'regional-moderator-profile';
+  }
+  else {
+    $type = $node->type;
+  }
+  drupal_goto("node/add/" . $type);
+}
+/**
+ * 
+ * Function to override title for the create content lonk
+ */
+function workbench_create_content_title($node) {
+	$type = $node->type;	
+	return t('Create new ' . $type); 
+}
+
+function _im_features_om_node_print_preview() {
+	$node = node_load(arg(2));
+	return theme('om_print_preview', array('node' => $node));
+}
+
+function im_features_om_theme($existing, $type, $theme, $path) {
+  return array(
+    'om_print_preview' => array(
+      'variables' => array('node' => NULL),
+      'template' => 'theme/im_features_om_print_preview',
+    ),
+  );
+}
+
+function om_mail_config_form(){
+  $form = array();
+  $form['om_email_subject'] = array(
+    '#title' => t('Subject'),
+    '#type' => 'textfield',
+  );
+  $form['om_email_content'] = array(
+    '#title' => t('Content'),
+    '#type' => 'textarea',
+  );
+  $form['om_email_submit'] = array(
+    '#type' => 'submit',
+    '#value' =>t('submit'),
+  );
+  return $form;
+}
+
+/**
+ * 
+ * Implementation of hook_FormID_alter of user_admin_settings
+ * @param $form
+ * @param $form_state
+ * @param $form_id
+ */
+function im_features_om_form_user_admin_settings_alter(&$form, $form_state, $form_id) {
+  $form['om_archive_mail'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#title' => t('Operational Model Archive Mail'),   
+    '#description' => t('Send email to Administrator and Content manager operational model content type.'),
+    '#group' => 'email',  
+  );
+    $form['om_archive_mail']['om_archive_mail_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),    
+    '#group' => 'email',
+    '#default_value' => variable_get('om_archive_mail_subject', FALSE),
+  );  
+  $form['om_archive_mail']['om_archive_mail_body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Body'),        
+    '#group' => 'email',
+    '#rows' => 15,
+    '#default_value' => variable_get('om_archive_mail_body', FALSE),
+  ); 
+  
+   $form['om_newversion_mail'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#title' => t('Operational Model New Version Mail'),   
+    '#description' => t('Send email to Administrator,Content manager and expert operational model content type regarding creation of new version.'),
+    '#group' => 'email',  
+  );
+    $form['om_newversion_mail']['om_newversion_mail_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),    
+    '#group' => 'email',
+    '#default_value' => variable_get('om_newversion_mail_subject', FALSE),
+  );  
+  $form['om_newversion_mail']['om_newversion_mail_body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Body'),        
+    '#group' => 'email',
+    '#rows' => 15,
+    '#default_value' => variable_get('om_newversion_mail_body', FALSE),
+  );
+  return $form;
+}
+
+
+function im_features_om_permission(){
+	return array(
+		'create new version' => array(
+      		'title' => t('Create New Version'),
+      		'description' => t('Allows a user to create a new version of content.'),
+    	),
+	);
+}
+
+/**
+ * Function to Create New Version of the published contents
+ * Enter description here ...
+ */
+function im_features_om_create_new_version($form, &$form_state){
+	$node_obj = node_load($form['nid']['#value']);	
+	$archived = $node_obj->field_node_archive['und'][0]['value'];	
+	if ($node_obj->status == 1 && $archived == 0) {
+	  $node_obj->status = 0;
+	  $node_obj->field_node_archive['und'][0]['value'] =1;	  
+	  node_save($node_obj);
+	  _im_search_delete_file_index($node_obj->nid,$node_obj->type);//UATIM-661
+	}	
+	$new_node = _im_features_om_new_node_prepare($node_obj, $form_state);			  
+	drupal_set_message(t('New version @ver_no with a @title was saved.', array('@title' => $new_node['title'],'@ver_no' => $new_node['ver_no'])));
+	drupal_goto('node/' . $new_node['nid'] . '/edit');
+}
+
+function _im_features_om_new_node_prepare($original_node, $form_state){
+	global $user;
+	global $language;
+	$new_node = array();
+	$node =  clone $original_node;
+	$node->nid = NULL;
+	$node->vid = NULL;
+	$node->uid = $user->uid;
+	$node->log = "Created by " . $user->name . ".";
+	$node->created = strtotime(date('d-m-Y H:i:s'));
+	$node->changed = strtotime(date('d-m-Y H:i:s'));
+	$node->revision_uid = $user->uid;
+	$node->revision_timestamp = strtotime(date('H:i:s'));
+	$node->status = 1;//UATIM-661
+	$node->language =  $language->language;
+	$field_list_set = field_read_fields(array('bundle' => $form_state['values']['type']));
+	$field_list = array_keys($field_list_set);
+	foreach ($field_list_set as $key=>$field) {			
+		if (in_array($key, $field_list)) {
+			if (isset($form_state['values'][$key])) {
+				//If field type is image/file
+				if ($field['type'] == 'image' || $field['type'] == 'file') {						
+					foreach ($form_state['values'][$key]['und'] as $fkey=>$fvalue) {
+						//If file attachment fid value is 0 unset that attachment
+						if ($fvalue['fid'] == 0) {
+							unset($form_state['values'][$key]['und'][$fkey]);
+						}
+					}
+					$node->$key = $form_state['values'][$key];
+				}
+				else {
+					$node->$key = $form_state['values'][$key];
+				}
+			}
+		}
+	}
+	$node->title = $form_state['values']['title'];
+	$node->field_om_domain['und'][0]['tid'] = $form_state['values']['field_om_domain_custom'];
+	$node->field_om_subdomain['und'][0]['tid'] = $form_state['values']['field_om_subdomain_custom'];
+	$node->field_om_macro_activity['und'][0]['tid'] = $form_state['values']['field_om_macro_activity_custom'];
+	//Publication period dates
+	$node->field_om_publication_period['und'][0]['value'] = date("Y-m-d") . "T" . date("H:i:s");
+	$node->field_om_publication_period['und'][0]['value2'] = date('Y-m-d', mktime(0, 0, 0, (date('m')+variable_get('im_admin_n', 0)), date('d'), date('Y'))) . "T" . date("H:i:s");
+	$node->field_parent_nid['und'][0]['value'] = $original_node->nid;
+	$new_ver_no = $original_node->field_om_version['und'][0]['value']+0.1;	
+	$node->field_om_version['und'][0]['value'] = $new_ver_no;
+	$node->field_draft_status['und'][0]['value'] = 0;//UATIM-661
+	$node->field_node_archive['und'][0]['value'] = 0;
+	node_save($node);
+	workbench_moderation_moderate($node,'published');//UATIM-661
+	$new_node['nid'] = $node->nid;
+	$new_node['title'] = $node->title;
+	$new_node['ver_no'] = $new_ver_no;
+	return $new_node;	
+}
+
+/**
+ * Function to retrieve the parent node id of the node
+ * Enter description here ...
+ */
+
+function _im_features_om_get_parent_node($node_id){
+	$parent_node = "";
+	$parent_node = db_query("SELECT entity_id FROM {field_data_field_parent_nid} WHERE field_parent_nid_value=:node_id  limit 1",array(":node_id" => $node_id))->fetchField();
+	return $parent_node;
+}
+
+
+/**
+ * Archive the parent(version n) node once the version n+1 is published
+ * @param $parent_nodeId
+ */
+
+function _im_features_om_archive_parent_node($parent_nodeId){
+	$parent_node = node_load($parent_nodeId);
+	$parent_node->status = 0;
+	//$parent_node->vid = $parent_node->vid + 1;
+	$parent_node->field_node_archive['und'][0]['value'] = 1;
+	$parent_node->workbench_moderation_state_new = 'draft';
+	$parent_node->workbench_moderation['published'] = "";
+	node_save($parent_node);
+}
+
+function _im_features_om_landing_page() {
+drupal_add_css(drupal_get_path('theme', 'im') . '/css/om_print.css', array('media' => 'print'));
+	global $language;
+	if (!arg(1)) {
+		$query = db_query("SELECT nid FROM node WHERE type = 'operational_model' AND status = '1' ORDER BY nid DESC LIMIT 1")->fetchAssoc();
+		$nid = $query['nid'];
+		drupal_add_js(array('om_nid'=>$nid), 'setting');
+	}
+	else {
+		$nid = arg(1);
+	}
+	$node = node_load($nid);
+  $build = node_view($node, $view_mode = 'full', $language->language);
+  return render($build);
+}
+
+/**
+ * 
+ * Enter description here ...
+ * @param $key
+ * @param $message
+ * @param $params
+ */
+function im_features_om_mail($key, &$message, $params){
+	$language = $message['language'];
+  	$variables = array('user' => $params['account'], 'list' => $params['list'], 'title' => $params['title'], 'comment' => $params['comment']);
+  	$message['subject'] .= im_features_om_mail_text($key . '_subject', $language, $variables);
+  	$message['body'][] = im_features_om_mail_text($key . '_body', $language, $variables);
+}
+
+function im_features_om_mail_text($key, $language = NULL, $variables = array(), $replace = TRUE){
+  $langcode = isset($language) ? $language->language : NULL;
+  if ($admin_setting = variable_get($key, FALSE)) {
+    // An admin setting overrides the default string.
+    $text = $admin_setting;
+  }
+  else {
+	  switch ($key) {
+	  	case 'om_archive_mail_subject':
+	  	  	$subject = variable_get('om_archive_mail_subject', '');
+	  	  	$text = t($subject, array(), array('langcode' => $langcode));
+	  		break;
+	  	case 'om_archive_mail_body':
+	  		$body = variable_get('action_mail_body', '');
+	  		$text = t($body, array(), array('langcode' => $langcode));
+	  		break;
+	  	case 'om_newversion_mail_subject':
+	  		$subject = variable_get('om_newversion_mail_subject', '');
+	      	$text = t($subject, array(), array('langcode' => $langcode));
+	  		break;
+	  	case 'om_newversion_mail_body':
+	  	  	$body = variable_get('om_newversion_mail_body', '');
+	      	$text = t($body, array(), array('langcode' => $langcode));
+	  		break;  			
+	  }
+	}
+	if ($replace) {
+  	// We do not sanitize the token replacement, since the output of this
+  	// replacement is intended for an e-mail message, not a web browser.
+    	return im_features_om_token_replace($text, $variables, array('language' => $language));
+  	}
+  	return $text;
+}
+
+function im_features_om_token_replace($replacements, $data, $options){
+	global $base_url;
+  	global $language;
+	// UATIM-707 : Token Replace for [site:name]// Replace [user:name] : UATIM-627
+  	$base = ($language->language) ? $base_url . '/' . $language->language : $base_url;
+  	$replacements = token_replace($replacements, array('user' => $data['user']));
+  	$replacements = str_replace('[site:name]',$base_url, $replacements);	
+	$replacements = str_replace('[user:name]',$data['user']->field_full_name['und'][0]['safe_value'], $replacements);  	
+  	$replacements = str_replace('[content:list]', $data['list'], $replacements);
+  	$replacements = str_replace('[content:title]', $data['title'], $replacements);
+  	$replacements = str_replace('[content:comment]', $data['comment'], $replacements);  	
+  	return $replacements;
+}
+
+/**
+ * Sending mail to all experts alerting to create new version of content
+ * all operational model published contents and if current date >= (validity End Date - n)
+ */
+function im_features_om_newversion_mail(){
+$node_ids = array();	
+	$mail_nvalue = variable_get('om_mail_trigger_nvalue'). ' days';
+	$today_date = strtotime(date('Y-m-d',strtotime(date('Y-m-d'). '+'.$mail_nvalue)));
+	$uids = array();
+    $users = array();
+    $select_options = array();
+    $role_obj = user_role_load_by_name('expert');
+    if($role_obj){
+    	$result = db_select('users_roles', 'ur')
+                  ->fields('ur')
+                  ->condition('ur.rid', $role_obj->rid, '=')
+                  ->execute();
+      	foreach ($result as $record) {
+        	$uids[] = $record->uid;
+     	};
+    }
+    if(!empty($uids)){
+    //fetch user details of experts
+    	$query = new EntityFieldQuery();
+      	$query->entityCondition('entity_type', 'user')
+            	->propertyCondition('uid', $uids, 'IN');
+      	$entities = $query->execute();
+      	if (!empty($entities)) {
+        	$users = entity_load('user', array_keys($entities['user']));
+        	foreach($users as $key=>$uvalue){
+        		$expert_name = $uvalue->field_full_name['und'][0]['value'];
+
+        		//Fetch the contents which belongs to particular expert
+        		$om_node_query = "SELECT DISTINCT om.nid AS nid, om.title AS title, om_experts.field_om_experts_value AS experts,
+  					  om_publication.field_om_publication_period_value2 AS field_om_publication_period_value2 
+  					  FROM node om 
+					  INNER JOIN field_data_field_om_publication_period om_publication ON om_publication.entity_id = om.nid 
+					  INNER JOIN field_data_field_om_experts om_experts ON om_experts.entity_id = om.nid
+					  WHERE om.nid NOT IN (SELECT CAST(parent_nid.field_parent_nid_value AS INT) 
+					  					   FROM field_data_field_parent_nid parent_nid WHERE parent_nid.field_parent_nid_value!='') 
+					  AND status=1 AND om_experts.field_om_experts_value='".$expert_name."'";
+        		$result = db_query($om_node_query);	
+        		foreach ($result as $value){
+					$om_pubtodate = strtotime(substr($value->field_om_publication_period_value2, 0, 10));
+  					if($today_date == $om_pubtodate){
+  						$node_ids[$value->nid] = $value->title;
+  					}
+				}
+				if(!empty($node_ids)){
+					$emailids[$key] = $uvalue->mail;
+					$module = 'im_features_om';
+		          	$key = 'om_newversion_mail';
+		          	$language = language_default();
+		          	$params = array();
+		          	$from = variable_get('site_mail', ini_get('sendmail_from'));
+		          	$send = TRUE;
+		          	if(!empty($uvalue->mail)){
+		          		$email = $uvalue->mail;
+		          	}else{
+		          		$email = $uvalue->name;
+		          	}
+		          	$params['account'] = $uvalue;
+		          	$content_details = '';
+		          	foreach($node_ids as $ukey=>$node_title){
+		             	$content_details .= "\t".$node_title . "\t\n";
+		          	}
+		          	$params['list'] = $content_details;
+		          	$params['title'] = '';
+		          	$params['comment'] = '';
+		          	$message = drupal_mail($module, $key, $email, $language, $params, $from, $send);
+		          	$i++;
+		       		if(!$message['result']){
+		             	watchdog('mail', 'Error sending e-mail (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
+		              	drupal_set_message(t('Unable to send e-mail. Contact the site administrator if the problem persists.'), 'error');
+		          	}
+		          	else{
+		            	drupal_set_message(t("Email send to Experts alerting to create a new version."));
+		          	}
+				}
+        	}
+      	}
+    }
+	else{
+    	print t('No results found');
+  	}
+}
+
+/**
+ * Sending mail to all experts, administrator and content managers alerting about the content expiration
+ * all operational model published contents and if current date >= validity End Date
+ */
+function im_features_om_archive_mail(){
+	$user_ids = array();
+	$node_ids = array();
+	
+	$archive_nvalue = '+'.variable_get('om_mail_archive_nvalue'). ' days';
+	$today_date = strtotime(date('Y-m-d',strtotime(date('Y-m-d'). '+'.$archive_nvalue)));
+	//Retrieve all published operational model contents
+	$om_node_query = "SELECT DISTINCT om.nid AS nid, om.title AS title, om_publication.field_om_publication_period_value2 AS field_om_publication_period_value2 FROM node om 
+					  INNER JOIN field_data_field_om_publication_period om_publication ON om_publication.entity_id = om.nid					  
+					  WHERE om.nid NOT IN (SELECT node_archive.field_node_archive_value FROM field_data_field_node_archive node_archive) 
+					  AND status=1";
+  	
+  	$result = db_query($om_node_query);					  
+	foreach ($result as $value){
+		$om_pubtodate = strtotime(substr($value->field_om_publication_period_value2, 0, 10));		
+		if($today_date == $om_pubtodate){
+  			$node_ids[$value->nid] = $value->title;  				
+  		}
+	}
+  	//Get all experts, administrator, content_manager_om
+  	$uids = array();
+    $users = array();
+    $role_ids = '';
+    $select_options = array();
+    
+    $user_query = "SELECT DISTINCT users.uid, users.name, users.mail FROM users 
+    				WHERE users.uid IN (SELECT user_roles.uid FROM users_roles user_roles 
+    						WHERE user_roles.rid IN (SELECT role.rid FROM role 
+    							WHERE role.name IN('administrator','expert','content_manager_om')))";
+    $result = db_query($user_query);					  
+	foreach ($result as $value){
+		$uids[] = $value->uid;
+	}
+    if(!empty($uids) && !empty($node_ids)){
+    	//fetch user details of experts
+    	$query = new EntityFieldQuery();
+      	$query->entityCondition('entity_type', 'user')
+            	->propertyCondition('uid', $uids, 'IN');
+      	$entities = $query->execute();
+      	if (!empty($entities)) {
+        	$users = entity_load('user', array_keys($entities['user']));
+      	}
+      	$emailids = array();
+      	$i = 0;
+      	//send mail to each experts
+      	foreach($users as $key=>$uvalue){
+      		$emailids[$key] = $uvalue->name;
+          	$module = 'im_features_om';
+          	$key = 'om_archive_mail';
+          	$language = language_default();
+          	$params = array();
+          	$from = variable_get('site_mail', ini_get('sendmail_from'));
+          	$send = TRUE;
+          	$user_details = user_load($uvalue->uid);
+          	$email = $user_details->mail;
+          	$params['account'] = $uvalue;
+          	$content_details = '';
+          	foreach($node_ids as $ukey=>$node_title){
+             	$content_details .= "\t".$node_title . "\t\n";
+          	}
+          	$params['list'] = $content_details;
+          	$params['title'] = '';
+          	$params['comment'] = '';
+          	$message = drupal_mail($module, $key, $email, $language, $params, $from, $send);
+          	$i++;
+       		if(!$message['result']){
+             	watchdog('mail', 'Error sending e-mail (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
+              	drupal_set_message(t('Unable to send e-mail. Contact the site administrator if the problem persists.'), 'error');
+          	}
+          	else{
+            	drupal_set_message(t("Email send to Experts, Adminsitrators and Content Managers alerting that procedures are going to expire."));
+          	}
+      	}
+    }   
+	else{
+    	print t('No results found');
+  	}
+}
+
+/** Implemented hook_cron
+ * Sending OM mails regarding new version creation and contents archiving
+ * Enter description here ...
+ */
+function im_features_om_cron(){
+  $cron_last = variable_get('cron_last');
+  if( date('ymd', $cron_last) != date('ymd', time() ) ){
+   im_features_om_newversion_mail();
+   im_features_om_archive_mail();
+   variable_set('cron_last', date('ymd', time()));
+  }
+}
+
+//function to retrieve status of OM node
+function _im_om_node_status($nid){
+	$status_text = '';
+	if($nid){
+		$node_details = node_load($nid);
+		if($node_details){
+		  $status = $node_details->workbench_moderation['current']->state;
+		  if(isset($node_details->field_node_archive)){
+		  	if($status == 'draft' && $node_details->field_node_archive['und'][0]['value'] == 0){
+		  		$status_text = 'Draft';
+		  	}else if($status == 'needs_review'){
+		    	$status_text = 'Needs Review';
+		    }else if($status == 'published'){
+		    	$status_text = 'Published';
+		    }else if($status == 'draft' && $node_details->field_node_archive['und'][0]['value'] == 1) {
+		      $status_text = 'Archive';
+		    }
+		  }
+		}
+	}
+	return $status_text;
+}
+
+/**
+ * Implemented hook_form for Procedure search
+ * @param $form
+ * @param $form_state
+ */
+function _om_search_form($form,&$form_state){
+	$form = array();
+	
+	$om_search_default = isset($_GET['search']) ? $_GET['search'] : t('Search procedure');
+	$nid = arg(1);
+	$tid = '';
+	if (arg(2) != '' && (arg(0) == 'node') || arg(0) == 'modele-operationnel') {
+    	$tid = arg(2);
+    }
+    else{
+    	$node_taxo_tid_query = db_query("select field_om_location_tid  from field_data_field_om_location where entity_id = :nid",array(':nid'=> $nid))->fetchAssoc();
+        $tid = $node_taxo_tid_query['field_om_location_tid'];
+    }
+	$form['om_search'] = array(
+		'#type' => 'textfield',
+     	'#required' => FALSE,
+  	 	'#default_value' => $om_search_default,
+  	 	'#weight' => 1,
+		'#attributes' => array('id' => 'om-search','class'=> array('auto_submit')),
+		'#autocomplete_path' => 'omsearchautocomplete/'.$nid.'/'.$tid,
+		'#size' => '30',
+	);
+	$form['selected_store_code'] = array(
+		'#type' => 'hidden',
+	    '#value' => (is_numeric(arg(2)) == TRUE) ? arg(2) : $_GET['selected_code'],
+     );
+	$form['om_search_submit'] = array(
+		'#type' => 'submit',
+     	'#value' => 'search',
+  	 	'#weight' => 2,
+	);
+	return $form;	
+}
+
+function _om_search_form_submit($form, &$form_state){
+	$url = $_GET['q'];
+	global $base_url;
+    if($form_state['clicked_button']['#value'] == $form_state['values']['om_search_submit']){
+       if(isset($form_state['values']['om_search']) && $form_state['values']['om_search']!=t('Search procedure')){
+         unset($_SESSION['nodeid']);
+         $_SESSION['nodeid'] = arg(1);
+         if(!empty($form_state['values']['selected_store_code']) && $form_state['values']['selected_store_code'] != '') {
+           drupal_goto($base_url."/".$url, array('query' => array('search' => $form_state['values']['om_search'], 'selected_code' => $form_state['values']['selected_store_code'], 'type' => 'search')));
+         }else { 
+           drupal_goto($base_url."/".$url, array('query' => array('search' => $form_state['values']['om_search'], 'type' => 'search')));
+         } 
+        }else{
+          $new_url = $base_url."/".$url;
+          drupal_goto(urldecode($new_url));
+        }
+	}
+}
+
+/**
+ * Function to autocomplete for node title on Procedure search
+ * @param unknown_type $string
+ */
+function _procedure_search_autocompletes($nid,$tid='',$string){
+	$matches = array();
+	$today_date = date('Y-m-d');
+	global $user;
+	if(!empty($string)){
+		$search_text = _im_feature_manage_content_views_query_chars_support($string);
+		$string_decode = $search_text['string_decode'];
+   		$string_encode = $search_text['string_encode'];
+   		$field_location_join = '';
+   		$tid_filter = '';
+   		$field_access_join = '';
+   		$field_access_filter = '';
+   		
+   		//Retrieve the user cadre status
+		$cadre_status = _get_user_cadre_status();
+
+		//Retrive the user store's tatus
+        $store_status = _get_user_store_status();
+        $store_status_join = '';
+        $store_status_condition = '';
+        
+   		if(is_numeric(arg(2))) {
+   			$field_location_join = "LEFT JOIN field_data_field_om_location field_data_field_om_location ON node.nid = field_data_field_om_location.entity_id AND (field_data_field_om_location.entity_type = 'node' AND field_data_field_om_location.deleted = '0') ";
+   			$tid_filter = " AND (field_data_field_om_location.field_om_location_tid = ".$tid." )";
+   		}
+   		if($cadre_status != 'cadre'  && (!in_array('content_manager_om',$user->roles) && !in_array('contributor_om',$user->roles) && !in_array('administrator',$user->roles) && !in_array('technical_director',$user->roles))){
+   			$field_access_join = "INNER JOIN field_data_field_om_access field_data_field_om_access ON node.nid = field_data_field_om_access.entity_id AND (field_data_field_om_access.entity_type = 'node' AND field_data_field_om_access.deleted = '0')";
+   			$field_access_filter = "AND field_data_field_om_access.field_om_access_value = '1'";
+   		}
+   		$query = "SELECT node.title as title, count(node_view_count.nid) AS node_view_count_nid FROM {node} node
+   				  LEFT JOIN field_data_field_om_publication_period field_data_field_om_publication_period ON node.nid = field_data_field_om_publication_period.entity_id AND (field_data_field_om_publication_period.entity_type = 'node' AND field_data_field_om_publication_period.deleted = '0')
+   				  LEFT JOIN node_view_count node_view_count ON node.nid = node_view_count.nid 
+   				  LEFT JOIN field_data_field_node_archive field_data_field_node_archive ON node.nid = field_data_field_node_archive.entity_id AND (field_data_field_node_archive.entity_type = 'node' AND field_data_field_node_archive.deleted = '0')";
+   		
+   				  if(!empty($field_access_join)){
+   				  	$query.=$field_access_join;
+   				  }
+				  if(!empty($field_location_join)){
+   				  	$query.=$field_location_join;
+   				  }
+   				  if(isset($store_status) && $store_status){
+              		$query.="LEFT JOIN field_data_field_om_status field_data_field_om_status ON node.nid = field_data_field_om_status.entity_id AND (field_data_field_om_status.entity_type = 'node' AND field_data_field_om_status.deleted = '0') ";
+				  }
+   				  $query.=" WHERE node.type='operational_model'
+   				  AND node.status='1'
+   				  AND (TO_CHAR(TO_DATE(field_data_field_om_publication_period.field_om_publication_period_value, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS'), 'YYYY-MM-DD') <= '".$today_date."')
+                  AND (TO_CHAR(TO_DATE(field_data_field_om_publication_period.field_om_publication_period_value2, 'FMYYYY-FMMM-FMDDTFMHH24:FMMI:FMSS'), 'YYYY-MM-DD') >= '".$today_date."')
+   				  AND (translate(lower(node.title), 'Ã¢Ã£Ã¤Ã¥Ä�ÄƒÄ…Ã¨Ã©Ã©ÃªÃ«Ä“Ä•Ä—Ä™Ä›Ã¬Ã­Ã®Ã¯Ã¬Ä©Ä«Ä­Ã³Ã´ÃµÃ¶Å�Å�Å‘Ã¹ÃºÃ»Ã¼Å©Å«Å­Å¯', 'aaaaaaaeeeeeeeeeeiiiiiiiiooooooouuuuuuu') ILIKE '%" . $string_decode . "%' OR translate(lower(node.title), 'aaaaaaaeeeeeeeeeeiiiiiiiiooooooouuuuuuu', 'Ã¢Ã£Ã¤Ã¥Ä�ÄƒÄ…Ã¨Ã©Ã©ÃªÃ«Ä“Ä•Ä—Ä™Ä›Ã¬Ã­Ã®Ã¯Ã¬Ä©Ä«Ä­Ã³Ã´ÃµÃ¶Å�Å�Å‘Ã¹ÃºÃ»Ã¼Å©Å«Å­Å¯') ILIKE '%" . $string_encode . "%')
+   				  AND field_data_field_node_archive.field_node_archive_value = '0'";
+				  if(!empty($tid_filter)){
+				  	$query.=$tid_filter; 	
+				  }
+				  if(!empty($field_access_filter)){
+					$query.=$field_access_filter; 	
+				  }
+				  if(isset($store_status) && $store_status){
+              		$query.=" AND field_data_field_om_status.field_om_status_value = '".$store_status."'";
+				  }   						   
+   				  $query.=" GROUP BY node.nid ORDER BY node_view_count_nid DESC LIMIT 10 ";
+   		$result = db_query($query)->Fetchall();
+   		if(!empty($result)){
+			foreach ($result as $row) {
+				$matches[$row->title] = check_plain($row->title);
+			}
+			drupal_json_output($matches);
+   		}else{
+   			drupal_json_output($matches);
+   		}
+	}
+}
+
+/**
+ * Get all the Experts name assigned to Procedures
+ */
+  
+function _im_features_om_experts(){
+	$experts = array();
+	$result = db_select('field_data_field_om_experts', 'om_experts')
+              ->fields('om_experts', array('field_om_experts_value'))
+              ->isNotNull('field_om_experts_value')
+              ->distinct()
+              ->orderBy('field_om_experts_value', 'ASC')
+              ->execute();
+      foreach ($result as $record) {
+      	if(empty($record->field_om_experts_value)){
+      		$experts['0'] = '';
+      	}else{
+      		$experts[$record->field_om_experts_value] = $record->field_om_experts_value;
+      	}
+      }
+    return $experts;
+}
+
+/**
+ * Implementing hook_node_update
+ * Update the workbench moderation status for OM/Action contents
+ * @param $node
+ */
+
+function im_features_om_node_update($node){
+	if(($node->type == "operational_model" || $node->type == "action") && $node->original->status == 0 && $node->status == 1){		
+    	$node->workbench_moderation_state_new = 'published';
+    	_im_features_om_update_workbench($node,$node->workbench_moderation_state_new );
+	}
+	if(($node->type == "operational_model" || $node->type == "action") && $node->original->status == 1 && $node->status == 0){		
+    	$node->workbench_moderation_state_new = 'draft';
+    	_im_features_om_update_workbench($node,$node->workbench_moderation_state_new );
+	}
+   if(($node->type == "operational_model") && $node->original->status == 1 && $node->status == 1){		
+    	$node->workbench_moderation_state_new = 'published';
+    	_im_features_om_update_workbench($node,$node->workbench_moderation_state_new );
+	}
+}
+
+function _im_features_om_update_workbench($node,$state){
+	global $user;
+	$old_revision = $node->workbench_moderation['my_revision'];
+	
+	$query = db_update('workbench_moderation_node_history')
+      ->condition('nid', $node->nid)
+      ->fields(array('current' => 0,'published' => 0))
+      ->execute();
+
+    // Get the number of revisions for this node with vids greater than $node->vid
+  	$vid_count = db_select('node_revision', 'r')
+    ->condition('r.nid', $node->nid)
+    ->condition('r.vid', $node->vid, '>')
+    ->countQuery()->execute()->fetchField();
+    
+    // If the number of greater vids is 0, then this is the most current revision
+  	$current = ($vid_count == 0)?1:0;
+  	$published = 0;
+  	if($state == "published"){
+  		$published = ($state == workbench_moderation_state_published())?1:0;
+  	}else if($state == 'draft'){
+  		$published = 0;
+  	}
+   	// Build a history record.
+  	$new_revision = array(
+    	'from_state' => $old_revision->state,
+    	'state' => $state,
+    	'nid' => $node->nid,
+    	'vid' => $node->vid,
+    	'uid' => $user->uid,
+    	'current' => $current,
+    	'published' => $published,
+    	'stamp' => $_SERVER['REQUEST_TIME'],
+  	);
+  	
+  	$workbench_new = db_insert('workbench_moderation_node_history')
+  					->fields($new_revision)
+  					->execute();  	
+  	return;
+}

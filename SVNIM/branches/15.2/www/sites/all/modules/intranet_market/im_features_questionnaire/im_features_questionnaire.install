@@ -1,0 +1,87 @@
+<?php
+ /**
+ * @file
+ * im_custom.install
+ */
+
+ /**
+ * Implements hook_install
+ * Assigning Questionnaire content type to webform
+ * 
+ */
+function im_features_questionnaire_install() {
+  variable_set('webform_node_types',Array(
+    '0' => 'questionnaire',
+    '1' => 'webform',
+  ));
+}
+/**
+ * Implementation of Hook_update_N
+ * Enter description here ...
+ */
+function im_features_questionnaire_update_7500() {
+  variable_set('webform_node_types',Array(
+    '0' => 'questionnaire',
+    '1' => 'webform',
+  ));
+}
+
+/**
+ * Implementation of Hook_update_N
+ * Enter description here ...
+ */
+function im_features_questionnaire_update_7501() {
+  variable_set('webform_node_types',Array(
+    '0' => 'questionnaire',
+    '1' => 'webform',
+  ));
+}
+
+function _im_features_questionnaire_new_table(){
+	$schema = array();
+	$schema['webform_custom_data'] = array(
+		'description' => 'Defines Profile and Magasin for the webform',
+		'fields' => array(
+			'nid' => array(
+        		'description' => 'Node id. Foreign key to {node}',
+        		'type' => 'int',
+        		'unsigned' => TRUE,
+        		'not null' => TRUE,
+        		'default' => 0,
+        		'disp-width' => '10',
+      		),
+      		'sid' => array(
+      			'description' => 'Webform id. Foreign key to {webform_submissions}',
+      			'type' => 'int',
+      			'unsigned' => TRUE,
+      			'not null' => TRUE,
+        		'default' => 0,
+        		'disp-width' => '10',
+      		),
+      		'profile' => array(
+      			'description' => 'Type of user Seiege or Magasin',
+      			'type' => 'varchar',
+      			'length' => '15',
+      			'not null' => FALSE,
+      		),
+      		'store' => array(
+      			'description' => 'Name of the store user has selected',
+      			'type' => 'varchar',
+      			'length' => '255',
+      			'not null' => FALSE,
+      		),
+		),
+	);
+	if (!db_table_exists('webform_custom_data')) {
+	 db_create_table('webform_custom_data', $schema['webform_custom_data']);
+	}
+}
+
+/**
+ * Implementation of hook_update.
+ * Hook update required for IM v14.2.9
+ * -Fix for UATIM-599 - Creating new table to save webform profile and magasin details.
+ */
+function im_features_questionnaire_update_7800() {
+	_im_features_questionnaire_new_table();	
+}

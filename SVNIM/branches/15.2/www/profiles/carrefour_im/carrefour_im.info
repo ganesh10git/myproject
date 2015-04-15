@@ -1,0 +1,35 @@
+name = Carrefour - Intranet Market
+description = Install with Carrefour Intranet Market modules
+version = 7.0
+core = 7.x
+dependencies[] = block
+dependencies[] = contextual
+dependencies[] = dashboard
+dependencies[] = field_ui
+dependencies[] = field_group
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = syslog
+dependencies[] = file
+dependencies[] = locale
+dependencies[] = token
+dependencies[] = features
+dependencies[] = date
+dependencies[] = views
+dependencies[] = views_ui
+dependencies[] = ctools
+dependencies[] = ckeditor
+dependencies[] = workbench
+dependencies[] = workbench_moderation
+dependencies[] = entity
+
+; Carrefour's custom modules:
+dependencies[] = im_custom
+
+
+files[] = carrefour_im.profile

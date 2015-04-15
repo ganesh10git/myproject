@@ -1,0 +1,60 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Portal configuration page
+msgid "Enter the number of days"
+msgstr "Nombre de jours avant la fin de publication"
+
+#OM edit page
+msgid "Draft"
+msgstr "Brouillon"
+
+msgid "draft"
+msgstr "Brouillon"
+
+#node edit page of application
+msgid "Send Anabel code"
+msgstr "Envoi du code Anabel"
+
+#Action Content type  - Create action link
+msgid "Create Action"
+msgstr "Créer une action / info"
+
+#Benchmark Content type  - Create benchmark link
+msgid "Create Benchmark"
+msgstr "Créer un benchmark"
+
+#User Add & DMD page
+msgid "First Name"
+msgstr "Prénom"
+
+# Apache solr Autocompletetheme_apachesolr_autocomplete_spellcheck
+msgid "Did you mean"
+msgstr "Vous cherchez peut-être"
+
+# im_agenda.js home page.
+msgid "Less"
+msgstr "Moins"
+
+#Agenda homepage
+msgid "MODELE OPERATIONNEL MENU"
+msgstr "Wiki Market"
+
+#Back Office
+msgid "Manage OM Content"
+msgstr "Gestion Wiki Market"
+
+#Back Office
+msgid "Manage Operational Model"
+msgstr "Gestion Wiki Market"

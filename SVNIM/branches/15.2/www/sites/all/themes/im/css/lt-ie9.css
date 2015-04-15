@@ -1,0 +1,58 @@
+/*
+ * Target IE 6, 7 and 8 (less than IE9)
+ */
+/*
+ * Assuming a mobile first approach with respond.js OFF, we must reset the font
+ * size for lt IE9
+ */
+html {
+  /*font-size: 81.3%;*/
+}
+.agenda-teaser { margin-right: 12px;}
+.agenda-teaser,
+.agendatype-detailAction .action_image,
+.agendatype-detailAction-info .action_image,
+.agendatype-detailAlert .action_image,
+.agendatype-detailNews .action_image {
+	border: 1px solid #CCCCCC;
+}
+#agenda-user-input-department .ui-dropdownchecklist-text {	height: 18px; }
+#edit-user-date-select input.form-text { 	height:20px;	padding-top: 5px; }
+.im-header-right #search-block-form input.form-text {  height: 21px;  padding: 8px 40px 0 15px; }
+#edit-user-date-select .form-item-user-date-select-date {  width: 130px; }
+#future-action {  margin-top: 6px; }
+
+/*********** HOLIDAY **********/
+#im-holiday .im-holiday-date { 
+	padding-top: 7px;
+}
+/******************* APPLICATION PAGE /  DIRECTORY  **************************/
+.im-app-category-container .single-app-container,
+.im-app-directory .directory-content {
+	border:  1px solid #ccc;
+	width: 206px;
+	height: 98px;
+  display: inline-block;
+  overflow: hidden;
+}
+/********* WIDGET **************/
+.todays-weather-info .temp-wrapper .today-weather-icon img{ max-width: 50px;}
+.weather-wrapper .weather-future-days .weather-future img {	max-width: 40px;}
+
+/******SALES PLAN **********/
+.sp-watermark-confidentiel.ie8 {
+	font-size: 0px;
+	background: url("images/confidentiel.png") no-repeat scroll 0 0 transparent;
+  top: 156px;
+  left: 3px;
+	width: 25px;
+	height: 100px;
+}
+/************ Adgenda of the DAY *********/
+.agenda-today-sec1 .action_body {   overflow: hidden; }
+.agenda-today-sec1 .action_body img{ max-width: 100%; }
+/*********** OM *************/
+.om-search-sec input[type="text"] {
+  height: 22px;
+  padding: 7px 15px 0 11px;
+}

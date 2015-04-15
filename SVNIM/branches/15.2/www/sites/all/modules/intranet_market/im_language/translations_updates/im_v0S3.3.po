@@ -1,0 +1,407 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Application content contribution page
+#node/add/application
+msgid "Last Modification Date"
+msgstr "Date de dernière modification"
+
+#Application content contribution page
+#node/add/application
+msgid "Category"
+msgstr "Catégorie"
+
+#Application content contribution page
+#node/add/application
+msgid "Application Logo"
+msgstr "Logo de l'application"
+
+#Application content contribution page
+#node/add/application
+msgid "URL"
+msgstr "URL"
+
+#Application content contribution page
+#node/add/application
+msgid "ldap_url"
+msgstr "Cocher pour application LDAP France avec SSO"
+
+#Application content contribution page
+#node/add/application
+msgid "ldap Document url"
+msgstr "Cocher pour un lien vers la documentation"
+
+#Application content contribution page
+#node/add/application
+msgid "LDAP SSO Redirect"
+msgstr "Code LDAP de l'application"
+
+#Application content contribution page
+#node/add/application
+msgid "Documentation file upload"
+msgstr "Tlechargement documentation"
+
+#Application content contribution page
+#node/add/application
+msgid "Documentation ldap url"
+msgstr "Lien vers la documentation"
+
+#Application content contribution page
+#node/add/application
+msgid "Description"
+msgstr "Description"
+
+#Application content contribution page
+#node/add/application
+msgid "Application"
+msgstr "Application"
+
+#application landing page
+#/applications
+msgid "Applications Home page"
+msgstr "Page d'accueil de l'application"
+
+#application landing page
+#/applications
+msgid "Plus"
+msgstr "Plus"
+
+#application landing page
+#/applications
+msgid "more"
+msgstr "plus"
+
+#application landing page
+#/applications
+msgid "add"
+msgstr "Ajouter"
+
+#application landing page
+#/applications
+msgid "Description"
+msgstr "Description"
+
+#Message content contribution
+#node/add/message
+msgid "Message"
+msgstr "Message"
+
+#Message content contribution
+#node/add/message
+msgid "Description"
+msgstr "Description"
+
+#Message content contribution
+#node/add/message
+msgid "Image"
+msgstr "Image"
+
+#Message content contribution
+#node/add/message
+msgid "Publication From Date"
+msgstr "Date de début de publication"
+
+#Message content contribution
+#node/add/message
+msgid "Publication To Date"
+msgstr "Date de fin de publication"
+
+#user administration
+#admin/im/user/dashboard
+msgid "The Dashboard allows the administrator to manage the users in back office"
+msgstr "Le tableau de bord est utilisé par l'administrateur pour gérer les utilisateurs du back office"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Show users only where"
+msgstr "Filtrage des utilisateurs affichés"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Name"
+msgstr "Nom"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Role"
+msgstr "Role"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Search"
+msgstr "Rechercher"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Add user"
+msgstr "Ajouter un utilisateur"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Remove Users"
+msgstr "Retirer des utilisateurs"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Save details"
+msgstr "Sauvegarder"
+
+#user administration
+#admin/im/user/dashboard
+msgid "No people available."
+msgstr "Auncun utilisateur trouvé"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Users"
+msgstr "Nom"
+
+#Store data Import
+#admin/im/store/import
+msgid "Import des magasins"
+msgstr ""
+
+#Store data Import
+#admin/im/store/import
+msgid "Settings"
+msgstr "Paramètres"
+
+#Store data Import
+#admin/im/store/import
+msgid "Source path"
+msgstr "Répertoire source"
+
+#Store data Import
+#admin/im/store/import
+msgid "Répertoire cible"
+msgstr ""
+
+#Store data Import
+#admin/im/store/import
+msgid "Save"
+msgstr "Sauvegarder"
+
+#Store data Import
+#admin/im/store/import
+msgid "Import Store Data"
+msgstr "Import données magasins"
+
+#Store data Import
+#admin/im/store/import
+msgid "Successfully updated"
+msgstr "Mise à jour réussie"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "IM Domain Import"
+msgstr "Import modèle opérationnel"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "Import (Domain, Subdomain, Macro and Procedures)"
+msgstr "Import des données du modèle opérationnel"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "Import Domain, Subdomain, Macro and Procedures"
+msgstr "Import des données du modèle opérationnel"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "Start Process"
+msgstr "Lancer l'import"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "Creating Domain of @num operations"
+msgstr "Creation des domaines pour opérations @num"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "@count results processed in @requests HTTP requests."
+msgstr "@count results processed in @requests HTTP requests."
+
+#Domain data Import
+#admin/im/domain/import
+msgid "An error occurred while processing @operation with arguments : @args"
+msgstr "An error occurred while processing @operation with arguments : @args"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Sales plan"
+msgstr "Plan de Vente"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Week"
+msgstr "Semaine"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Ongoing"
+msgstr "En cours"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Future"
+msgstr "Future"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Past"
+msgstr "Passée"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "School holidays"
+msgstr "Vacances scolaires"
+
+#Rightsidebar - weather
+#home page
+msgid "Weather"
+msgstr "Météo"
+
+#Rightsidebar - weather
+#home page
+msgid "Wind Speed"
+msgstr "Vent"
+
+#Rightsidebar - weather
+#home page
+msgid "Humidity"
+msgstr "Humidité"
+
+#Rightsidebar - weather
+#home page
+msgid "Precipitation"
+msgstr "Précipitation"
+
+#Rightsidebar - messages
+#home page
+msgid "Infos"
+msgstr "Infos"
+
+#Intranet market roles
+msgid "anonymous user"
+msgstr "utilisateur_anonyme"
+
+#Intranet market roles
+msgid "authenticated user"
+msgstr "utilisateur_authentifié"
+
+#Intranet market roles
+msgid "contributor_om"
+msgstr "contributeur_mod_op"
+
+#Intranet market roles
+msgid "administrator"
+msgstr "administrateur"
+
+#Intranet market roles
+msgid "content_manager_om"
+msgstr "gestionnaire_contenu_mod_op"
+
+#Intranet market roles
+msgid "contributor_action"
+msgstr "contributeur_action"
+
+#Intranet market roles
+msgid "salarie_siege"
+msgstr "salarie_siege"
+
+#Intranet market roles
+msgid "technical_director"
+msgstr "administrateur_technique"
+
+#Intranet market roles
+msgid "visitor"
+msgstr "visiteur"
+
+#Intranet market roles
+msgid "content_manager_action"
+msgstr "gestionnaire_contenu_action"
+
+#Intranet market roles
+msgid "expert"
+msgstr "expert"
+
+#Intranet market roles
+msgid "contributor_alert"
+msgstr "contributor_alerte"
+
+#Intranet market roles
+msgid "contributor_news"
+msgstr "contributor_news"
+
+#Intranet market roles
+msgid "contributor_sales_plan"
+msgstr "contributeur_plan_vente"
+
+#Intranet market roles
+msgid "contributor_benchmark"
+msgstr "contributor_benchmark"
+
+#Manage Links in FO
+msgid "My Content"
+msgstr "Mes contenus"
+
+#Manage Links in FO
+msgid "Manage OM Content"
+msgstr "Gestion modèle opérationnel"
+
+#Manage Links in FO
+msgid "Manage Sales Content"
+msgstr "Gestion plan de vente"
+
+#Manage Links in FO
+msgid "Manage Messages"
+msgstr "Gestion message"
+
+
+#Manage Links in FO
+msgid "Manage Application"
+msgstr "Gestion applications"
+
+#Manage Links in FO
+msgid "Manage DM Foncions"
+msgstr "Gestion fonctions DM"
+
+#Manage Links in FO
+msgid "IM Custom Settings"
+msgstr "Paramétrage du portail"
+
+#Manage Links in FO
+msgid "Add User"
+msgstr "Ajout utilisateur"
+
+#DMD Assignments
+msgid "DMD assignment for"
+msgstr "Délégation DM"
+
+#DMD Assignments
+msgid "Provide either Email or first name & last name"
+msgstr "Veuillez indiquer une adresse mail ou un nom et un prénom"
+
+#DMD Assignments
+msgid "Provide First name or Email"
+msgstr "Veuillez indiquer le prénom ou l'adresse mail"
+
+#DMD Assignments
+msgid "Provide Last name or Email"
+msgstr "Veuillez indiquer le nom ou l'adresse mail"

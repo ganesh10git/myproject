@@ -1,0 +1,1183 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Application content contribution page
+#node/add/application
+msgid "Last Modification Date"
+msgstr "Date de dernière modification"
+
+#Application content contribution page
+#node/add/application
+msgid "Application Logo"
+msgstr "Logo de l'application"
+
+#Application content contribution page
+#node/add/application
+msgid "Category"
+msgstr "Catégorie"
+
+#Application content contribution page
+#node/add/application
+msgid "URL"
+msgstr "URL"
+
+#Application content contribution page
+#node/add/application
+msgid "ldap_url"
+msgstr "LDAP France avec SSO"
+
+#Application content contribution page
+#node/add/application
+msgid "ldap Document url"
+msgstr "Insérer lien vers page Documentation"
+
+#Application content contribution page
+#node/add/application
+msgid "LDAP SSO Redirect"
+msgstr "Code LDAP de l'application"
+
+#Application content contribution page
+#node/add/application
+msgid "Documentation file upload"
+msgstr "Télécharger fichier d’aide"
+
+#Application content contribution page
+#node/add/application
+msgid "Documentation ldap url"
+msgstr "Lien vers la documentation"
+
+#Application content contribution page
+#node/add/application
+msgid "Description"
+msgstr "Description"
+
+#Application content contribution page
+#node/add/application
+msgid "Application"
+msgstr "Application"
+
+#application landing page
+#/applications
+msgid "Applications Home page"
+msgstr "Page d'accueil de l'application"
+
+#application landing page
+#/applications
+msgid "Plus"
+msgstr "Plus"
+
+#application landing page
+#/applications
+msgid "more"
+msgstr "plus"
+
+#application landing page
+#/applications
+msgid "add"
+msgstr "Ajouter"
+
+#application landing page
+#/applications
+msgid "Description"
+msgstr "Description"
+
+#Message content contribution
+#node/add/message
+msgid "Message"
+msgstr "Message"
+
+#Message content contribution
+#node/add/message
+msgid "Description"
+msgstr "Description"
+
+#Message content contribution
+#node/add/message
+msgid "Image"
+msgstr "Image"
+
+#Message content contribution
+#node/add/message
+msgid "Publication From Date"
+msgstr "Date de début de publication"
+
+#Message content contribution
+#node/add/message
+msgid "Publication To Date"
+msgstr "Date de fin de publication"
+
+#user administration
+#admin/im/user/dashboard
+msgid "The Dashboard allows the administrator to manage the users in back office"
+msgstr "Le tableau de bord est utilisé par l'administrateur pour gérer les utilisateurs du back office"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Show users only where"
+msgstr "Filtrage des utilisateurs affichés"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Name"
+msgstr "Nom"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Role"
+msgstr "Role"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Search"
+msgstr "Rechercher"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Add user"
+msgstr "Ajouter un utilisateur"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Remove Users"
+msgstr "Retirer des utilisateurs"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Save details"
+msgstr "Sauvegarder"
+
+#user administration
+#admin/im/user/dashboard
+msgid "No people available."
+msgstr "Auncun utilisateur trouvé"
+
+#user administration
+#admin/im/user/dashboard
+msgid "Users"
+msgstr "Nom"
+
+#Store data Import
+#admin/im/store/import
+msgid "IM Store Import"
+msgstr "Import des magasins"
+
+#Store data Import
+#admin/im/store/import
+msgid "Settings"
+msgstr "Paramètres"
+
+#Store data Import
+#admin/im/store/import
+msgid "Source path"
+msgstr "Répertoire source"
+
+#Store data Import
+#admin/im/store/import
+msgid "Destination path"
+msgstr "Répertoire cible"
+
+#Store data Import
+#admin/im/store/import
+msgid "Save"
+msgstr "Sauvegarder"
+
+#Store data Import
+#admin/im/store/import
+msgid "Import Store Data"
+msgstr "Import données magasins"
+
+#Store data Import
+#admin/im/store/import
+msgid "Successfully updated"
+msgstr "Mise à jour réussie"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "IM Domain Import"
+msgstr "Import modèle opérationnel"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "Import (Domain, Subdomain, Macro and Procedures)"
+msgstr "Import des données du modèle opérationnel"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "Import Domain, Subdomain, Macro and Procedures"
+msgstr "Import des données du modèle opérationnel"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "Start Process"
+msgstr "Lancer l'import"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "Creating Domain of @num operations"
+msgstr "Creation des domaines pour opérations @num"
+
+#Domain data Import
+#admin/im/domain/import
+msgid "@count results processed in @requests HTTP requests."
+msgstr "@count results processed in @requests HTTP requests."
+
+#Domain data Import
+#admin/im/domain/import
+msgid "An error occurred while processing @operation with arguments : @args"
+msgstr "An error occurred while processing @operation with arguments : @args"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Sales plan"
+msgstr "Plan de Vente"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Week"
+msgstr "Semaine"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Ongoing"
+msgstr "En cours"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Future"
+msgstr "A venir"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "Past"
+msgstr "Passée"
+
+#Rightsidebar - Sales plan
+#home page
+msgid "School holidays"
+msgstr "Conges scolaires"
+
+#Rightsidebar - weather
+#home page
+msgid "Weather"
+msgstr "Météo"
+
+#Rightsidebar - weather
+#home page
+msgid "Wind Speed"
+msgstr "Vent"
+
+#Rightsidebar - weather
+#home page
+msgid "Humidity"
+msgstr "Humidité"
+
+#Rightsidebar - weather
+#home page
+msgid "Precipitation"
+msgstr "Précipitation"
+
+#Rightsidebar - messages
+#home page
+msgid "Infos"
+msgstr "Infos"
+
+#Intranet market roles
+msgid "anonymous user"
+msgstr "utilisateur_anonyme"
+
+#Intranet market roles
+msgid "authenticated user"
+msgstr "utilisateur_authentifié"
+
+#Intranet market roles
+msgid "contributor_om"
+msgstr "contributeur_Documentation"
+
+#Intranet market roles
+msgid "administrator"
+msgstr "administrateur"
+
+#Intranet market roles
+msgid "content_manager_om"
+msgstr "gestionnaire_contenu_Documentation"
+
+#Intranet market roles
+msgid "contributor_action"
+msgstr "contributeur_action_info"
+
+#Intranet market roles
+msgid "salarie_siege"
+msgstr "salarie_siege"
+
+#Intranet market roles
+msgid "technical_director"
+msgstr "administrateur_technique"
+
+#Intranet market roles
+msgid "visitor"
+msgstr "visiteur"
+
+#Intranet market roles
+msgid "content_manager_action"
+msgstr "gestionnaire_contenu_action_info"
+
+#Intranet market roles
+msgid "expert"
+msgstr "expert"
+
+#Intranet market roles
+msgid "contributor_alert"
+msgstr "contributeur_alerte"
+
+#Intranet market roles
+msgid "contributor_news"
+msgstr "contributor_actumarket"
+
+#Intranet market roles
+msgid "contributor_sales_plan"
+msgstr "contributeur_plan_vente"
+
+#Intranet market roles
+msgid "content_manager_benchmark"
+msgstr "gestionnaire_contenu_benchmark"
+
+#Intranet market roles
+msgid "contributor_benchmark"
+msgstr "contributor_benchmark"
+
+#
+msgid "All stores"
+msgstr "Tous les magasins"
+
+# Agenda Home page
+msgid "Action future"
+msgstr "Actions à venir"
+
+#Agenda Home page
+msgid "Future Action"
+msgstr "Actions à venir"
+
+#Agenda Home page
+msgid "All Department"
+msgstr "Tous les rayons"
+
+#Agenda Home page
+msgid "Welcome"
+msgstr "Bonjour"
+
+#Agenda Home page
+msgid "Details"
+msgstr "Détails"
+
+#Agenda day page
+msgid "All Departments"
+msgstr "Tous les Rayons"
+
+#Operational Model
+msgid "Domain"
+msgstr "Domaine"
+
+#Operational Model
+msgid "Subdomain"
+msgstr "Sous domaine"
+
+#Operational Model
+msgid "Macro Activity"
+msgstr "Macro activité"
+
+#Operational Model
+msgid "Validity period of Publication"
+msgstr "Période de publication"
+
+#Operational Model
+msgid "From"
+msgstr "Du"
+
+#Operational Model
+msgid "to" 
+msgstr "au"
+
+#Operational Model
+msgid "To" 
+msgstr "au"
+
+#Operational Model
+msgid "Yes" 
+msgstr "Oui"
+
+#Operational Model
+msgid "No" 
+msgstr "No"
+
+#Operational Model
+msgid "Available options"
+msgstr "Disponibles"
+
+#Operational Model
+msgid "Available Options"
+msgstr "Disponibles"
+
+#Operational Model
+msgid "Selected Options"
+msgstr "Sélectionnés"
+
+#Operational Model
+msgid "Location"
+msgstr "Localisation (case(s) du plan où l’on pourra retrouver la procédure)"
+
+#Operational Model
+msgid "Duration"
+msgstr "Durée : Temps de réalisation de la procédure en magasin"
+
+#Operational Model
+msgid "Status Magasin"
+msgstr "Ciblage statut du magasin"
+
+#Operational Model
+msgid "Distribution executives"
+msgstr "Ciblage : cette procédure est limitée aux cadres "
+
+#Operational Model
+msgid "Attachments"
+msgstr "Fichiers joints"
+
+#Operational Model
+msgid "Material"
+msgstr "Matériel nécessaire"
+
+#Operational Model
+msgid "Content limited to @limit characters, remaining: <strong>@remaining</strong>"
+msgstr "contenu limité à @limit caractères, reste: <strong>@remaining</strong>"
+
+#Operational Model
+msgid "Objective"
+msgstr "Objectif"
+
+#Operational Model
+msgid "Content"
+msgstr "Contenu"
+
+#Operational Model
+msgid "View draft"
+msgstr "Prévisualisation"
+
+#Operational Model
+msgid "Create new operational model"
+msgstr "Créer une nouvelle procédure"
+
+#Operational Model
+msgid "Distribution executives"
+msgstr "Ciblage : cette procédure est limitée aux cadres "
+
+#Operational Model
+msgid "Fonctions concernees"
+msgstr "Fonctions concernées"
+
+#Operational Model
+msgid "End date of the validity"
+msgstr "Date de fin de validité"
+
+#Operational Model
+msgid "Duration estimate"
+msgstr "Durée Estimée"
+
+#Operational Model
+msgid "Experts the procedure"
+msgstr "Experts de la procédure"
+
+#Operational Model
+msgid "Expert Validation"
+msgstr "Experts de la procédure"
+
+#Operational Model
+msgid "Material necessary"
+msgstr "Matériel nécessaire"
+
+#Preferred store page - node form
+#User header block
+msgid "Resultants: @span_st@count@span_end store@puspan_st@purual@span_end found"
+msgstr "Résultats: @span_st@count@span_end magasin@puspan_st@purual@span_end trouvés"
+
+#Preferred store page - node form
+msgid "@span_st@count@span_end Selected store@puspan_st@purual@span_end"
+msgstr "@span_st@count@span_end magasin@puspan_st@purual@span_end retenus"
+
+#Preferred store page - node form
+msgid "@span_st@count@span_end Store@puspan_st@purual@span_end found"
+msgstr "@span_st@count@span_end magasin@puspan_st@purual@span_end trouvés"
+
+#Agenda day page
+msgid "Non Food"
+msgstr "NON ALIMENTAIRE"
+
+#Agenda day page
+msgid "Others"
+msgstr "Autres"
+
+#Backoffice
+msgid "Manage Operational Model"
+msgstr "Gestion Documentation"
+
+#Back Office
+msgid "Manage Sales plan Content"
+msgstr "Gestion Plan de ventes"
+
+#Back Office
+msgid "Manage Taxonomy"
+msgstr "Gestion taxonomie"
+
+#Back Office : Manage Agenda
+msgid "Status"
+msgstr "Statut"
+
+#Back Office : Manage Agenda
+msgid "News"
+msgstr "Actu Market"
+
+#Back Office : Manage Agenda
+msgid "Department"
+msgstr "Rayons / Secteurs"
+
+#Back Office : Manage Agenda
+msgid "Employee"
+msgstr "Employés"
+
+#Back Office : Manage Agenda
+msgid "Content Type"
+msgstr "Type de contenu"
+
+#Back Office : Manage Agenda
+msgid "search"
+msgstr "rechercher"
+
+#Back Office : Manage Sales Plan
+msgid "Regions"
+msgstr "Région commerciale"
+
+#Back Office : Manage Sales Plan
+msgid "Operation Period -  start date"
+msgstr "Date début opération"
+
+#Back Office : Manage Sales Plan
+msgid "Operation Period - end date"
+msgstr "Date fin opération"
+
+#Back Office : Manage Sales Plan
+msgid "Choose an operation"
+msgstr "Choisir une action"
+
+#Back Office : Manage Sales Plan
+msgid "- Choose an operation -"
+msgstr "- Choisir une action -"
+
+#Back Office : Manage Sales Plan
+msgid "Delete item"
+msgstr "Supprimer un contenu"
+
+#Back Office : Manage Sales Plan
+msgid "Execute"
+msgstr "Exécuter"
+
+#Back Office : Manage Sales Plan
+msgid "Operation Period"
+msgstr "Période d'opération en magasin"
+
+#Back Office : Manage Sales Plan
+msgid "Order Period"
+msgstr "Période de commande"
+
+#Back Office : Manage Sales Plan
+msgid "Image Pros"
+msgstr "Illustration opération"
+
+#Back Office : Manage Sales Plan
+msgid "Image pros"
+msgstr "Illustration opération"
+
+#Back Office : Manage Sales Plan
+msgid "Save and publish"
+msgstr "Enregistrer et publier"
+
+#Back Office : PLAN DE VENTES
+msgid "All business areas"
+msgstr "Toutes régions commerciales"
+
+#Back Office : PLAN DE VENTES
+msgid "Help Control"
+msgstr "Aides à la commande"
+
+#Back Office : PLAN DE VENTES
+msgid "Visual"
+msgstr "Visuels"
+
+#Back Office : PLAN DE VENTES
+msgid "Documents to destination stores"
+msgstr "Documents à disposition des magasins"
+
+#Application Back office node creation form
+msgid "Download a file"
+msgstr "Télécharger un fichier"
+
+#Application Back office node creation form
+msgid "Link to the documentation"
+msgstr "Lien vers la documentation"
+
+#Application Back office node creation form
+msgid "Insert link to documentation page"
+msgstr "Insérer lien vers page Documentation"
+
+#Application Back office node creation form
+msgid "Help out Download file"
+msgstr "Télécharger fichier d'aide"
+
+#Application Back office node creation form
+msgid "Help Button"
+msgstr "Bouton d’aide"
+
+#Operational Model
+msgid "Create Operational Model"
+msgstr "Créer une nouvelle procédure"
+
+#Operational Model
+msgid "Moderate"
+msgstr "Modération"
+
+#Operational Model
+msgid "Save as Draft"
+msgstr "Enregistrer comme brouillon"
+
+#Agenda homepage
+msgid "MODELE OPERATIONNEL MENU"
+msgstr "Documentation"
+
+#Agenda homepage
+msgid "Anuaire"
+msgstr "Annuaire"
+
+#Agenda homepage
+msgid "My application"
+msgstr "Applications"
+
+#Agenda homepage
+msgid "Manage user dashboard"
+msgstr "Gestion des utilisateurs"
+
+#Agenda homepage
+msgid "Manage taxonomy"
+msgstr "Gestion taxonomie"
+
+#Agenda homepage
+msgid "Manage Agenda Content"
+msgstr "Gestion agenda"
+
+#Agenda homepage
+msgid "Modele Operationnel"
+msgstr "Documentation"
+
+#Operational Model
+msgid "Operational Model"
+msgstr "Procédure"
+
+#Operational Model
+msgid "Domain"
+msgstr "Domaine"
+
+#Operational Model
+msgid "Subdomain"
+msgstr "Sous-domaine"
+
+#Operational Model
+msgid "Macro Activity"
+msgstr "Macro activité"
+
+#Operational Model
+msgid "Validity period of Publication"
+msgstr "Période de publication"
+
+#Operational Model
+msgid "From"
+msgstr "Du"
+
+#Operational Model
+msgid "to" 
+msgstr "au"
+
+#Operational Model
+msgid "To" 
+msgstr "au"
+
+#Operational Model
+msgid "Available options"
+msgstr "Disponibles"
+
+#Operational Model
+msgid "Available Options"
+msgstr "Disponibles"
+
+#Operational Model
+msgid "Selected Options"
+msgstr "Sélectionnés"
+
+#Operational Model
+msgid "Expert Validation"
+msgstr "Experts de la procédure"
+
+#Operational Model
+msgid "Location"
+msgstr "Emplacement"
+
+#Operational Model
+msgid "Duration"
+msgstr "Durée : Temps de réalisation de la procédure en magasin"
+
+#Operational Model
+msgid "Status Magasin"
+msgstr "Ciblage : statut du magasin"
+
+#Operational Model
+msgid "Attachments"
+msgstr "Fichiers joints"
+
+#Operational Model
+msgid "Material"
+msgstr "Matériel nécessaire"
+
+#Operational Model
+msgid "Content limited to @limit characters, remaining: <strong>@remaining</strong>"
+msgstr "contenu limité à @limit caractères, reste: <strong>@remaining</strong>"
+
+#Operational Model
+msgid "Objective"
+msgstr "Objectif"
+
+#Operational Model
+msgid "Content"
+msgstr "Contenu"
+
+#Operational Model
+msgid "Publish Now"
+msgstr "Publier maintenant"
+
+#Operational Model
+msgid "Publish"
+msgstr "Publier"
+
+#Operational Model
+msgid "View Draft"
+msgstr "Prévisualisation" 
+
+#Operational Model
+msgid "View draft"
+msgstr "Prévisualisation"
+
+#Operational Model
+msgid "Edit Draft"
+msgstr "Modification du brouillon"
+
+#Operational Model
+msgid "Edit draft"
+msgstr "Modification du brouillon"
+
+#Operational Model
+msgid "Moderate"
+msgstr "Modération"
+
+#Operational Model
+msgid "Create new operational model"
+msgstr "Créer une nouvelle procédure"
+
+#Operational Model
+msgid "Create new operational_model"
+msgstr "Créer une nouvelle procédure"
+
+#Operational Model
+msgid "Distribution executives"
+msgstr "Ciblage : Diffusion limitée aux cadres"
+
+#Operational Model
+msgid "Fonctions concernees"
+msgstr "Fonctions concernées"
+
+#Operational Model
+msgid "End date of the validity"
+msgstr "Date de fin de validité"
+
+#Operational Model
+msgid "Duration estimate"
+msgstr "Durée Estimée"
+
+#Operational Model
+msgid "Experts the procedure"
+msgstr "Experts de la procédure"
+
+#Operational Model
+msgid "Material necessary"
+msgstr "Matériel nécessaire"
+
+#Operational Model
+msgid "Material Necessary"
+msgstr "Matériel nécessaire"
+
+#Preferred store page - node form
+#User header block
+msgid "Resultants: @span_st@count@span_end store@puspan_st@purual@span_end found"
+msgstr "Résultats: @span_st@count@span_end magasin@puspan_st@purual@span_end trouvés"
+
+#Preferred store page - node form
+msgid "@span_st@count@span_end Selected store@puspan_st@purual@span_end"
+msgstr "@span_st@count@span_end magasin@puspan_st@purual@span_end retenus"
+
+#Preferred store page - node form
+msgid "@span_st@count@span_end Store@puspan_st@purual@span_end found"
+msgstr "@span_st@count@span_end magasin@puspan_st@purual@span_end trouvés"
+
+#Operational Model
+msgid "View published"
+msgstr "Prévisualisation"
+
+#Operational Model
+msgid "Archive"
+msgstr "Archivé"
+
+#Operational Model
+msgid "New Draft"
+msgstr "Modifier"
+
+#Operational Model
+msgid "New draft"
+msgstr "Modifier"
+
+#Agenda homepage
+msgid "MODELE OPERATIONNEL MENU"
+msgstr "MODÉLE OPÉRATIONNEL"
+
+#Agenda content validation error message
+msgid "Publication To Date should not be less than Publication From Date"
+msgstr ""
+
+#Agenda content detailed page
+msgid "Previous Info"
+msgstr "info précédente"
+
+#Agenda content detailed page
+msgid "Next Info"
+msgstr "info suivante"
+
+#
+msgid "Save and ask for publication"
+msgstr "Enregistrer et demander la publication"
+
+#
+msgid "Save and ask for Publication"
+msgstr "Enregistrer et demander la publication"
+
+#
+msgid "Delete"
+msgstr "Supprimer le brouillon"
+
+#Back Office
+msgid "Return publication"
+msgstr "Refuser la publication"
+
+#Back Office
+msgid "Publish modification (Save)"
+msgstr "Publier les modifications"
+
+#Back Office
+msgid "Preview"
+msgstr "Prévisualisation"
+
+#Back Office
+msgid "Edit"
+msgstr "Modification"
+
+#Back Office
+msgid "Create new action"
+msgstr "Créer une nouvelle action"
+
+#Back Office
+msgid "Create new alert"
+msgstr "Créer une nouvelle alerte"
+
+#Back Office
+msgid "Create new news"
+msgstr "Créer un nouvel actu Market"
+
+#Back Office
+msgid "Create new benchmark"
+msgstr "Créer un nouveau benchmark"
+
+#Back Office
+msgid "Create new sales plan"
+msgstr "Créer une opération commerciale"
+
+#Back Office
+msgid "Manage Agenda"
+msgstr "Gestion Agenda"
+
+#Back Office
+msgid "Manage sales plan"
+msgstr "Gestion plan de ventes"
+
+#Back Office
+msgid "please contact admin for the portal acess"
+msgstr "Merci de contacter l’administrateur du Portail"
+
+#Back Office
+msgid "Manage OM Content"
+msgstr "Gestion Documentation"
+
+#Back Office
+msgid "Manage User Dashboard"
+msgstr "Gestion des utilisateurs"
+
+#Back Office
+msgid "Create new sales_plan"
+msgstr "Créer une opération commerciale"
+
+#Back Office
+msgid "Create new sales plan"
+msgstr "Créer une opération commerciale"
+
+#Back Office
+msgid "Manage Agenda"
+msgstr "Gestion Agenda"
+
+#Back Office
+msgid "Manage OM Content"
+msgstr "Gestion Documentation"
+
+#Back Office
+msgid "Manage Applications"
+msgstr "Gestion Applications"
+
+#Back Office
+msgid "Manage Sales plan"
+msgstr "Gestion Plan de ventes"
+
+#Message content contribution
+#node/add/message
+msgid "Create new message"
+msgstr "Créer une nouvelle message"
+
+#BO Contribution
+msgid "Apply"
+msgstr "Appliquer"
+
+#BO Manage Agenda
+msgid "Create Application"
+msgstr "créer une application"
+
+#BO Manage Agenda
+msgid "Operation period date"
+msgstr "Période d'opération en magasin"
+
+#BO Manage Agenda
+msgid "Order period date"
+msgstr "Période de commande"
+
+#FO: Weather Report
+msgid "Weather service is down try reloading page in a few minutes"
+msgstr "Le service météo n'est pas accessible, essayer de recharger la page dans quelques minutes"
+
+#BO Im settings
+msgid "IM Settings"
+msgstr "Paramètres"
+
+#BO: Manage Agenda
+msgid "Agenda Settings"
+msgstr "Paramètres Agenda"
+
+#BO Im settings - om settings
+msgid "Om settings"
+msgstr "Paramètre modèle opérationnel"
+
+#BO Im settings - om settings
+msgid "Om Publication To date Settings"
+msgstr "Paramétrage de la date de fin de publication sur le modèle opérationnel"
+
+#BO Im settings - om settings
+msgid "Enter the N value"
+msgstr "Nombre de mois par défaut entre date début et fin de publication"
+
+#BO Im settings - om settings
+msgid "Enter the value of N in months"
+msgstr "Saisissez un nombre de mois"
+
+#BO Im settings - om settings
+msgid "Om Mail Trigger Setting"
+msgstr "Paramétrage des mails d'alerte sur le modèle opérationnel"
+
+#BO Im settings - om settings
+msgid "Enter the N value"
+msgstr "Nombre de jours avant la date de fin de publication pour l'envoi des mails"
+
+#BO Im settings - om settings
+msgid "Enter the value of N in days to trigger mail"
+msgstr "Saisissez un nombre de jours"
+
+#BO Im settings - om settings
+msgid "Agenda settings"
+msgstr "Paramètres Agenda"
+
+#BO Im settings - agenda settings
+msgid "Agenda Future Action Link Settings"
+msgstr "Paramétrage du lien vers actions futures"
+
+#BO Im settings - agenda settings
+msgid "N  days for future action link home page"
+msgstr "Nombre de jours de décalage pour le lien vers actions futures"
+
+#BO Im settings - agenda settings
+msgid "Enter the N value in days"
+msgstr "Saisissez un nombre de jour"
+
+#BO Im settings - agenda settings
+msgid "Agenda Publication To date Settings"
+msgstr "Paramétrage de la date de fin de publication sur l'agenda"
+
+#BO Im settings - agenda settings
+msgid "Enter the N value"
+msgstr "Nombre de mois par défaut entre date début et fin de publication"
+
+#BO Im settings - agenda settings
+msgid "Enter the value of N in months"
+msgstr "Saisissez un nombre de mois"
+
+#BO manage Om
+msgid "Domain Term"
+msgstr "Domaine"
+
+#BO manage Om
+msgid "Subdomain Term"
+msgstr "Sous domaine"
+
+#BO manage Om
+msgid "Macro Activity Term"
+msgstr "Macro activité"
+
+#store preference form
+msgid "Not In"
+msgstr "Different de"
+
+#store preference form
+msgid "Like"
+msgstr "Contenant"
+
+#store preference form
+msgid "In"
+msgstr "Egal à"
+
+#store preference form
+msgid "Starting From"
+msgstr "A partir de"
+
+#store preference form
+msgid "Ending From"
+msgstr "Jusqu'au"
+
+#store preference form
+msgid "Include"
+msgstr "Inclure"
+
+#store preference form
+msgid "Exclude"
+msgstr "Exclure"
+
+#Saint of the day page
+msgid "IM Saint Of The Day Import"
+msgstr "Import des saints du jour dans le portail"
+
+#Saint of the day page
+msgid "Import Saint Of The Day Data"
+msgstr "Données pour saint du jour"
+
+#Saint of the day page
+msgid "Saint of The day"
+msgstr "Saint du jour"
+
+#Saint of the day page
+msgid "Pick a csv file to upload"
+msgstr "Choisissez le fichier csv à télécharger"
+
+#Saint of the day page
+msgid "Upload"
+msgstr "Téléchargement"
+
+#Saint of the day page
+msgid "Date"
+msgstr "Date"
+
+#Saint of the day page
+msgid "Saint of the day"
+msgstr "Saint du jour"
+
+#FO Detailed Agenda
+msgid "Store director"
+msgstr "Visible uniquement par les Directeurs Magasin"
+
+#FO Detailed Agenda
+msgid "Store manager"
+msgstr "Visible par les Directeurs Magasin et les Managers Magasin"
+
+msgid "Store Manager"
+msgstr "Visible par les Directeurs Magasin et les Managers Magasin"
+
+#FO Detailed Agenda
+msgid "Store employee"
+msgstr "Visible par toutes les personnes en magasin"
+
+msgid "Store Employees"
+msgstr "Visible par toutes les personnes en magasin"
+
+##node/add/action
+msgid "Director of the store or its delegate"
+msgstr "Visible uniquement par les Directeurs Magasin"
+
+#Back Office
+msgid "Create new holiday"
+msgstr "Créer une holiday"
+
+#Manage Agenda
+msgid "Publication Possible"
+msgstr "publication possible"
+
+#Manage Agenda
+msgid "Drafts"
+msgstr "brouillons"
+
+#Manage Agenda
+msgid "edit"
+msgstr "modifier"
+
+#Manage Agenda
+msgid "No data is available"
+msgstr "Aucune donnée n'est disponible"
+
+#Manage Agenda
+msgid "Start Date"
+msgstr "Date début"
+
+#Manage Agenda
+msgid "- Any -"
+msgstr "Tous"
+
+#FO All
+msgid "All"
+msgstr "Tous"

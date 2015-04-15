@@ -1,0 +1,33 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Agenda content types for making store button mandatory.
+msgid "Store Selection (Define the criteria of CONCERNED stores) button is mandatory."
+msgstr "La sélection des magasins concernés est obligatoire."
+
+#PLAN DE VENTES
+msgid "All business areas"
+msgstr "Toutes régions commerciales"
+
+#Webform
+msgid "Store"
+msgstr "Magasin"
+
+#Annuaire page Error message when LDAP Response is failure
+msgid "One of the Login id is not valid."
+msgstr "Un code utilisateur est inconnu, veuillez contacter l'administrateur."
+
+#Applications page Error message when user tries to add more than 36 applications
+msgid  "Sorry you cannot add more than :limit applications."
+msgstr "Vous ne pouvez pas avoir plus de :limit applications dans vos favoris."

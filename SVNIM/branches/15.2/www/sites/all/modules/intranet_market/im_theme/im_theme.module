@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ */
+define('THEME_CRFR_IM', 'im');
+
+/**
+ * Implements hook_image_default_styles().
+ * Define IM images styles
+ */
+function im_theme_image_default_styles() {
+	$styles = array();
+	
+	$styles['im_header_menu_image'] = array(
+    'effects' => array(
+      array(
+        'name' => 'image_scale',
+        'data' => array('width' => 50, 'height' => 50, 'upscale' => FALSE),
+        'weight' => 0,
+      ),
+    )
+  );
+  return $styles;
+}
+  

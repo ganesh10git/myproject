@@ -1,0 +1,57 @@
+.jcarousel-skin-aqua .jcarousel-container-horizontal {
+	width: 262px;
+	margin: 0 auto;
+	padding: 10px 0px 5px 0px;
+}
+.jcarousel-skin-aqua .jcarousel-clip {  overflow: hidden }
+.jcarousel-skin-aqua .jcarousel-item {
+  min-width: 262px !important;
+  width: 262px;
+  color: #9a7d78;  
+  word-wrap: inherit;
+}
+.jcarousel-skin-aqua .jcarousel-item img{
+	float: left;
+	margin-right: 10px;
+}
+.jcarousel-skin-aqua .jcarousel-item-horizontal {
+  margin-left: 0;
+  margin-right: 0;
+}
+.jcarousel-skin-aqua .jcarousel-direction-rtl .jcarousel-item-horizontal {
+  margin-left: 10px;
+  margin-right: 0;
+}
+.jcarousel-skin-aqua .jcarousel-item-vertical {  margin-bottom: 10px }
+.jcarousel-skin-aqua .jcarousel-item-placeholder {
+  background: #fff;
+  color: #000;
+}
+
+/**
+ *  External Controls
+ */
+.jcarousel-control {
+	position: absolute;
+	top: 10px;
+  top: 0px\9;
+	right: 7px;
+}
+.jcarousel-control a {
+	background: url(images/message-sprite.png) scroll 8px 0px transparent;
+	display: inline-block;
+	font-size: 0px;
+	height: 8px;
+	width: 8px;
+	margin-right: 4px;
+}
+.jcarousel-control a:hover {  background-position: 8px -15px; }
+.jcarousel-control a.active {  background-position: 8px -15px; }
+.jcarousel-control-msg-popup a {
+background: url(images/message-sprite.png) scroll 8px 0px transparent;
+display: inline-block;
+font-size: 0px;
+height: 8px;
+width: 8px;
+margin-right: 4px;
+}

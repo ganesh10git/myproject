@@ -1,0 +1,1353 @@
+<?php
+/**
+ * @file
+ * Code for the im_search module. This module is used to customize the apachesolr setup, request query, response manipulation.
+ */
+
+/**
+* Implements hook_menu().
+*/
+function im_search_menu() {
+  $items = array();
+  $items['admin/im/settings/searchsetting'] = array(
+    'title' => t('IM Search settings'),
+    'description' => 'Configure IM search settings',
+    'page callback' => 'drupal_get_form',
+    'file' => 'includes/im_search.admin.inc',
+    'page arguments' => array('_im_search_settings_admin_form'),
+    'access callback' => '_im_search_setting_permission',
+    'type' => MENU_NORMAL_ITEM,
+  );  
+  $items['encode/search/site/%'] = array(
+    'title' => t('IM Search'),
+    'description' => '',
+    'page callback' => '_im_search_encode_search_keyword',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * To access admin/im/settings/searchsetting...
+ */
+function _im_search_setting_permission() {
+  global $user;    
+  if(in_array('technical_director',$user->roles) || $user->uid == 1) {
+    return TRUE;
+  }
+}
+
+/**
+ * hook_form_FORM_ID_alter for search form
+ */
+function im_search_form_search_block_form_alter(&$form, &$form_state, $form_id) {
+  //Adding js file for preventing search bar to enter 2 times...    
+  drupal_add_js(drupal_get_path('module', 'im_search') . '/js/im_search_autocomplete_override.js', array('weight' => 50));
+  $auto_status = variable_get('im_autocomplete_activation_status');
+  //checking status of autocomplete is enable or not...
+  if ($auto_status) {
+    $element = &$form['search_block_form'];
+    apachesolr_autocomplete_do_alter($element);
+  }
+  if (arg(0) == "search" && arg(1) == "site") {
+    //$form['search_block_form']['#default_value'] = base64_decode(trim(arg(2)));////Changed for FIX : UATIM-696
+    $form['search_block_form']['#default_value'] = base64_decode(str_replace('search/site/', '', $_GET['q']));
+  }
+  $form['#submit'][] = '_im_search_form_submit';
+}
+
+function _im_search_form_submit($form, &$form_state) { 
+  $search_keyword = base64_encode($form_state['values']['search_block_form']);
+  drupal_goto("search/site/" . $search_keyword);
+  exit;
+}
+
+/**
+ * Implements hook_apachesolr_query_alter.
+ */
+function im_search_apachesolr_query_alter(&$query, &$params, $caller) {
+  global $user;
+  //$search = base64_decode($query->getParam('q')); //Changed for FIX : UATIM-696
+  $search = base64_decode(str_replace('search/site/', '', $_GET['q']));
+  $query->addParam('hl.simple.pre', '<span class="result-snippet-highlight">');
+  $query->addParam('hl.simple.post', '</span>');
+  $query->addParam('fl', "ds_field_publication_from_date");
+  $query->addParam('fl', "ds_field_publication_to_date");
+  $query->addParam('fl', "sm_field_agenda_store");
+  $query->addParam('fl', "sm_field_agenda_concernees");
+  $query->addParam('fl', "sm_field_om_objective");
+  $query->addParam('fl', "sm_field_om_actuers");
+  $query->addParam('fl', "sm_field_om_material");
+  $query->addParam('fl', "sm_field_om_experts");
+  $query->addParam('fl', "dm_field_agenda_date");
+  $query->addParam('fl', "sm_type");
+  $query->addParam('fl', "sm_field_agenda_attachments_filename");
+  $query->addParam('fl', "sm_field_agenda_attachments_uri");
+  $query->addParam('fl', "sm_field_om_status");
+  $query->addParam('fl', "sm_field_om_status_value");
+  $query->addParam('fl', "sm_field_om_access"); 
+  $query->addParam('fl', "sm_field_om_status_count");
+  
+  $path = $_GET['q'];
+  $filters = array('action', 'alert', 'news', 'benchmark', 'operational_model', 'sales_plan');
+  _im_search_type_filters($query); 
+  if (empty($_GET['f4']['date']) && empty($_GET['f5']['date']) && !empty($_GET['f3'])) {
+  $flag_date = date("Y-m-d");
+  if ($_GET['f3'] == "week") {
+    $flag_date = date('Y-m-d', strtotime("-7 day", strtotime(date("Y-m-d"))));
+  }
+  else if ($_GET['f3'] == "month") {
+    $flag_date = date('Y-m-d', strtotime("-1 month", strtotime(date("Y-m-d"))));
+  }
+  else if ($_GET['f3'] == "quarter") {
+    $flag_date = date('Y-m-d', strtotime("-3 month", strtotime(date("Y-m-d"))));
+  }
+  else if ($_GET['f3'] == "semester") {
+    $flag_date = date('Y-m-d', strtotime("-6 month", strtotime(date("Y-m-d"))));
+  }
+  else if ($_GET['f3'] == "year") {
+    $flag_date = date('Y-m-d', strtotime("-1 year", strtotime(date("Y-m-d"))));
+  }
+  $datevalue = date("Y-m-d\TH:i:s\Z", strtotime($flag_date));
+  $query->addFilter('dm_field_publication_from_date', '['. $datevalue .' TO *]');
+  }
+  $core_search_page = apachesolr_search_page_load('core_search');
+  _im_search_action_apachesolr_build_action_query($query);
+    _im_search_action_apachesolr_build_agenda_query($query);
+    _im_search_action_apachesolr_build_om_query($query);
+    _im_search_action_apachesolr_build_sales_plan_query($query);
+  if ($search == '*' || empty($search) || $search == '*:*') {
+      $query->replaceParam('q', '');
+    }
+  /*$action_alert_search_page = apachesolr_search_page_load('action_search');
+  $agenda_search_page = apachesolr_search_page_load('action_search');
+  $om_search_page = apachesolr_search_page_load('om_search');
+  $sales_plan_search_page = apachesolr_search_page_load('sales_plan_search');
+  
+  if (isset($action_alert_search_page) && strpos($path, $action_alert_search_page['search_path']) == 0) {
+    // Action and Alert content search: Add condition for function concernee
+    _im_search_action_apachesolr_build_action_query($query);
+  }
+  if (isset($agenda_search_page) && strpos($path, $agenda_search_page['search_path']) == 0) {
+    // Action, Alert, News and Benchmark content search: Add the condition for Store
+    _im_search_action_apachesolr_build_agenda_query($query);
+  }
+  if (isset($om_search_page) && strpos($path, $om_search_page['search_path']) == 0) {
+    // Operational model content search
+    _im_search_action_apachesolr_build_om_query($query);
+  }
+  if (isset($sales_plan_search_page) && strpos($path, $sales_plan_search_page['search_path']) == 0) {
+    // Sales plan content search
+    _im_search_action_apachesolr_build_sales_plan_query($query);
+  }
+  else {
+    // Global search form
+    // Replace search text to avoid error on general search form if searched text is *
+    if ($search == '*' || empty($search) || $search == '*:*') {
+      $query->replaceParam('q', '');
+    }
+  }*/
+    //UATIM-14.2.10
+  $user = user_load($user->uid);
+  if (isset($user->field_user_stores['und'][0]['value'])) {
+    $userstores = explode(",", $user->field_user_stores['und'][0]['value']);     
+    if (isset($_SESSION['user_selected_store']) && $_SESSION['user_selected_store'] == 'all') {
+      $query->addFilter('sm_field_agenda_store','( im_all_stores OR ' . implode(' OR ', $userstores) . ') ');	
+    }
+    elseif (is_numeric($_SESSION['user_selected_store'])) {
+    	$user_selected_store = $_SESSION['user_selected_store'];
+    	$query->addFilter('sm_field_agenda_store', '( im_all_stores OR ' . $user_selected_store . ') ');    	
+    }    
+  } 
+  _im_search_agenda_date_validatin_query($query); 
+  // ordering result by last update date
+  if (arg(0) != "apachesolr_autocomplete") {
+    if (!empty($_GET['f8'])) {
+      $query->setAvailableSort('ds_field_publication_from_date', strtolower(trim($_GET['f8'])));
+      $query->setSolrsort('ds_field_publication_from_date', strtolower(trim($_GET['f8'])));
+    }
+  }
+  else {
+    $query->setAvailableSort('score', 'desc');
+    $query->setSolrsort('score', 'desc');
+  }
+  if (!empty($_GET['f9']) && is_numeric($_GET['f9'])) {
+    $query->replaceParam('rows', $_GET['f9']);
+  }
+  else if (!empty($_GET['f9']) && !is_numeric($_GET['f9'])) {
+    $query->replaceParam('rows', str_replace("all", "", $_GET['f9']));
+  } 
+  else {
+    $query->replaceParam('rows', 30);
+  }
+  if (!empty($search)) {
+    $query->replaceParam('q', $search);
+  }  
+}
+/**
+ * Implements hook_apachesolr_query_prepare().
+ *
+ * Add the fields required for the display of information.
+ */
+function im_search_apachesolr_query_prepare(&$query) {
+  $query->addParam('fl', "status");
+  $query->addParam('bq', "bundle:action");
+  $query->addParam('bq', "bundle:alert");
+  $query->addParam('bq', "bundle:news");
+  $query->addParam('bq', "bundle:benchmark");
+  $query->addParam('bq', "bundle:operational_model");
+  $query->addParam('bq', "bundle:sales_plan"); 
+  $query->addParam('bq', "bundle:file"); 
+}
+
+/**
+ * This function is used to the Start and End date filter on the Apache solr result result
+ * @param Object $query
+ */
+function _im_search_agenda_date_validatin_query(&$query) {
+  $subquery = apachesolr_drupal_query("solrquerydate");
+  if (!empty($_GET['f4']['date'])) {
+    global $base_url;
+    $date = trim($_GET['f4']['date']);
+    $date = explode("/", $date);
+    $datevalue_flag = date('d-m-Y H:i:s', strtotime($date[2] . "-" . $date[1] . "-" . $date[0]));
+    $datevalue = date("Y-m-d\TH:i:s\Z", strtotime($date[2] . "-" . $date[1] . "-" . $date[0]));
+    $enddatevalue = date("Y-m-d")."T23:59:59Z";    
+    $today_date = date("d-m-Y H:i:s");
+    
+    //Validate Start Date should not be greater than Today's date
+    if (strtotime($datevalue_flag) > strtotime($today_date)) {
+        drupal_goto($base_url . "/" . arg(0) . "/" . arg(1) . "/" . arg(2) . "?startdateerror");
+    }
+    if (!empty($_GET['f5']['date'])) {
+      $date = trim($_GET['f5']['date']);
+      $date = explode("/", $date);
+      $enddatevalue_flag = date("d-m-Y H:i:s", strtotime($date[2] . "-" . $date[1] . "-" . $date[0]));
+      $enddatevalue = date("Y-m-d\TH:i:s\Z", strtotime($date[2] . "-" . $date[1] . "-" . $date[0]));
+      
+      //Validate End Date should not be greater than Today's date
+    if(strtotime($enddatevalue_flag) > strtotime($today_date)) {
+      drupal_goto($base_url . "/" . arg(0) . "/" . arg(1) . "/" . arg(2) . "?enddateerror");
+    }else if (strtotime($datevalue) > strtotime($enddatevalue_flag)) {
+        drupal_goto($base_url . "/" . arg(0) . "/" . arg(1) . "/" . arg(2) . "?dateerror");
+      }
+    } 
+    //Date Filter for Agenda Contents Publish From date
+    $subquery->addFilter('dm_field_publication_from_date', '['. $datevalue .' TO '.$enddatevalue.']');
+    //Date Filter for Operational Model Contents Publish From date
+    $subquery->addFilter('dm_field_om_publication_period', '['. $datevalue .' TO '.$enddatevalue.']');
+    //Date Filter for Sales Plan Contents Publish From date
+    $subquery->addFilter('dm_field_sp_operation_period', '['. $datevalue .' TO '.$enddatevalue.']');
+    //Date Filter for Agenda Contents Publish End date
+    $subquery->addFilter('dm_field_publication_to_date', '['. $datevalue .' TO '.$enddatevalue.']'); //'['. $sdatevalue .' TO ' . $datevalue . ']'
+    //Date Filter for Operational Model Contents Publish End date
+    $subquery->addFilter('dm_field_om_publication_period_end', '['. $datevalue .' TO '.$enddatevalue.']');
+    //Date Filter for Sales Plan Contents Publish End date
+    $subquery->addFilter('dm_field_sp_operation_period_end', '['. $datevalue .' TO '.$enddatevalue.']');
+  }else{
+    //Date Filter for Agenda and OM Contents Publish From date less than or equal to current date
+    $subquery->addFilter('dm_field_publication_from_date', '[* TO NOW]');
+    
+    //No Date Filter for Sales Plan Contents 
+    $subquery->addFilter('dm_field_sp_operation_period', '[* TO *]');
+  }
+  if (!empty($_GET['f9']) && is_numeric($_GET['f9'])) {
+    $subquery->replaceParam('rows', $_GET['f9']);
+  }
+  else if (!empty($_GET['f9']) && !is_numeric($_GET['f9'])) {
+    $subquery->replaceParam('rows', str_replace("all", "", $_GET['f9']));
+  } 
+  else {
+    $subquery->replaceParam('rows', 30);
+  }
+  $query->addFilterSubQuery($subquery, "OR");
+}
+/**
+ * This function is used to the Content type wise filtering the Apache Solr search result and Filter the Contents and Files wise filtering.
+ * @param Object $query
+ */
+function _im_search_type_filters(&$query) {
+  $filters = array('action', 'alert', 'news', 'benchmark', 'operational_model', 'sales_plan');
+  if (empty($_GET['f2']) && empty($_GET['f1'])) {
+    $filters = array_merge($filters, array('file'));
+    $query->addFilter('bundle', '(' . implode(' OR ', $filters) . ')');
+  }
+  else if (empty($_GET['f2']) && !empty($_GET['f1'])) {
+    $filters = array($_GET['f1'], 'file');
+    $query->addFilter('bundle', '(' . implode(' OR ', $filters) . ')');
+    $query->addFilter('sm_type', $_GET['f1']);
+  }
+  else if (!empty($_GET['f2']) && empty($_GET['f1'])) {
+  if ($_GET['f2'] == "files") {
+    $filters = array('file'); //array_merge($filters, array('file'));
+    $query->addFilter('bundle', '(' . implode(' OR ', $filters) . ')');
+  }
+  else if ($_GET['f2'] == "contents") {
+    $query->addFilter('bundle', '(' . implode(' OR ', $filters) . ')');
+  }
+  }
+  else if (!empty($_GET['f2']) && !empty($_GET['f1'])) {
+  if ($_GET['f2'] == "files") {
+    $filters = array('file'); //array_merge(array($_GET['f1']), array('file'));
+    $query->addFilter('bundle', '(' . implode(' OR ', $filters) . ')');
+    $query->addFilter('sm_type', $_GET['f1']);
+  }
+  else if ($_GET['f2'] == "contents") {
+    $query->addFilter('bundle', '(' . $_GET['f1'] . ')');
+  }
+  }
+}
+
+/**
+ * Build the query to filter the function concernees to the Action and Alert content types
+ * @param Object $query
+ */
+function _im_search_action_apachesolr_build_action_query(&$query) {
+  global $user;
+  $user = user_load($user->uid);
+  $userroles = $user->roles;
+  $ldap_user_role = array();
+  $subquery = apachesolr_drupal_query("solrqueryfirst"); 
+  if (isset($_SESSION['ldap_user_role']) && !empty($_SESSION['ldap_user_role'])) {
+    if ($_SESSION['ldap_user_role'] == "store_director" || $_SESSION['ldap_user_role'] == "store_director_trainee") {
+      $ldap_user_role = array('store_director', 'store_manager', 'store_employee');
+    }
+    else if ($_SESSION['ldap_user_role'] == "store_manager" || $_SESSION['ldap_user_role'] == "store_manager_trainee") {  
+      $ldap_user_role = array('store_manager', 'store_employee');
+    }
+    else if ($_SESSION['ldap_user_role'] == "store_employee") {
+      $ldap_user_role = array('store_employee');
+    }  
+    if (in_array("store_director", $ldap_user_role)) {
+     /*$subquery->addFilter('sm_field_agenda_concernees', 'store_manager', TRUE);
+     $subquery->addFilter('sm_field_agenda_concernees', 'store_employee', TRUE);*/
+    }
+    else if (in_array("store_manager", $ldap_user_role)) {
+      $subquery->addFilter('sm_field_agenda_concernees', 'store_director', TRUE); 
+    }
+    else if (in_array("store_employee", $ldap_user_role)) {
+      $subquery->addFilter('sm_field_agenda_concernees', 'store_manager', TRUE);
+      $subquery->addFilter('sm_field_agenda_concernees', 'store_director', TRUE);
+    }
+  }
+  _im_search_type_filters($subquery);
+  if (!empty($_GET['f9']) && is_numeric($_GET['f9'])) {
+    $subquery->replaceParam('rows', $_GET['f9']);
+  }
+  else if (!empty($_GET['f9']) && !is_numeric($_GET['f9'])) {
+    $subquery->replaceParam('rows', str_replace("all", "", $_GET['f9']));
+  } 
+  else {
+    $subquery->replaceParam('rows', 30);
+  } 
+  $query->addFilterSubQuery($subquery, "OR");  
+}
+
+/**
+ * This function is used to Filter the apachesolr search result with user's stores
+ * @param Object $query
+ */
+function _im_search_action_apachesolr_build_agenda_query(&$query) {
+  global $user;
+  $user = user_load($user->uid);
+  $subquery = apachesolr_drupal_query("solrquerysecond"); 
+  //_im_search_type_filters($subquery);
+  $filters = array('operational_model', 'sales_plan', 'file');
+  $subquery->addFilter('bundle', '(' . implode(' OR ', $filters) . ')');
+  if (isset($user->field_user_stores['und'][0]['value'])) {
+    $userstores = explode(",", $user->field_user_stores['und'][0]['value']);
+    $allstores = _get_all_available_stores();
+    $remaining_stores = array_diff($allstores, $userstores);
+    if (isset($_SESSION['user_selected_store']) && $_SESSION['user_selected_store'] == 'all') {
+      $subquery->addFilter('sm_field_agenda_store', '(' . implode(' OR ', $userstores) . ') ');	
+    }
+    elseif (is_numeric($_SESSION['user_selected_store'])) {
+    	$user_selected_store = $_SESSION['user_selected_store'];
+    	$subquery->addFilter('sm_field_agenda_store', '(' . $user_selected_store . ') ');    	
+    }    
+  }
+  
+  if (!empty($_GET['f9']) && is_numeric($_GET['f9'])) {
+    $subquery->replaceParam('rows', $_GET['f9']);
+  }
+  else if (!empty($_GET['f9']) && !is_numeric($_GET['f9'])) {
+    $subquery->replaceParam('rows', str_replace("all", "", $_GET['f9']));
+  } 
+  else {
+    $subquery->replaceParam('rows', 30);
+  } 
+  $query->addFilterSubQuery($subquery, "OR");
+}
+
+
+/**
+ * This function is used to filter with Start and End date filter on the OM content type
+ * @param Object $query
+ */
+function _im_search_action_apachesolr_build_om_query(&$query) { 
+  include_once drupal_get_path('module', 'im_user') . '/im_user.profile.inc';
+  $storeType = _get_user_store_status();
+  $showRoles = array('store_director', 'store_manager', 'salarie_siege');
+  $subquery = apachesolr_drupal_query("solrquerythird");  
+  $hasRole = FALSE;  
+  if (isset($_SESSION['ldap_user_role']) && !empty($_SESSION['ldap_user_role'])) {
+    if (in_array($_SESSION['ldap_user_role'], $showRoles) || ($_SESSION['ldap_user_role_assigned'] == 'store_director' || $_SESSION['ldap_user_role_assigned'] == 'store_director_trainee')) {
+      $hasRole = TRUE;
+    }
+  }
+  if (!$hasRole) {
+    $subquery->addFilter('sm_field_om_access', '0', TRUE);
+  } 
+  if ($storeType == 'INTEGRE') {
+    $subquery->addFilter('sm_field_om_status_value', 'FRANCHISE', TRUE);
+  }
+  else if($storeType == 'FRANCHISE') {
+    $subquery->addFilter('sm_field_om_status_value', 'INTEGRE', TRUE);
+  }
+  _im_search_type_filters($subquery);
+  if (!empty($_GET['f9']) && is_numeric($_GET['f9'])) {
+    $subquery->replaceParam('rows', $_GET['f9']);
+  }
+  else if (!empty($_GET['f9']) && !is_numeric($_GET['f9'])) {
+    $subquery->replaceParam('rows', str_replace("all", "", $_GET['f9']));
+  } 
+  else {
+    $subquery->replaceParam('rows', 30);
+  }
+  $query->addFilterSubQuery($subquery, "OR");
+}
+
+/**
+ * This function is used to filter with Start and End date filter on the Sales plan content type
+ * @param Object $query
+ */
+function _im_search_action_apachesolr_build_sales_plan_query(&$query) {
+  //_im_search_agenda_date_validatin_query($query);
+}
+/**
+ * Implements hook_apachesolr_index_document_build()
+ */
+function im_search_apachesolr_index_document_build($document, $entity, $entity_type, $namespace) {
+  $type = '';
+  $teaser = '';
+  // Get the current node type
+  if (isset($entity->type)) {
+    $type = $entity->type;
+  }
+  // Get the node stores and added as a array on the indexing document
+  if (isset($entity->field_agenda_store)) {
+    $stores = array();
+    $stores = explode(",", $entity->field_agenda_store['und'][0]['value']);
+    foreach ($stores as $key=>$value) {
+      $document->setMultiValue('sm_field_agenda_store', $value);
+    }
+  }  
+  /**
+   * Start - This block of code is used to set Node content type and 
+   * If its file type then assign that particular file's content type to the indexing document. 
+   */
+  $parent_type = '';
+  if (isset($type) && $entity_type != "file") {
+    $document->addField('sm_type', $type);
+  }
+  else if ($entity_type == "file") {
+    $parent_type = json_decode($document->zm_parent_entity);
+    $parent_type = $parent_type->type;
+    $document->addField('sm_type', $parent_type);
+  }
+  /**
+   * End
+   */
+  if (isset($entity->title)) {
+    $document->addField('sm_title', $entity->title);
+  }
+  if (isset($entity->body['und'][0]['safe_value'])) {
+    $document->addField('sm_description', strip_tags($entity->body['und'][0]['value']));
+  }
+  /**
+   * Start - This block of code is used to remove the filename indexing on the content wise filtering.
+   */
+  if ($entity_type == "node") {
+    if (isset($entity->body['und'][0]['safe_value'])) {
+      
+      $content = $document->content . " " . strip_tags($entity->body['und'][0]['value']);
+      $teaser .= $content;
+       unset($document->content);
+      //unset($document->teaser);
+      $document->addField('content', $content);
+    }
+    if (!empty($document->tags_a)) {
+      unset($document->tags_a);
+    }
+  }
+  /**
+   * End
+   */ 
+  if (empty($teaser)) {
+    $teaser = '';
+  }
+  if ($type == "action" || $type == "alert" || $type == "benchmark" || $type == "news") {
+    /**
+     * Action, Alert, Benchmark and News content type wise fields are adding to the indexing document.
+     */
+    if (isset($entity->field_agenda_relais['und'])) {
+      foreach ($entity->field_agenda_relais['und'] as $value) {
+        $document->setMultiValue('sm_field_agenda_relais', $value['taxonomy_term']->name);
+        $teaser .= $value['taxonomy_term']->name . ". <br />";
+      }
+    }
+     
+    if (isset($entity->field_agenda_concernees['und'][0]['value'])) {
+      $document->addField('sm_field_agenda_concernees', $entity->field_agenda_concernees['und'][0]['value']);
+      $teaser .= $entity->field_agenda_concernees['und'][0]['value'] . ". <br />";
+    }
+    if (isset($entity->field_agenda_date['und'][0]['value'])) {
+      $tz = new DateTimeZone($entity->field_agenda_date['und'][0]['timezone']);
+      $date2 = date_create($entity->field_agenda_date['und'][0]['value'], $tz);
+      $document->addField('dm_field_agenda_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_agenda_date['und'][0]['value'])));
+    }
+    if (isset($entity->field_publication_from_date['und'][0]['value'])) {
+      $tz = new DateTimeZone($entity->field_publication_from_date['und'][0]['timezone']);
+      $date2 = date_create($entity->field_publication_from_date['und'][0]['value'], $tz);
+      $document->addField('ds_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_publication_from_date['und'][0]['value'])));
+      $document->addField('dm_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_publication_from_date['und'][0]['value'])));
+    }
+    if (isset($entity->field_publication_to_date['und'][0]['value'])) {
+      $tz = new DateTimeZone($entity->field_publication_to_date['und'][0]['timezone']);
+      $date2 = date_create($entity->field_publication_to_date['und'][0]['value'], $tz);
+      $document->addField('ds_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_publication_to_date['und'][0]['value'])));
+      $document->addField('dm_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_publication_to_date['und'][0]['value'])));
+    }
+  }
+  else if ($type == "operational_model") {
+    /**
+     * Adding the Operaional model content type fields to the indexing document
+     */
+    if (isset($entity->field_om_publication_period['und'][0]['value'])) {
+      $tz = new DateTimeZone($entity->field_om_publication_period['und'][0]['timezone']);
+      $date2 = date_create($entity->field_om_publication_period['und'][0]['value'], $tz);
+      $document->addField('ds_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_om_publication_period['und'][0]['value'])));
+      $document->addField('dm_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_om_publication_period['und'][0]['value'])));
+    }
+    if (isset($entity->field_om_publication_period['und'][0]['value2'])) {
+      $tz = new DateTimeZone($entity->field_om_publication_period['und'][0]['timezone']);
+      $date2 = date_create($entity->field_om_publication_period['und'][0]['value2'], $tz);
+      $document->addField('ds_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_om_publication_period['und'][0]['value2'])));
+      $document->addField('dm_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_om_publication_period['und'][0]['value2'])));
+    }
+    if (isset($entity->field_om_actuers['und'])) {
+      foreach ($entity->field_om_actuers['und'] as $value) {
+        $document->setMultiValue('sm_field_om_actuers', $value['taxonomy_term']->name);
+        $teaser .= $value['taxonomy_term']->name . ". <br />";
+      }
+    }
+    if (isset($entity->field_om_material['und'][0]['safe_value'])) {
+      $document->addField('sm_field_om_material', $entity->field_om_material['und'][0]['safe_value']);
+      $teaser .= $entity->field_om_material['und'][0]['safe_value'] . ". <br />";
+    }
+    if (isset($entity->field_om_experts['und'])) {
+      foreach ($entity->field_om_experts['und'] as $value) {
+        $document->setMultiValue('sm_field_om_experts', $value['value']);
+        $teaser .= $value['value'] . ". <br />";
+      }
+    }      
+    // Added field for indexing field_om_status and field_om_access...
+    if (isset($entity->field_om_status['und'])) {
+      $document->addField('sm_field_om_status_count', count($entity->field_om_status['und']));
+      if (count($entity->field_om_status['und']) == 1) {
+        foreach ($entity->field_om_status['und'] as $value) {
+          $status_value[] = $value['value'];
+          $document->setMultiValue('sm_field_om_status_value', $value['value']);
+          $teaser .= $value['value'] . ". <br />";
+        }
+      }
+    }
+    if (isset($entity->field_om_access['und'][0]['value'])) {
+      $document->addField('sm_field_om_access', $entity->field_om_access['und'][0]['value']);
+      $teaser .= $entity->field_om_access['und'][0]['value'] . ". <br />";
+    } 
+    if (isset($entity->field_om_objective['und'][0]['safe_value'])) {
+      $document->addField('sm_field_om_objective', strip_tags($entity->field_om_objective['und'][0]['safe_value']));
+      $teaser .= strip_tags($entity->field_om_objective['und'][0]['safe_value']) . ". <br />";
+    }
+    $document->addField('sm_field_agenda_store', 'im_all_stores');
+    
+  }
+  else if ($type == "sales_plan") {
+    /**
+     * Adding the Sales plan content type fields to the indexing document.
+     */
+    if (isset($entity->field_sp_operation_period['und'][0]['value'])) {
+      $tz = new DateTimeZone($entity->field_sp_operation_period['und'][0]['timezone']);
+      $date2 = date_create($entity->field_sp_operation_period['und'][0]['value'], $tz);
+      $document->addField('ds_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_sp_operation_period['und'][0]['value'])));
+      $document->addField('dm_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_sp_operation_period['und'][0]['value'])));
+    }
+    if (isset($entity->field_sp_operation_period['und'][0]['value2'])) {
+      $tz = new DateTimeZone($entity->field_sp_operation_period['und'][0]['timezone']);
+      $date2 = date_create($entity->field_sp_operation_period['und'][0]['value2'], $tz);
+      $document->addField('ds_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_sp_operation_period['und'][0]['value2'])));
+      $document->addField('dm_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($entity->field_sp_operation_period['und'][0]['value2'])));
+      $document->addField('sm_field_agenda_store', 'im_all_stores');
+    }
+  }
+  /**
+   * Start - This block of code is used to Get the proper file based content type start and end for the filtering purpose.
+   */
+  if ($entity_type == "file") {
+    $zm_parent_entity = json_decode($document->zm_parent_entity);
+    $file_entity_nid = $zm_parent_entity->nid;    
+    $file_entity_node = node_load($file_entity_nid);    
+    //if (isset($file_entity_node->body['und'][0]['value'])) {
+      // $content = $document->content ; //. " " . strip_tags($file_entity_node->body['und'][0]['value']);
+       //$teaser .= $content;
+       //unset($document->content);
+       //$document->addField('content', $content);
+    //}
+    if ($file_entity_node->type == "action" || $file_entity_node->type == "alert" || $file_entity_node->type == "benchmark" || $file_entity_node->type == "news") {
+      $tz = new DateTimeZone($file_entity_node->field_agenda_date['und'][0]['timezone']);
+      $date2 = date_create($file_entity_node->field_agenda_date['und'][0]['value'], $tz);
+      $document->addField('dm_field_agenda_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_agenda_date['und'][0]['value'])));
+      
+      $document->addField('ds_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_publication_from_date['und'][0]['value'])));
+      $document->addField('ds_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_publication_to_date['und'][0]['value'])));
+      $document->addField('dm_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_publication_from_date['und'][0]['value'])));
+      $document->addField('dm_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_publication_to_date['und'][0]['value'])));
+      
+      if (isset($file_entity_node->field_agenda_relais['und'])) {
+        foreach ($file_entity_node->field_agenda_relais['und'] as $value) {
+        	$relais = $value['taxonomy_term']->name ? $value['taxonomy_term']->name : '';
+          $document->setMultiValue('sm_field_agenda_relais',$relais );
+          $teaser .= $value['taxonomy_term']->name . ". <br />";
+        }
+      }
+       
+      if (isset($file_entity_node->field_agenda_concernees['und'][0]['value'])) {
+        $document->addField('sm_field_agenda_concernees', $file_entity_node->field_agenda_concernees['und'][0]['value']);
+        $teaser .= $file_entity_node->field_agenda_concernees['und'][0]['value'] . ". <br />";
+      }
+      
+      if (isset($file_entity_node->field_agenda_store)) {
+        $stores = array();
+        $stores = explode(",", $file_entity_node->field_agenda_store['und'][0]['value']);
+        foreach ($stores as $key=>$value) {
+          $document->setMultiValue('sm_field_agenda_store', $value);
+        }
+      }
+    }
+    else if ($file_entity_node->type == "operational_model") {
+      $document->addField('ds_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_om_publication_period['und'][0]['value'])));
+      $document->addField('ds_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_om_publication_period['und'][0]['value2'])));
+      $document->addField('dm_field_om_publication_period', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_om_publication_period['und'][0]['value'])));
+      $document->addField('dm_field_om_publication_period_end', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_om_publication_period['und'][0]['value'])));
+      
+      $document->addField('dm_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_om_publication_period['und'][0]['value'])));
+      $document->addField('dm_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_om_publication_period['und'][0]['value2'])));
+      
+      if (isset($file_entity_node->field_om_actuers['und'])) {
+        foreach ($file_entity_node->field_om_actuers['und'] as $value) {
+          if (!empty($value['taxonomy_term']->name)) {
+            $document->setMultiValue('sm_field_om_actuers', $value['taxonomy_term']->name);
+            $teaser .= $value['taxonomy_term']->name . ". <br />";
+          }
+        }
+      }
+      if (isset($file_entity_node->field_om_material['und'][0]['safe_value'])) {
+        $document->addField('sm_field_om_material', $file_entity_node->field_om_material['und'][0]['safe_value']);
+        $teaser .= $file_entity_node->field_om_material['und'][0]['safe_value'] . ". <br />";
+      }
+      if (isset($file_entity_node->field_om_experts['und'])) {
+        foreach ($file_entity_node->field_om_experts['und'] as $value) {
+          $document->setMultiValue('sm_field_om_experts', $value['value']);
+          $teaser .= $value['value'] . ". <br />";
+        }
+      }      
+      // Added field for indexing field_om_status and field_om_access...
+      if (isset($file_entity_node->field_om_status['und'])) {
+        $document->addField('sm_field_om_status_count', count($file_entity_node->field_om_status['und']));
+        if (count($file_entity_node->field_om_status['und']) == 1) {
+          foreach ($file_entity_node->field_om_status['und'] as $value) {
+            $document->setMultiValue('sm_field_om_status_value', $value['value']);
+            $teaser .= $value['value'] . ". <br />";
+          }
+        }
+      }
+      if (isset($file_entity_node->field_om_access['und'][0]['value'])) {
+        $document->addField('sm_field_om_access', $file_entity_node->field_om_access['und'][0]['value']);
+        $teaser .= $file_entity_node->field_om_access['und'][0]['value'] . ". <br />";
+      } 
+      if (isset($file_entity_node->field_om_objective['und'][0]['safe_value'])) {
+        $document->addField('sm_field_om_objective', strip_tags($file_entity_node->field_om_objective['und'][0]['safe_value']));
+        $teaser .= strip_tags($file_entity_node->field_om_objective['und'][0]['safe_value']) . ". <br />";
+      }
+      $document->addField('sm_field_agenda_store', 'im_all_stores');
+    }
+    else if ($file_entity_node->type == "sales_plan") {
+      $document->addField('ds_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_sp_operation_period['und'][0]['value'])));
+      $document->addField('ds_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_sp_operation_period['und'][0]['value2'])));
+      $document->addField('dm_field_sp_operation_period', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_sp_operation_period['und'][0]['value'])));
+      $document->addField('dm_field_sp_operation_period_end', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_sp_operation_period['und'][0]['value'])));
+      
+      $document->addField('dm_field_publication_from_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_sp_operation_period['und'][0]['value'])));
+      $document->addField('dm_field_publication_to_date', date("Y-m-d\TH:i:s\Z", strtotime($file_entity_node->field_sp_operation_period['und'][0]['value2'])));
+      $document->addField('sm_field_agenda_store', 'im_all_stores');
+    }
+    //Fix for UATIM-413  
+   if (isset($document->tags_inline)) {
+      unset($document->tags_inline);
+    }
+    if (isset($document->tags_h1)) {
+      unset($document->tags_h1);
+    }
+    if (isset($document->tags_h2_h3)) {
+      unset($document->tags_h2_h3);
+    }
+  }
+  if (!empty($teaser)) {
+    if (isset($document->teaser)) {
+      unset($document->teaser);
+    }
+   /* if ($entity_type == "node") {
+      if (isset($entity->body['und'][0]['safe_value'])) {
+        $teaser .= strip_tags($entity->body['und'][0]['safe_value']);
+      }
+    }*/
+    $document->addField('teaser', $teaser);
+  }   
+  /**
+   * End
+   */
+  if (isset($entity->uid)) {
+    $user = array();
+    $user = user_load($entity->uid);
+    $document->addField('sm_author', $user->name);
+  }
+  if((isset($document->bs_status)&& $document->bs_status == 1)) {  	 
+  	return $document;
+  } 
+   
+}
+
+/**
+ * Implements hook_search_preprocess_search_results
+ * This funciton returns the entire Apache solr search results
+ * @param $variables Call by refernce Array
+ */
+function im_search_preprocess_search_results(&$variables) {
+  global $base_url;
+  $concat = '?';
+  $sort = 'f8=asc';
+  $modifed_sort = '';
+  if (strstr($_SERVER['REQUEST_URI'], '?')) {
+    $concat = '&';
+    if (strstr($_SERVER['REQUEST_URI'], 'f8=asc')) {
+      $modifed_sort = 'f8=desc';
+    }
+    else if (strstr($_SERVER['REQUEST_URI'], 'f8=desc')) {
+      $sort = 'f8=desc';
+      $modifed_sort = 'f8=asc';
+    }
+  } 
+  if (empty($modifed_sort)) {
+    $query_string = $base_url . $_SERVER['REQUEST_URI'] . $concat . $sort;
+  }
+  else {
+    $query_string = $base_url . str_replace($sort, $modifed_sort, $_SERVER['REQUEST_URI']);
+  }
+  $options = array();
+  $link = urldecode(l(t("Published date"), $query_string, $options));
+  $variables['search_results_no_title'] = TRUE;
+  $variables['num_results'] = $variables['response']->response->numFound;
+  //$_SESSION['num_results'] = $variables['num_results'];
+  $variables['publish_sort'] = $link;
+  _im_search_cuwa($variables['num_results']); 
+}
+
+/**
+ * Implements hook_search_preprocess_search_result
+ * This funciton returns the Apache solr search results one by one
+ * @param $variables Call by refernce Array
+ */
+function im_search_preprocess_search_result(&$variables){
+  global $is_https;
+  $https_variable = variable_get("https");
+  $image_type_classs = '';
+  $bundle = $variables['result']['fields']['bundle']; 
+  $attachedfilename = rawurlencode(rawurldecode($variables['result']['fields']['label']));
+  $options = array('attributes' => array('target' => '_blank','onclick' => "return xt_click(this, 'C','3','download::documentation::".str_replace(' ','_',$attachedfilename)."','A')"));
+  //Check if the bundle is file.
+  if ($bundle == "file") {
+    $variables['result']['fields']['sm_field_agenda_attachments_filename'] = array($variables['title']);
+    if (strstr($variables['result']['link'], '///')) {
+      $tmp_url = explode('///', $variables['result']['link']);
+    if ($https_variable) {
+     $variables['result']['link'] = 'https://' . $tmp_url[1]; 
+    }
+    else {
+      $variables['result']['link'] = 'http://' . $tmp_url[1];
+      }
+    }
+    else if (strstr($variables['result']['link'], '//')) {
+      $tmp_url = explode('//', $variables['result']['link']);
+    if ($https_variable) {
+      $variables['result']['link'] = 'https://' . $tmp_url[1]; 
+    }
+    else {
+      $variables['result']['link'] = 'http://' . $tmp_url[1];
+      }
+    }
+    //Check for the https and http for the attachement URL.
+    if ($https_variable) {
+      $attach_url = 'https:' . $variables['result']['fields']['url'];   
+    }
+    else {
+      $attach_url = 'http:' . $variables['result']['fields']['url'];
+    }  
+  //Assign the URI to the variable if the the bundle is file in-order to dosplay the file download link next to description.
+    $variables['result']['fields']['sm_field_agenda_attachments_uri'] = array($variables['result']['link']);
+    //Assign the variable['title] as Node tile i.e retrived from the snippet.
+    $title = explode('<em>attached to:</em>', $variables['snippet']);
+    $variables['snippet'] = $title[0];
+    $variables['title'] = strip_tags(str_replace('</span>', '', $title[1]));
+    $image_type_classs = "file-image-pic";
+    $variables['search_results']['files'][] = array('fname' => $variables['result']['fields']['label'], 'fpath' => l($variables['result']['fields']['label'],'check_file_access/'.$variables['result']['fields']['entity_id'], $options));
+  }
+  $file_sm_type = '';
+  if (isset($variables['response']->response->numFound)) {
+    $variables['num_results'] = $variables['response']->response->numFound;
+  }
+  if ($image_type_classs == "file-image-pic") {
+    if (is_array($variables['result']['fields']['sm_type'])) {
+      $file_sm_type = $variables['result']['fields']['sm_type'][0];
+    }
+    else {
+      $file_sm_type = $variables['result']['fields']['sm_type'];
+    }
+  }  
+  if ($bundle == "action" || $file_sm_type == "action") {
+    $image_type_classs = "action-image-pic";
+  }
+  else if ($bundle == "alert" || $file_sm_type == "alert") {
+    $image_type_classs = "alert-image-pic";
+  }  
+  else if ($bundle == "news" || $file_sm_type == "news") {
+    $image_type_classs = "news-image-pic";
+  }
+  else if ($bundle == "benchmark" || $file_sm_type == "benchmark") {
+    $image_type_classs = "benchmark-image-pic";
+  }
+  else if ($bundle == "sales_plan" || $file_sm_type == "sales_plan") {
+    $image_type_classs = "sales-plan-image-pic";
+  }
+  else if ($bundle == "operational_model" || $file_sm_type == "operational_model") {
+    $image_type_classs = "op-image-pic";
+  }
+  if ($bundle == "directory") {
+    $image_type_classs = "directory-plan-image-pic";
+  }
+  $path = $variables['result']['fields']['path'] . '/tid';
+
+  if ($bundle != "file") {
+    $nid = $variables['result']['fields']['entity_id'];
+  }
+  else {
+    $nid = json_decode($variables['result']['fields']['zm_parent_entity'][0]);
+    $nid = $nid->nid;
+  }  
+  if (empty($file_sm_type)) {
+    $options_home = array('attributes' => array('target' => '_blank', 'html' => TRUE), 'query' => array('search_id' => $nid, 'type' => $bundle));
+  } 
+  else {
+    $options_home = array('attributes' => array('target' => '_blank', 'html' => TRUE), 'query' => array('search_id' => $nid, 'type' => $file_sm_type));
+  } 
+  // for sales plan need to redirect to proper sales plan page
+  if (is_array($variables['result']['fields']['ds_field_publication_from_date'])) {
+    $agenda_date_sale = str_replace("-", "", substr($variables['result']['fields']['ds_field_publication_from_date'][0], 0, 10));
+  }
+  else {
+    $agenda_date_sale = str_replace("-", "", substr($variables['result']['fields']['ds_field_publication_from_date'], 0, 10));
+  }
+  if (!empty($file_sm_type)) {
+    $agenda_date_sale = date('Ymd', strtotime("+1 day", strtotime($agenda_date_sale)));
+  }
+  
+  $title = $variables['title'];
+  if (is_array($variables['result']['fields']['dm_field_agenda_date'])) {
+    $agenda_date = str_replace("-", "", substr($variables['result']['fields']['dm_field_agenda_date'][0], 0, 10));
+  }
+  else {
+    $agenda_date = str_replace("-", "", substr($variables['result']['fields']['dm_field_agenda_date'], 0, 10));
+  }
+  if (!empty($file_sm_type)) {
+    $agenda_date = date('Ymd', strtotime("+1 day", strtotime($agenda_date)));
+  }
+  
+  if ($bundle == 'action' || $bundle == 'alert' || $file_sm_type == "action" || $file_sm_type == "alert") {
+  	if (isset($_SESSION['user_selected_store']) && $_SESSION['user_selected_store'] == 'all') {
+  	  $link_content = 'agenda'. '/' .'list' .'/' . $agenda_date . '/all' . '/all';	
+  	}
+  	elseif (is_numeric($_SESSION['user_selected_store'])) {
+  	  $user_selected_store = $_SESSION['user_selected_store'];
+  	  $link_content = 'agenda'. '/' .'list' .'/' . $agenda_date . '/'. $user_selected_store  . '/all';
+  	}
+    $link = l($title, $link_content, $options_home);
+  }
+  else if ($bundle == 'news' || $bundle == 'benchmark' || $file_sm_type == "news" || $file_sm_type == "benchmark") {  
+    $link_content = 'agenda-day'.'/'. $agenda_date . '/all'.'/all';    
+    $link = l($title, $link_content, $options_home);
+  }
+  else if ($bundle == 'sales_plan' || $file_sm_type == "sales_plan") { 
+  	$sp_year = date('Y', strtotime($variables['result']['fields']['ds_field_publication_from_date']));
+  	$sp_week = date('W', strtotime($variables['result']['fields']['ds_field_publication_from_date']));
+  	$sp_options = array('attributes' => array('target' => '_blank', 'html' => TRUE), 'query' => array('sp_year' => $sp_year,'sp_week' => $sp_week));   
+    $link_content = 'sales-plan'. '/' . substr($agenda_date_sale,0,4) . '/all/' .  $sp_week . '/' .  $nid;    
+    $link = l($title, $link_content, $sp_options);
+  }
+  else if ($bundle == 'operational_model' || $file_sm_type == "operational_model") {
+    $link_content = 'modele-operationnel' .'/'. $nid. '/tid';    
+    $link = l($title, $link_content, $options);
+  }
+  else {
+    $variables['url'] = $variables['result']['link'];
+    $link = l($title, $variables['result']['link'], $options);
+  }
+  $variables['search_results']['image_type'] = $image_type_classs;
+  $variables['search_results']['snippet'] = '';
+  if ($bundle != "file") {
+    $variables['search_results']['snippet'] = !empty($variables['snippet']) ? $variables['snippet'] : '';
+  }
+  else {
+    $variables['search_results']['snippet'] = !empty($variables['result']['snippets']['content'][0]) ? $variables['result']['snippets']['content'][0] : '';
+  }  
+  $variables['search_results']['title'] = html_entity_decode($link);
+  $url = '';
+  if (isset($redirect_ur)) {
+    $url = $redirect_ur;
+  }
+  else if(isset($variables['url'])) {
+    $url = $variables['url'];
+  }
+  $variables['search_results']['snippet'] = strip_tags($variables['search_results']['snippet'], '<span><b><strong>');
+  $variables['search_results']['url'] =  $url;
+  $variables['search_results']['score'] = $variables['result']['score'];
+  $variables['search_results']['published'] = date('d/m/Y', strtotime($variables['result']['fields']['ds_field_publication_from_date']));
+  /*$tmp_snippet = explode(" ", $variables['search_results']['snippet']);
+  $tmp_keyword = arg(2);
+  foreach ($tmp_snippet as $Key => $tmp_snip) {
+    if (stristr($tmp_keyword, $tmp_snip)) {
+      $tmp_snippet[$key] = str_ireplace($tmp_snip, '<strong>' . $tmp_snip . '</strong>', $tmp_snippet[$key]);
+    }
+  }
+  $tmp_snippet = implode(" ", $tmp_snippet);*/
+  $tmp_snippet = $variables['search_results']['snippet'];
+  $tmp_keyword = explode(" ", arg(2));
+  foreach ($tmp_keyword as $Key => $tmp_snip) {
+    if (stristr($tmp_snippet, $tmp_snip)) {
+      $tmp_snippet = str_ireplace($tmp_snip, '<span class="result-snippet-highlight">' . $tmp_snip . '</span>', $tmp_snippet);
+    }
+  }
+  $variables['search_results']['snippet'] = $tmp_snippet;
+}
+/**
+ * This funciton is used to validate the node and validate period wise change the node status to prevent on apache solr indexing
+ * @param Object $node
+ */
+function _im_search_publication_date_validation($node) {
+  $node_status = $node->status;
+  if (isset($node->field_publication_from_date) && isset($node->field_publication_to_date)) {
+    $start_date = strtotime($node->field_publication_from_date['und'][0]['value']);
+    $end_date = strtotime($node->field_publication_to_date['und'][0]['value']);
+    if (($start_date <= strtotime(date('Y-m-d'))) && ($end_date >= strtotime(date('Y-m-d')))) {
+      $node->status = 1;
+    }
+    else {
+      $node->status = 0;
+    }
+  }
+  if (isset($node->field_om_publication_period)) {
+    $start_date = strtotime(substr($node->field_om_publication_period['und'][0]['value'], 0, 10));
+    $end_date = strtotime(substr($node->field_om_publication_period['und'][0]['value2'], 0, 10));
+    if (($start_date <= strtotime(date('Y-m-d'))) && ($end_date >= strtotime(date('Y-m-d')))) {
+      $node->status = 1;
+    }
+    else {
+      $node->status = 0;
+    }
+  }
+  if ($node_status == 0) {
+    $node->status = 0;
+  }
+  return $node;
+}
+
+/**
+ * Implements hook_node_update
+ */
+function im_search_node_update($node) {
+  $status = $node->status;
+  $type = $node->type;
+  $solr = apachesolr_get_solr('solr');
+  apachesolr_mark_entity($type, $node->nid);
+  $indexer_table = apachesolr_get_indexer_table($type);
+  $result = db_select($indexer_table, 'i')
+    ->fields('i')
+    ->condition('entity_type', $type, '=')
+    ->condition('entity_id', $node->nid, '=')
+    ->execute()
+    ->fetchAssoc();
+  if (empty($result)) {
+    db_insert($indexer_table)
+    ->fields(array(
+      'status' => $status,
+      'entity_type' => $type,
+      'entity_id' => $node->nid,
+      'bundle' => 'node',
+    ))
+    ->execute();
+  }
+  else {
+    db_update($indexer_table)
+      ->fields(array(
+      'changed' => REQUEST_TIME,
+      'status' => $status,
+      ))
+    ->condition('entity_id', $node->nid)
+    ->execute();
+  }
+  if ($status == 0) {
+    if (apachesolr_index_delete_entity_from_index("solr", "event", $node->nid)) {
+      // There was no exception, so delete from the table.
+      $table = apachesolr_get_indexer_table($type);
+      db_delete($table)
+      ->condition('entity_type', $type)
+      ->condition('entity_id', $node->nid)
+      ->execute();
+    }
+  }
+}
+/**
+ * Implements hook_node_presave().
+ */
+function im_search_node_presave($node){
+  $indexable_bundles = apachesolr_get_index_bundles('solr', 'node');
+  // Array of content types to act on.
+  if (in_array($node->type, $indexable_bundles)) {
+    $all_fields = field_info_field_map();
+    $file_fields = array();
+    //module_load_include('inc', 'field', 'field.info');
+    foreach($all_fields as $field_name =>$field_details){
+      $node_fields = array_filter(_field_invoke_get_instances('node', $node->type, array('field_name'=>$field_name)));
+        if(!empty($node_fields)){
+          foreach($node_fields as $node_field){
+            if($node_field['widget']['module'] == 'file'){
+              $file_fields[] = $node_field['field_name'];
+            }
+          }
+        }
+    }  
+  /*	
+  $field_list = field_info_fields();
+  // Get list of fields that implements one image/file
+  $file_fields = array();
+  foreach ($field_list as $key => $field) {
+    if ($field['type'] == 'image' || $field['type'] == 'file') {
+      $file_fields[] = $field['field_name'];
+    }
+  }
+  */
+    $wrapper = entity_metadata_wrapper('node', $node);
+    if (isset($node->original)) {
+      $original_wrapper = entity_metadata_wrapper('node', $node->original);
+      // Array of file fields to act on.
+      foreach ($file_fields as $field) {
+        if (!isset($original_wrapper->{$field})) {
+          continue;
+        }
+        $current_files = array();
+        $original_files = array();
+        // Get files that were attached to the original node (before update).
+        if(isset($original_wrapper->{$field}->value)){
+          foreach ($original_wrapper->{$field}->value() as $file) {
+            $original_files[] = $file['fid'];
+          }
+        }
+        // Stop if there were no files previously attached.
+        if (empty($original_files)) {
+          continue;
+        }
+        // Get files currently attached to the node (after update).
+        foreach ($wrapper->{$field}->value() as $file) {
+          $current_files[] = $file['fid'];
+        }
+        // Delete files that were in the original node but were removed during
+        // this update.
+        $deleted_files = array_diff($original_files, $current_files);
+        foreach ($deleted_files as $fid) {
+          if ($file = file_load($fid)) {
+            // Delete all usages of the file. Each node revision adds to the usage
+            // count.
+            $indexer_table = apachesolr_get_indexer_table('file');
+            db_delete($indexer_table)
+                ->condition('parent_entity_id', $node->nid)
+                ->condition('entity_id', $fid)
+                ->execute();
+            $solr = apachesolr_get_solr();
+            $solr->deleteByQuery("entity_type:file AND entity_id:$fid AND hash:" . apachesolr_site_hash());
+            $solr->commit();
+            file_usage_delete($file, 'file', 'node', $node->nid, 0);
+            file_delete($file);
+          }
+        }
+      }
+    }
+  }
+}
+    
+/**
+ * Implementation of hook_block_info
+ */
+function im_search_block_info() {
+  $blocks['im_search_filter_block'] = array(
+    'info' => t('Intranet market search block'),
+    'weight' => 1,
+    'cache' => DRUPAL_CACHE_GLOBAL,
+    'module' => 'im_search',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'title' => t('Filter the list of search results'),
+    'status' => 1,
+  );
+  return $blocks;
+}
+
+/**
+ * Implemetation of hook_block_view
+ */
+function im_search_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'im_search_filter_block':
+      $block['subject'] = '';
+      $block['content'] = _get_im_search_block_content();
+      break;
+  }
+  return $block;
+}
+/**
+ * Implementation of hook_theme
+ */
+function im_search_theme($existing, $type, $theme, $path) {
+  return array(
+    'im_search_block_template' =>  array(
+      'variables' => array('output' => NULL),
+      'template' => 'theme/im_search_block_template'
+       )
+    );
+}
+
+/**
+ * This funciton is used to Get the Apache Solr search filter block form 
+ */
+function _get_im_search_block_content(){
+  module_load_include('inc', 'im_search', '/includes/im_search.block');
+  drupal_add_css(drupal_get_path('module', 'im_search') . '/css/im_search.css');
+  drupal_add_js(drupal_get_path('module', 'im_search') . '/js/im_search.js');
+  drupal_add_js(drupal_get_path('module', 'im_search') . '/js/im_search_autocomplete_override.js');
+  $result = drupal_get_form('im_search_block_form');
+  return $result;
+}
+
+/**
+ * Implementation of hook_page_alter
+ * @param Array $page
+ * This function is used to 
+ * 1. Add the apache solr filter block title.
+ * 2. Render the apache solr filter block form.
+ * 3. Hide the default search form on the search result page.
+ */
+function im_search_page_alter(&$page) {
+    if (isset($page['content']['system_main']['search_form']['#search_page']['search_path'])) {
+    if (isset($_GET['dateerror'])) {
+      drupal_set_message(t("The end date should be greater than the start date"), "error");
+    }
+    
+  if (isset($_GET['startdateerror'])) {
+      drupal_set_message(t("The start date should not be greater than current date"), "error");
+    }
+  if (isset($_GET['enddateerror'])) {
+      drupal_set_message(t("The end date should not be greater than current date"), "error");
+    }
+    drupal_add_js('jQuery(document).ready(function () { jQuery("#page-title").hide(); });', 'inline');
+    drupal_add_js('jQuery(document).ready(function () { jQuery("#edit-basic").hide(); });', 'inline');
+    $output = '<div class="search-block-title">' .  t("Filter the list of search results") . '<div class="result-point-arrow"></div></div>';
+    $search_filter_form = module_invoke("im_search",'block_view', "im_search_filter_block");
+    $output .= render($search_filter_form['content']);
+    $page['content']['system_main']['search_form']['#suffix'] = $output;
+  }
+}
+
+function _im_search_cuwa($search_result_count = 0) {
+	 global $user;
+	  if (file_exists(DRUPAL_ROOT . '/sites/default/custom_settings.php')) {
+	    include DRUPAL_ROOT . '/sites/default/custom_settings.php';
+	  }
+  //CUWA
+  // To get the Number of Pages, returned for search result.
+    $output = '';
+    $search_value = base64_decode(trim(arg(2)));
+    $xt_mtcl = str_replace(" ", "%20", $search_value);
+    
+    //Prepare xt variable
+    $xt_npg = '';
+    $xt_an = '';
+	  $xtn2 = 7;
+	  $im_cuwa_x1 = '';
+	  $im_cuwa_x2 = '';
+	  $im_cuwa_x3 = '';
+	  $im_cuwa_x4 = '';
+	  $im_cuwa_x5 = '';	 
+	  $im_cuwa_x6 = '';
+	  $xtpage = "search_results";
+	  
+    if($search_result_count == 0) {
+      $xt_npg = 0;
+    }
+    else {
+      $xt_npg = $search_result_count;
+    }
+	  //Test or default mode
+	  $cuwa_mode = variable_get('core_custom_im_cuwa_mode', 'test');
+	
+	  //We can add cuwa scripts only if configurations is avalaible
+	  if (!isset($cuwa) || !(isset($cuwa[$cuwa_mode]))) {
+	    return;
+	  }  	      
+     
+    if (!empty($_SESSION['profil']['store'])) {
+	    $im_cuwa_x2 = 1;
+	  }
+	  else {
+	    $im_cuwa_x2 = 2;
+	  }
+    //Prepare xtn2 var if 404 or 403
+    $headers = drupal_get_http_header();
+    // CUWA for 404 error
+	  if (isset($headers['status']) && !empty($headers['status'])) {
+	    $status = $headers['status'];
+	    //if (substr($status, 0, 3) == '404' || substr($status, 0, 3) == '403') {
+	    if (substr($status, 0, 3) == '404') {
+	      $xtn2 = 8;
+	      //$xtpage = str_replace('-', '_', pathauto_cleanstring(drupal_get_title()));
+	      $xtpage = '404_error';
+	    }
+	  }
+	  
+	  if (isset($xt_mtcl)) {
+	   //Add cuwa scripts for search
+	   drupal_add_js(drupal_get_path('module', 'im_cuwa') . '/js/im_cuwa_search.js');  
+	  }	
+    if ($user->uid != '') {
+	    $xt_an = $user->uid;
+	  }	 
+	         
+  //$_SESSION['ldap_user_role'] = 'store_director';
+  if (isset($_SESSION['ldap_user_role'])) {
+    if ($_SESSION['ldap_user_role'] != 'salarie_siege') {
+      if (isset($_SESSION['profil']['store'])) {
+        $im_cuwa_x3 = $_SESSION['profil']['store'];
+      }
+    }
+    if ($_SESSION['ldap_user_role'] == 'store_director'){
+      $im_cuwa_x1 = 1;
+    }
+    if ($_SESSION['ldap_user_role'] == 'store_manager') {
+      $im_cuwa_x1 = 2;
+    }
+    if ($_SESSION['ldap_user_role'] == 'store_employee') {
+      $im_cuwa_x1 = 3;
+    }
+  }
+   // Add variables in Drupal settings
+   drupal_add_js(array(
+    'im_cuwa' => array(
+      'xtpage' => $xtpage,
+      'xtn2' => $xtn2,
+      'xt_an' => $xt_an,
+      'xtsite' => $cuwa[$cuwa_mode]['xtsite'],//xsite value
+      'x1' => $im_cuwa_x1,//DD,MM,EMP
+      'x2' => $im_cuwa_x2,//MAGASIN,SEIGE
+      'x3' => $im_cuwa_x3,//SHOP ID
+      'x4' => $im_cuwa_x4,//Content id
+      'x5' => $im_cuwa_x5,//DEPT
+      'xt_mtcl' => $xt_mtcl,
+      'xt_npg' => $xt_npg,
+      'x6' => $im_cuwa_x6,
+    )
+  ), 'setting');
+  //Add cuwa scripts
+  drupal_add_js(drupal_get_path('module', 'im_cuwa') . '/js/im_cuwa.js');
+  
+  //As xtcore.js is called asynchronously, put it's path on Drupal.settings
+  drupal_add_js(array(
+    'im_cuwa' => array(
+      'xtcore_path' => drupal_get_path('module', 'im_cuwa') . '/js/xtcore.js'
+    )
+  ), 'setting');
+  //Prepare variables for noscript in page.tpl.php
+  $variable['cuwa_xtpage'] = $xtpage;
+  $variable['cuwa_xtn2'] = $xtn2;
+  $variable['cuwa_xt_an'] = isset($xt_an) ? $xt_an : '';
+  $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
+  $variable['cuwa_xtsd'] = $cuwa[$cuwa_mode]['xtsd'][$protocol];
+  $variable['cuwa_xtsite'] = $cuwa[$cuwa_mode]['xtsite'];
+  
+  $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
+  if((isset($cuwa_xtsd) && isset($cuwa_xtsite) && isset($cuwa_xtpage)  && isset($cuwa_xt_an))) {
+    $output = '<noscript> <div><img width="1" height="1" alt="" src="'.$cuwa[$cuwa_mode]['xtsd'][$protocol].'.xiti.com/hit.xiti?s='.$cuwa[$cuwa_mode]['xtsite'].'&s2=1&p='.$xtpage.'&di=&an=1&ac=" /></div></noscript>';
+  }
+  return $output;
+}
+
+/**
+ * To redirect to search url from jquery(image click) with base64_encode
+ * Enter description here ...
+ */
+function _im_search_encode_search_keyword() {
+  if(arg(3)){  
+    $search_keyword = base64_encode(arg(3));
+    drupal_goto("search/site/" . $search_keyword);
+    exit;
+  }else{
+    drupal_goto("search/site/");
+  exit;
+  }
+}
+
+
+function _im_search_delete_file_index($nid,$parent_entity_bundle){
+ // $n = node_load($nid);  
+  $entity_ids = array();  
+  $indexer_table = apachesolr_get_indexer_table('file');
+   // Load the values from the db if we are viewing an existing node.
+    $query = db_select($indexer_table, 'f');
+    $query->fields('f', array('entity_id','parent_entity_id'));
+    $query->condition('f.parent_entity_id', $nid, '=');
+    $query->execute();
+  $result = $query->execute();  
+  while($record = $result->fetchAssoc()) {
+    $entity_id = $record['entity_id'];
+    $parent_entity_type = 'node';
+    $parent_entity_bundle = $parent_entity_bundle;
+    $parent_entity_id = $nid;
+    db_delete($indexer_table)
+      ->condition('parent_entity_id', $parent_entity_id)
+      ->condition('entity_id', $entity_id)
+      ->execute();
+    $solr = apachesolr_get_solr();
+    $solr->deleteByQuery("sm_parent_entity:{$parent_entity_type}-{$parent_entity_bundle}-{$parent_entity_id} AND entity_type:file AND hash:" . apachesolr_site_hash());
+    $solr->commit();
+ /*  $solr = apachesolr_get_solr();
+    $solr->deleteByQuery("entity_type:file AND entity_id:$entity_id AND hash:" . apachesolr_site_hash());
+    $solr->commit();*/
+   }
+}

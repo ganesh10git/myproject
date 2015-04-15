@@ -1,0 +1,41 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-12-20 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Homepage Searchbar
+msgid "Enter your search"
+msgstr "Entrez votre recherche"
+
+#User Store Preference Form
+msgid "Filtering information presented on the portal"
+msgstr "Filtrage des informations présentées sur le portail"
+
+#User Store Preference Form
+msgid "Store Status"
+msgstr "Statut magasin"
+
+#User Store Preference Form
+msgid "Criteria"
+msgstr "Critère"
+
+#User Store Preference Form
+msgid "Store choice of reference for the weather"
+msgstr "Choix du magasin de référence pour la météo"
+
+#User Store Preference Form
+msgid "Validate"
+msgstr "Valider"
+
+#Agenda homepage
+msgid "Please wait..."
+msgstr "S'il vous plaît patienter ..."

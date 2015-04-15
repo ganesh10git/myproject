@@ -1,0 +1,11 @@
+name = Intranet Market Custom Search
+description = Custom configuration settings and global functions will be used in this module.
+package = Intranet Market
+core = 7.x
+dependencies[] = im_custom
+dependencies[] = apachesolr
+dependencies[] = apachesolr_search
+;dependencies[] = facetapi
+dependencies[] = im_language
+dependencies[] = apachesolr_attachments
+version = "7.x-3.0"

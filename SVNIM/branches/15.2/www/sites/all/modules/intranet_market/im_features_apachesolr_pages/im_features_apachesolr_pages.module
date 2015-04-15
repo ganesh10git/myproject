@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the im_features_apachesolr_pages feature.
+ */
+
+include_once 'im_features_apachesolr_pages.features.inc';

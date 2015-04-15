@@ -1,0 +1,506 @@
+<?php
+/**
+ * @file
+ * Code for the IM Features Application feature.
+ */
+
+include_once 'im_features_application.features.inc';
+
+/**
+ * Implementation of hook_menu
+ * 
+ */
+function im_features_application_menu(){
+  $items = array();
+  $items['applications/add'] = array(
+    'page callback' => 'im_features_application_js_add_callback',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['applications/remove'] = array(
+    'page callback' => 'im_features_application_js_remove_callback',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['applications/integree/%'] = array(
+  		'page callback' => 'im_features_application_load_iframe',
+  		'access callback' => TRUE,
+  		'page arguments' => array(2),
+  		'title' => 'Application Integree',
+  		'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Implenmentation of hook_preprocess_view_view
+ * 
+ */
+function im_features_application_preprocess_views_view(&$vars) {
+  $view = $vars['view'];
+  if($view->name == 'applications_home_page'){
+    $result = views_get_view_result('applications_home_page', $display_id = 'page');
+    drupal_add_js(drupal_get_path('module', 'im_features_application') . '/js/im_feature_application.js');
+  }
+}
+
+//add link callback
+function im_features_application_js_add_callback(){
+  global $user;
+  $value = $_GET['app'];//Modified to use query string due to '/' in the application name 
+  $userProfile = user_load($user->uid);
+  if(empty($userProfile->field_user_apps[LANGUAGE_NONE][0]['value'])){
+  	watchdog('im_features_application', t('Added to Empty FAV APPS %selected_app'), $variables = array('%selected_app'=>$value), $severity = WATCHDOG_NOTICE, $link = NULL);
+    $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'] = $value;
+    user_save($userProfile);
+  }
+  else{
+  	$user_apps = $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'];
+  	$limit = '35';
+  	$get_apps_array = explode(',',$user_apps);
+  	$im_my_app_valid = array();
+    foreach($get_apps_array as $get_app){
+  	 $im_my_app = im_node_load_by_title($get_app, 'application');
+  	 if(isset($im_my_app)){
+  	 	$im_my_app_valid[] = $im_my_app->title;
+  	 }
+  	}
+  	$im_my_app_valid_data = array_unique($im_my_app_valid);
+  	if(count($im_my_app_valid_data) > $limit  ){
+  		drupal_set_message(t('Sorry you cannot add more than 36 applications.'),'error');
+  		drupal_goto("applications");
+      break;
+  	}
+  	else{
+  		watchdog('im_features_application', t('Selected Application %selected_app'), $variables = array('%selected_app'=>$value), $severity = WATCHDOG_NOTICE, $link = NULL);
+  		$app_exists = array_search($value,$im_my_app_valid);
+  		if(empty($app_exists)){
+  	    $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'] = $user_apps.",".$value;
+        user_save($userProfile);
+        watchdog('im_features_application', t('Added: Exisiting FAV APPS %selected_app'), $variables = array('%selected_app'=>$userProfile->field_user_apps[LANGUAGE_NONE][0]['value']), $severity = WATCHDOG_NOTICE, $link = NULL);
+        
+  		}
+  		else{
+  			watchdog('im_features_application', t('Already Added: Application exisits %selected_app'), $variables = array('%selected_app'=>$userProfile->field_user_apps[LANGUAGE_NONE][0]['value']), $severity = WATCHDOG_NOTICE, $link = NULL);
+  		  drupal_goto("applications");
+        break;
+  		}
+  	}
+  }
+  $path = '<front>';
+  $menu_name = 'market-portail';
+  $mlid = db_select('menu_links', 'm')
+          ->fields('m', array('mlid'))
+          ->condition('m.link_path', $path, '=')
+          ->condition('m.menu_name', $menu_name, '=')
+          ->execute()
+          ->fetchField();
+  drupal_goto("applications");
+  //exit;
+}
+
+//remove link-callback
+function im_features_application_js_remove_callback(){
+  global $user;
+  $value = $_GET['app'];//$_POST['data'];
+  $userProfile = user_load($user->uid);
+  $value_contains_comma = strstr($userProfile->field_user_apps[LANGUAGE_NONE][0]['value'],',');
+
+  if (!empty($userProfile->field_user_apps[LANGUAGE_NONE][0]['value']) && ($value_contains_comma)){
+    $user_app_value = $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'];
+    $explode_value = explode("," , $user_app_value);
+
+    if (in_array($value, $explode_value,TRUE)) {
+      unset($explode_value[array_search($value,$explode_value,TRUE)]);
+    }
+    $app_removed_value = implode(",", $explode_value);
+    watchdog('im_features_application', t('Removed: Application %selected_app'), $variables = array('%selected_app'=>$value), $severity = WATCHDOG_NOTICE, $link = NULL);
+    $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'] = $app_removed_value;
+    user_save($userProfile);
+  }
+  else{
+    $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'] = '';
+    user_save($userProfile);
+  }
+  drupal_goto("applications");
+  //exit;
+}
+/**
+ * Implenmentation of hook_form_alter
+ * 
+ */
+function im_features_application_form_application_node_form_alter(&$form, &$form_state, $form_id){
+  include_once drupal_get_path('module', 'im_user') . '/im_user.profile.inc';
+  drupal_add_js(drupal_get_path('module', 'im_features_application') . '/js/im_feature_application.js');
+  //print "<pre>";print_r($form['field_app_help_button']['und']['#options']);exit;
+  if (isset($form['field_ldap_sso_checkbox'])) {
+    $form['field_ldap_sso_checkbox']['und']['#options'] = array(
+      '0' => t('URL'),
+      '1' => t('LDAP France Tag'),
+    );
+    $form['field_ldap_sso_checkbox']['und']['#title'] = '';
+  }
+  if(isset($form['field_app_help_button'])) {
+    $form['field_app_help_button']['und']['#options'] = array(
+      '0' => t('Insert link to documentation page'),
+      '1' => t('Help out Download file'),
+    );
+  }
+  if($form['#form_id'] == 'application_node_form'){
+    if (isset($_SESSION['ldap_login_key'])) {
+      $app_names ='';
+      //$ladp_id = '8e5a5f10-4420-4517-a2d0-2179356947af';
+      $ldap_id = $_SESSION['ldap_login_key'];
+      $obj = new imldapSoapService();
+      $profile = $obj->soapRequest('getProfil', array('id' => $ldap_id));
+      if (isset($profile) && !empty($profile)) {
+        $profile = simplexml_load_string($profile->data);
+        foreach($profile->app as $key => $value){
+          $app_names .= $value->name .',';
+        }
+        $ldap_sso_options['-none-']= "None";
+        $app_name= substr($app_names, 0, -1);
+        $app_name_explode_array =explode(',',$app_name);
+        if (isset($app_name_explode_array)) {
+          asort($app_name_explode_array);
+          foreach ($app_name_explode_array as $value){
+            $ldap_sso_options[$value] = $value;
+          }
+          uksort($ldap_sso_options, 'ldap_sso_sort_criteria');
+        }
+      }
+    }
+    else{
+      $ldap_sso_options['-none-']= "none";
+    }
+    global $user;
+    $author_name = $form['#node']->name;
+    $status = '';
+  if(isset($form['#node']->nid)){
+    $author = _im_user_get_data($form['#node']->uid);
+    $status = im_sales_plan_node_status($form['#node']->nid);
+    $default_name = $author['full_name'];
+    $created_time = date('d/m/Y', $form['#node']->created);
+    $modified_time = date('d/m/Y', $form['#node']->changed);
+  }else{
+    $author = _im_user_get_data($user->uid);
+    $default_name = $author['full_name'];
+    $created_time = date('d/m/Y');
+    $modified_time = date('d/m/Y');
+  }
+  $form['app_created_by'] = array(
+    '#type' => 'item',
+    '#title' => t('Created by'),
+    '#markup' => $default_name,
+    '#weight' => -5,
+  );
+  $form['app_created_date'] = array(
+    '#type' => 'item',
+    '#title' => t('Created Date'),
+    '#markup' => $created_time,
+    '#weight' => -4.3,
+  );
+  $form['app_status'] = array(
+    '#type' => 'item',
+    '#title' => t('Status'),
+    '#markup' => t($status),
+    '#weight' => -4,
+  );
+  $form['app_last_modified_date'] = array(
+    '#type' => 'item',
+    '#title' => t('Last Modification Date'),
+    '#markup' => $modified_time,
+    '#weight' => -3,
+  );
+  
+    $form['field_ldap_sso_redirect']['und']['#options']= $ldap_sso_options;
+    $form['field_ldap_sso_redirect']['und']['#title'] = t('LDAP France Tag'). " ". theme('form_required_marker');
+    $form['field_app_url']['und'][0]['value']['#title'] = t('URL'). " ". theme('form_required_marker');
+    $form['field_node_archive']['#attributes']['style'] = 'display:none';
+    $form['field_ldap_sso_redirect']['#weight'] = 3;
+  }
+  //for the edit node page.
+  if ((is_numeric(arg(1))) && arg(2) == 'edit'){
+  	$nodearray = array();
+    $nodearray = node_load(arg(1));
+     //print'<pre>';print_r($nodearray);exit;
+    if (!empty($nodearray->field_app_url)){
+      $nodearray->field_ldap_sso_checkbox['und'][0]['value'] = 0;
+    }
+    else{
+    	$nodearray->field_ldap_sso_checkbox['und'][0]['value'] = 1;
+    }
+    if(!empty($nodearray->field_app_document)){
+      $nodearray->field_ldap_document_url['und'][0]['value']=1;
+    }
+    else {
+      $nodearray->field_ldap_document_url['und'][0]['value']= 0;
+    }
+    if(isset($nodearray->field_ldap_sso_redirect['und'][0]['value'])){
+    	$form['field_ldap_sso_redirect']['und']['#default_value'] = $nodearray->field_ldap_sso_redirect['und'][0]['value'];
+    }
+  }
+}
+/**
+ * Implenmentation of hook_node_validate
+ * 
+ */
+function im_features_application_node_validate($node, $form, &$form_state) {
+  //validation for the ldap url field	
+  if ($node->type == 'application') {
+    drupal_add_js(drupal_get_path('module', 'im_features_application') . '/js/im_feature_application.js');
+    if (isset($form_state['values']['field_ldap_sso_checkbox'])) {
+      if ($form_state['values']['field_ldap_sso_checkbox']['und'][0]['value'] == 1 && $form_state['values']['field_ldap_sso_redirect']['und'][0]['value'] == '-none-') {
+        form_set_error('field_ldap_sso_redirect',t('Ldap sso redirect field is not selected'));
+      }
+    }
+    if(isset($form_state['values']['field_ldap_sso_redirect'])){
+      if($form_state['values']['field_ldap_sso_checkbox']['und'][0]['value'] == 0 && empty($form_state['values']['field_app_url']['und'][0]['value'])){
+       form_set_error('field_app_url',t('Url field is empty'));
+      }
+    }
+    if($node->field_application_type['und'][0]['value']==1) {
+    	$num_of_inegree_type = 0;
+		$result = db_select('field_data_field_application_type', 'f')
+		  ->fields('f', array('entity_id', 'field_application_type_value'))
+		  ->condition('entity_type', 'node')
+		  ->condition('bundle', 'application')
+		  ->condition('deleted', 0)
+		  ->execute();
+		
+		foreach ($result as $row){
+		  if($row->field_application_type_value == 1) {
+		  	$num_of_inegree_type++;
+		  }
+		}
+		if($num_of_inegree_type>6) {
+			//drupal_set_message(t("Maximum limit for 'Intégrée' appplication type reached."), 'error');
+			form_set_error('field_application_type',"Maximum limit for 'Intégrée' appplication type reached.");
+		}
+    }
+  }
+}
+
+/**
+ * hook_node_presave
+ */
+function im_features_application_node_presave($node){
+  if($node->type == 'application'){
+    if(arg(2) == 'application' && arg(1)== 'add'){
+      if($node->field_ldap_sso_checkbox['und'][0]['value'] == 1){
+	    unset($node->field_app_url);
+	  }
+	  else{
+        $node->field_ldap_sso_redirect['und'][0]['value'] == '-none-';
+      }
+      
+	  if (empty($node->field_app_help_button['und'][0]['value'])) {
+	    unset($node->field_documentation_file_upload);
+	  }
+	  elseif ($node->field_app_help_button['und'][0]['value'] == 1) {
+	    unset($node->field_app_document);
+	  }
+	  
+    }
+    if((is_numeric(arg(1)) && arg(2) == 'edit')){
+      if(empty($node->field_ldap_sso_checkbox['und'][0]['value'])){
+        $node->field_ldap_sso_redirect['und'][0]['value'] = '-none-';
+      } 
+      else{
+        unset($node->field_app_url['und'][0]['value']);
+      }
+      
+      if(empty($node->field_app_help_button['und'][0]['value'])){
+        unset($node->field_documentation_file_upload['und']);
+      }
+      elseif($node->field_app_help_button['und'][0]['value'] == 1){
+        unset($node->field_app_document['und'][0]['value']);
+      }
+      if ($node->title != $node->original->title) {
+        _im_application_delete_title($node->title,$node->original->title);
+      }
+    }
+    elseif (arg(1) != 'add' && $node->title != $node->original->title) {
+      _im_application_delete_title($node->title,$node->original->title);
+    }
+  }
+}
+/**
+ * 
+ * Function to remove the title from the User object...
+ * @param Object $node
+ */
+function _im_application_delete_title($newtitle,$oldtitle) {
+  global $user;
+  $value = $newtitle;
+  $userProfile = user_load($user->uid);
+  if (!empty($userProfile->field_user_apps['und'][0]['value'])) {
+    $value_contains_comma = strstr($userProfile->field_user_apps[LANGUAGE_NONE][0]['value'],',');
+
+    if (!empty($userProfile->field_user_apps[LANGUAGE_NONE][0]['value']) && ($value_contains_comma)) {
+      $user_app_value = $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'];
+      $explode_value = explode("," , $user_app_value);
+
+      if (in_array($value, $explode_value,TRUE)) {
+        $explode_value[array_search($value,$explode_value,TRUE)] = $value; 
+      }
+      $app_updated_value = implode(",", $explode_value);
+      $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'] = $app_updated_value;
+      user_save($userProfile);
+    }
+  elseif(!empty($userProfile->field_user_apps[LANGUAGE_NONE][0]['value']) && $value_contains_comma == ''){
+    $userProfile->field_user_apps[LANGUAGE_NONE][0]['value'] = $value;
+    user_save($userProfile);
+  }
+  }
+  return;
+}
+
+/**
+ * Custom function to set the criteria for sorting sso options.
+ */
+function ldap_sso_sort_criteria($a, $b) {
+  if ($a == $b) {
+    return 0;
+  }
+  elseif(strcasecmp($a, $b) < 0){
+    return -1;
+  }
+  elseif(strcasecmp($a, $b) > 0){
+    return 1;
+  }
+}
+
+/**
+ * Helper function; Load node by title
+ */
+function im_node_load_by_title($title, $node_type) {
+  $query = new EntityFieldQuery();
+  $entities = $query->entityCondition('entity_type', 'node')
+    ->propertyCondition('type', $node_type)
+    ->propertyCondition('title', $title)
+    ->propertyCondition('status', 1)
+    ->range(0,1)
+    ->execute();
+  if(!empty($entities)) {
+    return node_load(array_shift(array_keys($entities['node'])));
+  }
+}
+
+/**
+ * Implementation of hook_form_alter for manage application page filter
+ *
+ */
+  function im_features_application_form_views_exposed_form_alter(&$form, &$form_state) {
+	$view = $form_state['view'];
+	if ($view->name == 'manage_applications'){
+	  	$form['field_application_type_value']['#type'] = 'radios';
+  	}
+  }
+  
+  function im_features_application_node_insert($node) {
+  	if(($node->form_id=='application_node_form')&&($node->field_application_type['und'][0]['value']==1)) {
+  		application_menu_modify($node);
+  	}
+  }
+  
+  function application_menu_modify($node) {
+  	$file_details = file_load($node->field_app_icon['und'][0]['fid']);
+  	if($file_details->filename!=NULL) {
+  		$menu_logo = '/sites/default/files/public/'.$file_details->filename;
+  	}
+  	else {
+  		$menu_logo = '/sites/all/modules/intranet_market/im_features_application/application_default_logo.png';
+  	}
+  	$path = '<front>';
+  	$menu_name = 'market-portail';
+  	$mlid = db_select('menu_links', 'm')
+  	->fields('m', array('mlid'))
+  	->condition('m.link_path', $path, '=')
+  	->condition('m.menu_name', $menu_name, '=')
+  	->condition('m.weight', 0, '=')
+  	->execute()
+  	->fetchField();
+  	$items = array(
+	  			$item = array(
+	  					'menu_name' => 'market-portail',
+	  					'link_path' => 'applications/integree/'.$node->nid,
+	  					'link_title' => "<span class='menu_logo'><img src='".$menu_logo."'></span><p>".t($node->title)."</p>",
+	  					'plid' => $mlid,
+	  					'weight' => 7,
+	  					'options' => array(
+	  							'attributes' => array(
+	  									'title' => '',
+	  									'class' => array(
+	  											0 => 'header_nav_menu_application',
+	  									),
+	  							),
+	  							'html' => TRUE,
+	  					),
+	  			)
+  			);
+  	foreach ($items as $links) {
+  		menu_link_save($links);
+  	}
+  	menu_cache_clear_all();
+  }
+  
+  function im_features_application_load_iframe($node_id) {
+  	$node = node_load($node_id);
+  	if($node->field_app_url['und'][0]['value']!=NULL) {
+  		$app_full_url = $node->field_app_url['und'][0]['value'];
+  	}
+  	else {
+  		$app_name = $node->field_ldap_sso_redirect['und'][0]['value'];
+  		include_once drupal_get_path('module', 'im_user') . '/im_user.profile.inc';
+  		if (isset($_SESSION['ldap_login_key'])) {
+  			$app_names ='';
+  			$ladp_id = $_SESSION['ldap_login_key'];
+  			$obj = new imldapSoapService();
+  			$profile = $obj->soapRequest('getProfil', array('id' => $ladp_id));
+  			if (isset($profile) && !empty($profile)){
+  				$profile = simplexml_load_string($profile->data);
+  				foreach($profile->app as $key => $value){
+  					if(strcmp(trim($app_name), trim($value->name)) == 0){
+  						$ws_app_url= $value->url;
+  						$app_url = strstr($ws_app_url, "http://");
+  						$app_url_with_https = strstr($ws_app_url, "https://");
+  						if (empty($app_url) && empty($app_url_with_https)) {
+  							if (!empty($query_string)) {
+  								$app_full_url = "http://" . $ws_app_url.str_replace('?', '&', $query_string);
+  							}
+  							else {
+  								$app_full_url = "http://" . $ws_app_url;
+  							}
+  						}
+  						else{
+  							if (!empty($query_string)) {
+  								$app_full_url = $ws_app_url.str_replace('?', '&', $query_string);
+  							}
+  							else{
+  								$app_full_url = $ws_app_url;
+  							}
+  						}
+  					}
+  				}
+  			}
+  		}
+  	}  	  	
+  	if(isset($node->field_documentation_file_upload['und'][0]['filename'])) {
+  		$download_file = '/check_file_access/'.$node->field_documentation_file_upload['und'][0]['fid'];
+  	}
+  	return theme('applications_apply_theme', array('iframe_url'=>$app_full_url,'link_to_download'=>$download_file));
+  }
+  
+  /**
+   * Implements hook_theme
+   *
+   */
+  function im_features_application_theme($existing, $type, $theme, $path) {
+  	return array(
+  			'applications_apply_theme' => array(
+  					'template' => 'im-applications-iframe-page',
+  					'variables' => array('iframe_url'=>NULL,'link_to_download'=>NULL),
+  			),
+  	);
+  }

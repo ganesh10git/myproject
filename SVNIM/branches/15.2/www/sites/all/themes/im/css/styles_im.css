@@ -1,0 +1,731 @@
+@CHARSET "ISO-8859-1";
+/* ========================  Header ======================== */
+*, a:hover, a:active { outline: 0px none; }
+blockquote {
+	margin: 1em 35px;
+	border-left-width: 5px !important;
+	border-color: #CCCCCC;
+	border-style: solid;
+	border-width: 0;
+	padding: 12px 0px 12px 15px;
+}
+blockquote p, ul li blockquote ul li{
+	font: italic 14px georgia;
+}
+ul li blockquote ul { margin:0px; }
+.page-node-add #page {
+	width: 100%;
+}
+#page {
+	width: 1024px;
+}
+.page-node-add #header {
+  position: inherit;
+  width: 100%;
+}
+#header {
+  position: fixed;
+  width: 1024px;
+  z-index: 10;
+}
+#columns {
+  margin-top: 91px;
+  display: inline-block;
+  width: 100%;
+}
+#c4_im_header {
+  color: #ae9490;
+  height: 32px;
+  padding: 16px 14px 0 0px;
+  background-color: #F0EBEA;  
+}
+ul#my-custom-listing {
+  float: right;
+}
+ul#my-custom-listing li{
+  border-right: 1px solid #AE9490;
+  float: left;
+  font-size: 12px;
+  margin-right: 8px;
+  padding: 0 8px 0 0;
+}
+#c4_im_header  li h5 {
+  font-size: 12px;
+  margin: 0;
+}
+ul#my-custom-listing li.im_user_full_name {
+  background: url("images/small-arrow-down.png") no-repeat scroll right 1px transparent;
+  padding-right: 20px;
+}
+ul#my-custom-listing li a.full-name-link{
+	color: #ae9490;
+}
+ul#my-custom-listing li a.full-name-link:hover{
+	text-decoration: none;
+}
+ul#my-custom-listing div.uh-settings-icon{
+	cursor:pointer;
+	margin-top: -5px;
+}
+ul#my-custom-listing li.im_user_settings_menu {
+	background: url("images/small-arrow-down.png") no-repeat scroll 25px 0 transparent;
+  height: 15px;
+  width: 35px;
+}
+li.im_user_settings_menu ul.menu-categories,
+li.im_stores_list_menu ul.menu-categories{
+	background-color: #fff;
+	width:128px;
+	line-height: 20px;
+	float: left;
+	margin: 0 0 0 -9px;
+	position: relative;
+	z-index: 1;
+	border: 1px solid #d6c6c4;
+}
+li.im_user_settings_menu ul.menu-categories {
+	margin: -6px 0 0 -9px;
+}	
+ul#my-custom-listing li.im_user_settings_menu ul.menu-categories li,
+ul#my-custom-listing li.im_stores_list_menu ul.menu-categories li {
+	width: 118px;
+	padding: 0 5px;
+	margin: 0px;
+	line-height: 20px;
+	border: 0px none;
+	border-bottom: 1px solid #d6c6c4;
+}
+ul#my-custom-listing li.im_stores_list_menu ul.menu-categories li {
+	width: 156px;
+}
+ul#my-custom-listing li.im_user_settings_menu ul.menu-categories li.last,
+ul#my-custom-listing li.im_stores_list_menu ul.menu-categories li.last {
+	border-bottom: 0px none;
+}
+li.im_user_settings_menu ul.menu-categories li a,
+li.im_stores_list_menu ul.menu-categories li a {
+	color: #826964;
+	width: 100%;
+	display: inline-block;
+}
+li.im_user_settings_menu ul.menu-categories li a:hover, 
+li.im_user_settings_menu ul.menu-categories li a:focus,
+li.im_stores_list_menu ul.menu-categories li a:hover, 
+li.im_stores_list_menu ul.menu-categories li a:focus {
+	text-decoration: none;
+	color: #fff;
+}
+li.im_user_settings_menu ul.menu-categories li:hover,
+li.im_stores_list_menu ul.menu-categories li:hover {
+	background-color: #9C8782;
+	color: #fff;
+}
+ul#my-custom-listing li.im_stores_list_menu {
+  background: url("images/small-arrow-down.png") no-repeat scroll right top transparent;
+  height: 16px;
+  padding:0 16px 0 0px;
+  min-width: 120px;
+}
+ul#my-custom-listing li.im_user_settings_menu div a,
+ul#my-custom-listing li.im_stores_list_menu div a {
+	color: #AE9490;
+	display: inline-block;
+  width: 100%;
+}
+ul#my-custom-listing li.im_stores_list_menu div a:hover{
+	text-decoration: none;
+}
+ul#my-custom-listing li.last {
+	border: 0px none;
+	margin-top: -4px;
+}
+ul#my-custom-listing li.last a.logout {  color: #AE9490;  line-height: 24px; }
+ul#my-custom-listing li.last a:hover { text-decoration: none; color: #B0DA19; }
+li.im_stores_list_menu ul.menu-categories{
+	margin: 1px 0 0 -9px;
+	width: 183px;
+	height: 300px;
+	overflow-y: scroll;
+	position: absolute;
+}
+.single-store {
+	color: #AE9490 !important;
+}
+.single-store:focus, .single-store:hover {
+	text-decoration: none;
+}
+/********************************************************/
+/* ======================= MENU BAR ================== */
+body #admin-menu { font-size: 11px; }
+#im-header-main {
+  background: url("/sites/all/themes/im/css/images/s-bar.png") repeat scroll 0 0 transparent;
+  height: 43px;
+  width: 100%;
+}
+.im-header-left {
+  padding-left: 30px;
+}
+.im-header-right {
+	float: right;
+	padding-right: 34px;
+}
+.im-header-left ul.nice-menu-down li.menuparent {
+  background: none;
+  border: 0 none;
+}
+.im-header-left ul.nice-menu ul {
+	top:43px;
+}
+.im-header-left ul.nice-menu-down ul li {
+  background-image: none;
+  background-color: #fff;
+  border-width: 0 0 1px 0;
+  border-bottom: 1px solid #d6c6c4;
+  height: 43px;
+  line-height: 43px;
+  width: 216px;
+}
+.im-header-left ul.nice-menu-down ul li.last {
+  border-bottom: 0px none;
+}
+.im-header-left ul.nice-menu-down ul li a {
+	color: #72544f;
+  font-size: 14px;
+  padding:2px 0 0 65px;
+}
+
+
+.im-header-left ul.nice-menu-down ul li a:hover,
+.im-header-left ul.nice-menu-down ul li a:focus {
+	text-decoration: none;
+	background-color: #9a7d78;
+	color: #fff;
+}
+.im-header-left ul.nice-menu-down li.menuparent a.header_nav_menu1 {
+  height: 43px;
+  padding: 0;
+  width: 216px;
+  color: #ED1C24;
+  font-size: 1px;
+}
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu2,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu3,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu4,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu5,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu6,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu7,
+/*** for current menu stats ***/
+#im-header-main .accueil,
+#im-header-main .modele-operationnel,
+#im-header-main .plan-de-ventes,
+#im-header-main .applications,
+#im-header-main	.guide-produits,
+#im-header-main .annuaire {
+	background-image: url("/sites/all/themes/im/css/images/nav-icons.png");
+	background-repeat: no-repeat;
+}
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu2:hover,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu3:hover,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu4:hover,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu5:hover,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu6:hover,
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu7:hover {
+	background-color: #9a7d78;
+}
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu2 { background-position:26px 13px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu2:hover {	background-position: -165px 13px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu3 {	background-position: 27px -35px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu3:hover {	background-position: -164px -35px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu4 {	background-position: 27px -78px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu4:hover {	background-position: -164px -78px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu5 {	background-position: 27px -122px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu5:hover {	background-position: -164px -122px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu6 {	background-position: 26px -166px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu6:hover {	background-position: -165px -166px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu7 {	background-position: 27px -211px; }
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu7:hover {	background-position: -164px -211px; }
+#im-header-main .accueil,
+#im-header-main .modele-operationnel,
+#im-header-main .plan-de-ventes,
+#im-header-main .applications,
+#im-header-main	.guide-produits,
+#im-header-main .annuaire {
+  color: #FFFFFF;
+  line-height: 43px;
+  text-indent: 45px;
+  font-size: 12px;
+  float: left;
+}
+#im-header-main .accueil { background-position: -177px 13px;}
+#im-header-main .modele-operationnel { background-position: -177px -35px;}
+#im-header-main .plan-de-ventes { background-position: -177px -78px;}
+#im-header-main .applications { background-position: -177px -167px;}
+#im-header-main .guide-produits { background-position: -177px -123px;}
+#im-header-main .annuaire { background-position: -177px -211px;}
+
+.im-header-left ul.nice-menu-down ul li a.header_nav_menu_application {
+  padding-left:31px;
+	line-height:13px;
+	display: table;
+	width: 86%;
+  height: 41px;
+}
+.im-header-left ul.nice-menu-down ul li a span.menu_logo {
+	margin: 9px 9px 0 0;
+  height: 24px;
+  width: 24px;
+  float: left;
+  overflow: hidden;
+}
+.im-header-left ul.nice-menu-down ul li a p {
+	display: table-cell;
+  width: 80%;
+  vertical-align: middle;
+  line-height: 13px;
+}
+
+/********* Applicantion Sub Menu *********/
+/*.im-header-left ul.nice-menu-down ul h3, .im-header-left #my-apps-submenu h3 {
+   font-size: inherit;
+   margin: 0;
+   font-weight: normal;
+}
+.im-header-left ul.nice-menu-down ul .app-sub-menu-title{
+	color: #72544F;
+	font-size: 14px;
+	padding: 0 0 0 30px;
+	height: 43px;
+	width: 186px;
+	line-height: 53px;
+	float: left;
+	background-color: #ebe2e0;
+}
+.im-header-left ul.nice-menu-down ul .my-application-menu-class,{
+  background-color: #ebe2e0;
+  float: left;
+}
+.im-header-left ul.nice-menu-down ul .my-application-menu-class li{
+  border: 0;
+  height: 30px;
+  line-height: 30px;
+  background-color: #ebe2e0;
+  margin: 0 20px 0 31px;
+  width: 165px;
+  overflow: hidden;
+}
+.im-header-left ul.nice-menu-down ul .my-application-menu-class li a{
+  padding: 0 5px 0 35px;
+  border-top: 1px solid #fff;
+  font-size: 12px;
+}
+*/
+#my-apps-col-1, #my-apps-col-2, #my-apps-col-3, #my-apps-submenu .my-application-menu-class {
+  float:left;
+  background-color: #ebe2e0;
+  min-height: 392px;
+}
+#my-apps-col-2, #my-apps-col-3 {
+margin-top: -44px;
+padding-top: 43px;
+}
+#my-apps-submenu{
+  position: absolute;
+  z-index: 100;
+  left: 215px;
+  padding-bottom:10px;
+  min-height:210px;
+  width:700px;
+}
+.im-header-left #my-apps-submenu h3 {
+   font-size: inherit;
+   margin: 0;
+   font-weight: normal;
+}
+.im-header-left #my-apps-submenu .app-sub-menu-title {
+  color: #72544F;
+  font-size: 14px;
+  padding: 0 0 0 30px;
+  height: 43px;
+  width: 192px;
+  line-height: 53px;
+  background-color: #ebe2e0;
+}
+
+ .im-header-left #my-apps-submenu .my-application-menu-class li {
+  border: 0;
+  height: 30px;
+  line-height: 30px;
+  background-color: #ebe2e0;
+  margin: 0 20px 0 31px;
+  width: 171px;
+  overflow: hidden;
+  list-style: none outside none;
+  border-top: 1px solid #fff;
+}
+ #my-apps-submenu .my-application-menu-class li a{
+  color: #72544F;
+  font-size: 14px;
+  padding-left: 15px;
+}
+#my-apps-submenu .my-application-menu-class li a:hover{
+  color: white;
+}
+
+/**************** Search Bar ************/
+.im-header-right #search-block-form .form-item {
+	margin: 0px;
+}
+.im-header-right #search-block-form input.form-text {
+  background: url("images/search-bar.png") no-repeat scroll 0 0 transparent;
+  border: 0 none;
+  font-size: 12px;
+  height: 29px;
+  margin-top: 7px;
+  padding: 0 40px 0 15px;
+  width: 346px;
+}
+.im-header-right #search-block-form	.container-inline{
+	position: relative;
+}
+.im-header-right #search-block-form #im-search-form-submit-header {
+  left: 368px;
+  position: absolute;
+  top: 12px;
+}
+
+/*======================================================================*/
+/*************************** CHANGE USER FORM ***************************/
+#change-user-form-sec, #change-user-form-results {
+	color: #72544F;
+	font-size: 12px;
+	padding: 25px 25px 0;
+}
+#change-user-form-results {
+}
+#change-user-form-sec {
+	border-bottom: 2px solid #9A7D78;
+	background-color: #FAF9F9;
+	padding-bottom: 15px;
+}
+#change-user-form-sec label {
+	float: left;
+	font-weight: normal;
+	line-height: 28px;
+	margin: 0px;
+	width: 100px;
+}
+#change-user-form-sec input.form-text {
+	height: 26px;
+	padding: 0;
+	width: 240px;
+}
+#change-user-form-sec .change-user-form-buttons {
+  padding-left: 100px;
+  position: relative;
+}
+#change-user-form-sec .change-user-form-buttons div.throbber  {
+  margin-top: -13px;
+  position: absolute;
+  right: 180px;
+}
+#change-user-form-sec .change-user-form-buttons input.form-submit,
+#change-user-form-results .change-user-form-results-buttons  input.form-submit {
+  height: 34px;
+}
+#change-user-form-sec .change-user-form-buttons .form-submit:hover,
+.change-user-form-results-buttons .form-submit:hover {
+	background-position: 0 -251px;
+}
+#change-user-form-sec .change-user-form-buttons input.form-submit,
+.change-user-form-results-buttons  input.form-submit {
+  background: url("/sites/all/modules/intranet_market/im_agenda/css/images/green-buttons.png") no-repeat scroll 0 -251px transparent;
+  border: 0 none;
+  color: #FFFFFF;
+  font-size: 11px;
+  height: 37px;
+  text-transform: uppercase;
+  width: 108px;
+  margin: 0 24px 0 0;
+  outline: none;
+  font-weight: 400;
+}
+.change-user-form-results-buttons  input.form-submit {
+  margin: 0 0 0 25px;
+}
+/*======================================================================*/
+/*********************** APPLICATION / DIRECTORY **********************/
+/*====================================================================*/
+.page-annuaire-all #page-title{
+  display:none;
+}
+.im-app-category-container, .im-app-directory {
+	font-size: 11px;
+	padding: 20px 30px;
+	background-color: #faf9f9;
+}
+.im-app-category-container .app-category-title, .im-app-directory h3 {
+	margin: 0;
+	font-size: 12px;
+	height: 20px;
+	font-weight: 400;
+	border-bottom: 1px solid #9A7D78;
+	line-height: 10px;
+}
+.im-app-category-container .app-category-title a,  .im-app-directory h3 a {
+	color: #000;
+}
+.im-app-category-container .app-category-title a:hover, .im-app-category-container .app-category-title a:focus,
+.im-app-category-container .single-app-container .app-container-title a:hover, .im-app-category-container .single-app-container .app-container-title a:focus,
+.im-app-category-container .single-app-container .add-app-button:hover, .im-app-category-container .single-app-container .add-app-button:focus,
+.im-app-category-container .single-app-container .remove-app-button:hover, .im-app-category-container .single-app-container .remove-app-button:focus  {
+	text-decoration: none;
+}
+.im-app-category-container .single-app-container, .im-app-directory .directory-content {
+	width: 207px;
+	height: 100px;
+	background-color: #fff;
+	box-shadow: 1px 1px 1px #ccc;
+	display: inline-table;
+	margin: 20px 14px 0 0;
+	padding: 10px;
+	position: relative;
+}
+.im-app-category-container .single-app-container.last-cont,
+.im-app-category-container .single-app-container.views-row-last,
+.im-app-directory .last-count .directory-content,
+.im-app-directory .directory-content.count-four {
+	margin-right: 0;
+}
+.im-app-category-container .single-app-container .im-app-icon {
+	float: left;
+	width: 35px;
+	height: 23px;
+	background: url("images/application-sprite.png") no-repeat scroll -214px -174px transparent;
+}
+.im-app-category-container .single-app-container .app-container-title,
+.im-app-directory .directory-content .directory-function {
+	height: 22px;
+	text-transform: uppercase;
+	line-height: 20px;
+	border-bottom: 1px solid #C3B1AE;
+	overflow: hidden;
+}
+.im-app-category-container .single-app-container .app-container-title a {
+	color: #000;
+	font-weight: 700;
+}
+.im-app-category-container .single-app-container a.add-app-button,
+.im-app-category-container .single-app-container a.remove-app-button {
+	position: absolute;
+	top: 41px;
+	right: 10px;
+	width: 72px;
+	height: 20px;
+	color: #fff;
+	text-transform: uppercase;
+	font-size: 9px;
+	line-height: 21px;
+	text-indent: 22px;
+	background: url("images/application-sprite.png") no-repeat scroll right -63px transparent;
+}
+.im-app-category-container .single-app-container a.remove-app-button {
+	width: 85px;
+	background: url("images/application-sprite.png") no-repeat scroll right -129px transparent;
+}
+.im-app-category-container .single-app-container .im-app-description {
+	padding-top: 18px;
+	color: #9a7d78;
+	word-break: break-all;
+}
+.im-app-category-container .single-app-container .im-app-description a {
+	color: #5e413d;
+}
+.im-app-category-container .single-app-container .im-app-description a:hover{
+	text-decoration: none;
+	cursor: default;
+}
+.im-app-category-container .single-app-container span.views-label-body {
+	float: left;
+	margin: 11px 0 8px 0;
+	width: 100%;
+}
+.im-app-category-container .single-app-container 	a.im-app-doc-help-link {
+	position: absolute;
+	background: url("images/application-sprite.png") no-repeat scroll right 0 transparent;
+	height: 17px;
+	width: 16px;
+	top: 10px;
+	right: 10px;
+	color: #B0DA19;
+	font-size: 0em;
+}
+/*======================================================================*/
+/*************************** DIRECTORY *******************************/
+/*====================================================================*/
+.im-app-directory h3 {
+	text-indent: 15px;
+}
+.im-app-directory .app-teasers {
+	display: inline-table;
+}
+.im-app-directory .directory-content .directory-function  {
+	font-size: 12px;
+	text-transform: none;
+	color: #72544f;
+}
+.im-app-directory .directory-content .directory-user-img {
+  float: left;
+  height: 66px;
+  padding-right: 5px;
+  padding-top: 10px;
+  text-align: center;
+  width: 48px;
+}
+.im-app-directory .directory-content .directory-user-img img {
+  max-height: 66px;
+  max-width: 48px;
+}
+.im-app-directory .directory-content .directory-detial-sec {
+  float: left;
+  padding-top: 10px;
+  width: 74%;
+}
+.im-app-directory .directory-content .directory-detial-sec .directory-user-name{
+  color: #5E413D;
+  margin-bottom: 3px;
+}
+.im-app-directory .directory-content .directory-detial-sec .directory-user-mail {
+  color: #75C92B;
+  font-size: 9px;
+  height: 22px;
+}
+.im-app-directory .directory-content .directory-detial-sec .directory-user-bureau,
+.im-app-directory .directory-content .directory-detial-sec .directory-user-mobile {
+  color: #9a7d78;
+  font-size: 10px;
+  padding-top: 1px;
+}
+.im-app-directory .directory-content .directory-detial-sec .directory-user-bureau span,
+.im-app-directory .directory-content .directory-detial-sec .directory-user-mobile span {
+  color: #5E413D;
+  text-align: right;
+  padding-right: 7px;
+  text-align: right;
+  width: 35px;
+}
+.agenda-date-selection a{
+  color: #AE9490;
+  font-size: 12px;	
+}
+.page-sales-plan #page-title {
+  display: none;
+}
+/*======================================================================*/
+/************************************* ACCESS DENIED PAGE  *********************************/
+/*====================================================================*/
+#access-error-container {
+	background: url("images/error-logo.png") no-repeat scroll 750px 50px #F9F9FA;
+	border: 1px solid #D5C9C8;
+	overflow: hidden;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	top: 0;
+	margin: auto;
+	height: 212px;
+	width: 750px;
+	padding: 50px;
+	text-align: left;
+}
+#access-error-container .type1 {
+  font: bold italic 68px serif;
+  color: #ED1C24;
+  padding-bottom: 10px;
+}
+#access-error-container .type2 {
+  font: bold 24px arial;
+  color: #979797;
+  padding-bottom: 8px;
+}
+#access-error-container .type3 {
+  font: 20px arial;
+  color: #ED1C24;
+  padding-bottom: 8px;
+}
+#access-error-container .type4 {
+  font: 18px arial;
+  color: #979797;
+}
+
+/*===========================================================*/
+/************************************* MESSAGE POPUP  *********************************/
+/*==========================================================*/
+.message-popup-wrapper { height: auto; }
+.message-popup-wrapper  .form-item { margin: 0; }
+.message-popup-wrapper .message-popup-title {
+  background-color: #FFFFFF;
+  height: 40px;
+  text-align: center;
+  width: 100%;
+  box-shadow:0px 0px 6px #888888;
+  margin-bottom:10px;
+  color: #684E49;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 40px;
+}
+.message-popup-wrapper  .message-popup-message-title,
+.message-popup-wrapper .message-popup-description { margin: 0 20px; }
+.message-popup-wrapper  .message-popup-message-title {
+  border-bottom: 1px solid #856D69;
+  color: #856D69;
+  font-size: 14px;
+  font-weight: 700;
+  padding-bottom: 7px;
+}
+.message-popup-wrapper .message-popup-description p {
+  margin-top: 5px;
+  margin-bottom: 15px;
+  font: 12px/16px arial;
+  color: #333;
+}
+.message-popup-submit { 
+  text-align: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.message-popup-submit .close-pop input {
+  border: none;
+  background: none;
+  line-height: 28px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+}
+.message-popup-submit .close-pop {
+  background-position: -147px -59px;
+  width: 110px;
+  text-indent: 38px;
+}
+.message-popup-next-info{
+	margin: 0px 20px 20px 0px;
+	text-align: center;
+	float: right;
+}
+/*===========================================================*/
+/************************************* Application integree iframe theme  *********************************/
+/*==========================================================*/
+.applications-iframe iframe{
+  height: 750px;
+  width: 100%;
+  border: 0px;
+}
+.applications-iframe div{ float:right; width:20px; height:20px; position:relative; }
+.applications-iframe div a.im-app-doc-help-link {
+  background-image: url("images/application-sprite.png");
+  height: 20px;
+  width: 20px;
+  background-position: 18px 0px;
+  cursor: pointer;
+	position:absolute;
+}

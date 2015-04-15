@@ -1,0 +1,1037 @@
+<?php
+/**
+ * @file
+ * Code for the IM Features Stores feature.
+ */
+
+include_once 'im_features_stores.features.inc';
+include_once drupal_get_path('module', 'im_user'). '/includes/im_user_store_preference_form.inc';
+
+function im_features_stores_init() {
+  if (($_GET['q'] == 'system/ajax') && preg_match('/^[a-z_]+_node_form/', $_POST['form_id'])) {
+    module_load_include('inc', 'node', 'node.pages');
+  }
+}
+/**
+* Implements hook_menu().
+*/
+function im_features_stores_menu() {
+  $items = array();
+  $items['preferred/node/form/%ctools_js/add'] = array(
+    'title' => 'Preferrred Store Form',
+    'page arguments' => array(3),
+    'page callback' => '_im_preferred_node_form_add',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['preferred/node/form/%ctools_js/%/edit'] = array(
+    'title' => 'Preferrred Store Form',
+    'page arguments' => array(3),
+    'page callback' => '_im_preferred_node_form_edit',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['user_store_preference_form/node/form/%ctools_js/%/edit'] = array(
+    'title' => 'Preferrred Store Form',
+    'page arguments' => array(3),
+    'page callback' => '_im_preferred_node_form_user_edit',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['preferred/node/form/%ctools_js/add-regional-user']  = array(
+    'title' => 'Preferrred Store Form',
+    'page arguments' => array(3),
+    'page callback' => '_im_preferred_node_form_add_user',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['preferred/node/form/%ctools_js/add-regional-user-dashboard/%']  = array(
+    'title' => 'Preferrred Store Form',
+    'page arguments' => array(3),
+    'page callback' => '_im_preferred_node_form_add_user',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['regional-user-dashboard-edit/node/form/%ctools_js/%/%'] = array(
+    'title' => 'Preferrred Store Form',
+    'page arguments' => array(3),
+    'page callback' => '_im_preferred_node_form_regioanl_edit',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['regional-user-dashboard-edit/node/form/%ctools_js/%'] = array(
+    'title' => 'Preferrred Store Form',
+    'page arguments' => array(3),
+    'page callback' => '_im_preferred_node_form_regioanl_edit',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+/**
+ * 
+ * Implements hook_FORM_ID_alter. To alter the Preferref node form.
+ */
+function im_features_stores_form_preferred_store_node_form_alter(&$form, &$form_state, $form_id) {
+  drupal_add_css(drupal_get_path('module', 'im_features_stores') . '/css/im_features_stores.css');
+  drupal_add_js(drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js');
+  $form['preferred_page_header_title'] = array(
+    '#type' => 'markup',
+    '#markup' =>t('Filtering information presented on the portal'),
+  );
+  $form['preferred_page_title'] = array(
+    '#type' => 'markup',
+    '#markup' =>t('Filtres sur la liste des magasins'),
+  );
+  $delta = 0;
+  //Set the Ajax call back for the Filed collection DO/DR/CF/
+  $max_delta = $form['field_preferred_do_dr'][LANGUAGE_NONE]['#max_delta'];
+  while ($delta <= $max_delta) {
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE]['#options'] = array_unique(get_do_field());
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE]['#prefix'] = '<div id="sp-do" class="sp-do">';
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE]['#suffix'] = '</div>';
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE]['#attributes'] = array('class' => array('preferred_do'));
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE]['#ajax'] = array('callback' => 'ajax_callback_preferred_do_field', 'wrapper' => 'dr-cf-' . $delta);
+    //Default value for Do field in the Edit form page.
+    if(isset($form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#entity']->field_preferred_do[LANGUAGE_NONE][0]['value'])) {
+      $default_do = $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#entity']->field_preferred_do[LANGUAGE_NONE][0]['value'];
+      $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE]['#default_value'] = $default_do; 
+    }
+    else {
+      $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE]['#default_value'] = "All";
+    }
+    $drcf_field_option = array();
+    //Check the values from Ajax call back return.   
+    if (isset($form_state['values']['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE][0]['value'])) {
+      $drcf_field_option = get_dr_cf_field($form_state['values']['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_do'][LANGUAGE_NONE][0]['value']);
+      $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#options'] = $drcf_field_option; 
+    }    
+     //Default value for DR CF field in the Edit form page.
+    if(isset($form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#entity']->field_preferred_dr_cf[LANGUAGE_NONE])) {
+      if (empty($drcf_field_option)) { 
+      	$drcf_field_option = get_dr_cf_field($default_do);       
+        foreach ($form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#entity']->field_preferred_dr_cf[LANGUAGE_NONE] as $key => $value) {
+          $drcf_default_option[$value['value']] = $value['value'];	
+        }        
+        $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#options'] = $drcf_field_option;
+        if (isset($drcf_default_option) && count($drcf_default_option) > 0) {
+          $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#default_value'] = $drcf_default_option;
+        }
+      }
+    }
+   else {
+   	$drcf_default_option = '';
+   	if(empty($drcf_field_option)) {
+   	  $drcf_field_option = get_dr_cf_field("All");
+   	  $drcf_default_option["All"] = "All";	
+   	}      
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#options'] = $drcf_field_option;
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#default_value'] = $drcf_default_option;
+    }
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#prefix'] = '<div id="dr-cf-' . $delta . '" class="dr-cf">';
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'][LANGUAGE_NONE]['#suffix'] = '</div>';  
+    
+    $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['remove_button']['#attributes'] = array('class' => array('field-remove-submit'));
+   $form['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['remove_button']['#ajax'] = array("callback" => "_im_features_stores_dr_cr_ajax_remove_submit");
+    $delta++;
+  }
+   
+  //Set the AJAX Callback for the Crietria Field.
+  $criteria = 0;
+  $max_criteria = $form['field_preferred_criteria_set'][LANGUAGE_NONE]['#max_delta'];
+  while ($criteria <= $max_criteria) {
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_preferred_criteria'][LANGUAGE_NONE][0]['value']['#autocomplete_path'] = 'uspautocomplete';
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_preferred_criteria'][LANGUAGE_NONE][0]['value']['#ajax'] = array('callback' => 'ajax_callback_preferred_criteria', 'wrapper' => 'autoc-' . $criteria);  
+    $options = array();
+    $val_options = array();	
+    //Check the values from Ajax call back return.
+    if (isset($form_state['values']['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_preferred_criteria'][LANGUAGE_NONE][0]['value'])) {
+      $item_type = get_item_type_by_autocomplete($form_state['values']['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_preferred_criteria'][LANGUAGE_NONE][0]['value']);
+      if (isset($item_type['dit_idt_type'])) {
+        $options = get_operator_value($item_type['dit_idt_type']);
+      }
+      if (isset($item_type['dit_cod_item'])) {
+      	$val_options = get_criteria_filter_list($item_type['dit_cod_item']);
+      } 
+    }
+    //Default value for User Operator field in the Edit form page.
+    $default_criteria = '';
+    if(isset($form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['#entity']->field_preferred_criteria[LANGUAGE_NONE][0]['value'])){
+    	$preferred_criteria = $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['#entity']->field_preferred_criteria[LANGUAGE_NONE][0]['value'];
+  	  	$item_type = get_item_type_by_autocomplete($preferred_criteria);
+    }
+    if(isset($form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['#entity']->field_preferred_criteria[LANGUAGE_NONE][0]['value']) && isset($form['field_preferred_criteria_set'][LANGUAGE_NONE][0]['#entity']->field_preferred_user_operator[LANGUAGE_NONE][0]['value'])) {
+  	  if (isset($item_type['dit_idt_type'])) {
+        $options = get_operator_value($item_type['dit_idt_type']);
+      } 
+      $default_criteria = $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['#entity']->field_preferred_user_operator[LANGUAGE_NONE][0]['value'];
+      if (in_array($default_criteria, $options)) {
+        $options[$default_criteria] = $default_criteria;
+      }    
+    }
+  	$default_val_criteria = '';
+  	$val_options = array();
+ 	if(isset($form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['#entity']->field_preferred_criteria[LANGUAGE_NONE][0]['value']) && isset($form['field_preferred_criteria_set'][LANGUAGE_NONE][0]['#entity']->field_auto_complete_value_type5)) {
+  	  if (isset($item_type['dit_idt_type'])) {
+        $val_options = get_criteria_filter_list($item_type['dit_cod_item']);
+      } 
+      $default_val_criteria = $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['#entity']->field_auto_complete_value_type5[LANGUAGE_NONE];
+      /*if (in_array($default_val_criteria, $val_options)) {
+        $val_options[$default_val_criteria] = $default_val_criteria;
+      }*/
+       foreach($default_val_criteria as $delta => $nid){
+       		$default_type5_values[] = $nid['value'];
+       }    
+ 	}
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_preferred_user_operator'][LANGUAGE_NONE]['#options'] = $options;
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_preferred_user_operator'][LANGUAGE_NONE]['#default_value'] = $default_criteria;
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_preferred_user_operator'][LANGUAGE_NONE]['#prefix'] = '<div id="autoc-' . $criteria . '">';
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_preferred_user_operator'][LANGUAGE_NONE]['#suffix'] = '</div>';    
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['remove_button']['#ajax'] = array("callback" => "_im_features_stores_criteria_ajax_remove_submit");
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['remove_button']['#attributes'] = array('class' => array('field-remove-submit'));
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_auto_complete_value_type5'][LANGUAGE_NONE]['#options'] = $val_options;
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_auto_complete_value_type5'][LANGUAGE_NONE]['#default_value'] = $default_type5_values;
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_auto_complete_value_type5'][LANGUAGE_NONE]['#prefix'] = '<div id="auto-type5-' . $criteria . '">';
+    $form['field_preferred_criteria_set'][LANGUAGE_NONE][$criteria]['field_auto_complete_value_type5'][LANGUAGE_NONE]['#suffix'] = '</div>';
+    $criteria++;
+  }
+  if (arg(0) == "regional-user-dashboard-edit") {
+  	$custom_form_id = arg(0);
+  }
+  else {
+  	$custom_form_id = arg(4);
+  }
+  $form["custom_form_id"] =array(
+    '#type' => 'value',
+    '#value' => $custom_form_id,
+  );
+  $form["custom_user_id"] =array(
+    '#type' => 'value',
+    '#value' => arg(5),
+  );
+  $form['preferred_filter'] = array(
+    '#type' => 'submit',
+    '#value' => t('Filter'),
+    '#ajax' => array (
+      'callback' => '_im_user_form_preferred_form_filter',
+      'wrapper' => 'preferred-store-option',
+     ),
+    '#weight' => '4',
+    '#attributes' => array('name' => 'usp_save'),
+  );
+  $form['preferred_reset'] = array(
+    '#markup' => '<input type="reset" class="form-submit" name="usp_reset" value=" ' . t('Reset') . '" />',
+    '#weight' => '5',
+    '#ajax' => array(
+      'callback' => '_im_features_stores_form_reset',
+  	  'wrapper' => 'stores-form-reset',
+    ),
+  );
+  if (arg(0) == "preferred" && arg(1) == "node") {
+  	$form['preferred_cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('cancel'),
+    );
+  }  
+  $form['field_preferred_store_options']['#weight'] = '6';
+  $form['field_preferred_store_choice']['#weight'] = '7';
+  $store_options  = array();
+  $store_list =  _get_all_stores(); //get_store_result();
+  foreach ($store_list as $store_id => $store_name) {
+   $store_options[$store_id] = $store_name;
+  }
+  $form['field_preferred_store_choice'][LANGUAGE_NONE]['#options']  = $store_options;
+  $form['field_preferred_store_choice']['#prefix'] = '<div id = "preferred-store-choice">';
+  $form['field_preferred_store_choice']['#suffix'] = '</div>';
+  
+  $form['field_preferred_store_options']['#prefix'] = '<div id = "preferred-store-option">';
+  $form['field_preferred_store_options']['#suffix'] = '</div>';
+  
+  $form['preferred_store_checkbox_avl'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Select all'),
+  );
+  $form['preferred_store_checkbox_sel'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Select all'),
+  );
+  $form['actions']['submit']['#value'] = t("Validate");
+  $form['#validate'][] = 'im_user_form_preferred_form_validate'; 
+  $form['#submit'][] = 'im_user_form_preferred_form_submit';
+  $form['actions']['submit']['#attributes'] = array('class' => array('user-store-submit'));
+  $form['preferred_cancel']['#attributes'] = array('class' => array('user-store-cancel'));
+  $regional_nid = '';
+  if (arg(4) == "add-regional-user-dashboard" && is_numeric(arg(5))) {
+  	$userId = arg(5);
+  	if (isset($_SESSION["dashboard_regional_users"][$userId]['regional_nid'])) {
+  		$regional_nid = intval($_SESSION["dashboard_regional_users"][$userId]['regional_nid']);  		
+  	}
+  }  
+  //Default values  for the node edit page :Store Options and store choice field
+  if (is_numeric(arg(4)) || !empty($_SESSION['selected_store_preference_nid_ctools']) || !empty($regional_nid)) {
+  	$form['field_preferred_store_options'][LANGUAGE_NONE]['#attributes']['class'] = array('field_preferred_store_options_sel ajax_rendered_multiselect_box');
+  	$selected_stores_array = $form['field_preferred_store_options'][LANGUAGE_NONE]['#entity']->field_preferred_store_options['und'];
+	  if (empty($selected_stores)) {
+	  	$selected_stores = array();
+	  	$selected_stores_options = array();
+	  }
+	  foreach ($selected_stores_array as $key=>$value) {	  	
+	  	$selected_stores[] = $value['value'];
+	  	if (array_key_exists($value['value'], $store_options)) {
+	  	  $selected_stores_options[$value['value']] = $store_options[$value['value']];	  	  
+	  	}
+	  }
+	  drupal_add_js(array('store_options' => $selected_stores_options), 'setting');
+	  if (!empty($regional_nid)) {
+	  	drupal_add_js(array('preferred_node_edit' => 'preferred_node_edit'), 'setting');
+	  }	  
+	  $form['field_preferred_store_options'][LANGUAGE_NONE]['#options']  = $store_options;
+	  $form['field_preferred_store_options'][LANGUAGE_NONE]['#default_value']  = $selected_stores_options; 
+	  $default_store_choice = isset($form['field_preferred_store_choice'][LANGUAGE_NONE]['#entity']->field_preferred_store_choice['und'][0]['value']) ?  $form['field_preferred_store_choice'][LANGUAGE_NONE]['#entity']->field_preferred_store_choice['und'][0]['value'] : '';
+	  $store_choice = array();
+      if (array_key_exists($default_store_choice, $store_options)) {
+	  	  $store_choice[] = $default_store_choice;
+	  	}
+	  $form['field_preferred_store_choice'][LANGUAGE_NONE]['#options']  = $store_options;
+	  $form['field_preferred_store_choice'][LANGUAGE_NONE]['#default_value']  = $store_choice;
+  }
+  else {
+  	$form['field_preferred_store_options'][LANGUAGE_NONE]['#options']  = $store_options;
+  }
+  $store_options_prefix = $form['field_preferred_store_options'][LANGUAGE_NONE]['#prefix'];
+  $store_filtered_content = count($store_options);
+  $purual = '';
+  $store_options_prefix = str_replace(t("Available Options"), t('@span_st@count@span_end Store@puspan_st@purual@span_end found', array("@purual" => $purual, "@puspan_st" => '<span id="left-store-purual">', "@count" => 0, "@span_st" => '<span id="unavail_filtered_store_count">', "@span_end" => '</span>')), $store_options_prefix);
+  if ($store_filtered_content > 0) {
+    $purual = 's';
+  }
+  $store_options_prefix = str_replace(t("Selected Options"), t('@span_st@count@span_end Selected store@puspan_st@purual@span_end', array("@purual" => $purual, "@puspan_st" => '<span id="right-store-purual">', "@count" => $store_filtered_content, "@span_st" => '<span id="avail_filtered_store_count">', "@span_end" => '</span>')), $store_options_prefix);
+  $store_options_prefix = str_replace(t("Store options"), t('Resultants: @span_st@count@span_end store@puspan_st@purual@span_end found', array("@purual" => $purual, "@puspan_st" => '<span id="store-purual">', "@count" => $store_filtered_content, "@span_st" => '<span id="total_filtered_store_count">', "@span_end" => '</span>')), $store_options_prefix);
+  
+  $form['field_preferred_store_options'][LANGUAGE_NONE]['#prefix'] = decode_entities($store_options_prefix);
+  
+  if (arg(0) == "preferred" && arg(1) == "node") {
+  	 $form['field_preferred_store_choice']['#access'] = FALSE;
+  }
+  $form['#prefix'] = '<div id = "stores-form-reset">';
+  $form['#suffix'] = '</div>';
+
+  //Dynamically fetching Store status options.
+  $form['field_preferred_store_status']['und']['#options'] = _get_status_magasin_options();
+  //setting the default values.
+  $store_status_default = _get_status_magasin_options();
+  $store_opts_default = array();
+  foreach($store_status_default as $key => $value){
+    $store_opts_default[] = $value;
+  }
+  //UATIM-621 Fix for Store status value to be stored.
+  if (isset($form_state['node']->field_preferred_store_status)) {
+    $store_opts_default = array();
+    if (isset($form_state['node']->field_preferred_store_status['und'])) {
+      foreach ($form_state['node']->field_preferred_store_status['und'] as $value) {
+        $store_opts_default[] = $value['value'];
+      }
+    }
+  }
+  $form['field_preferred_store_status']['und']['#default_value'] = $store_opts_default;
+}
+
+function _im_features_stores_form_reset($form, $form_state) {
+	return $form;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function im_features_stores_theme($existing, $type, $theme, $path) {
+  return array(
+    'preferred_store_node_form' => array(
+      'render element' => 'form',
+      'template' => 'theme/preferred-store-node-form',
+    ),
+  );
+}
+
+/**
+ * 
+ * Ajax call back back to the get the value of for the DO field.
+ */
+function ajax_callback_preferred_do_field($form, $form_state) {	
+  $delta = isset($form_state['triggering_element']['#field_parents'][2]) ? $form_state['triggering_element']['#field_parents'][2] : '';
+  return $form ['field_preferred_do_dr'][LANGUAGE_NONE][$delta]['field_preferred_dr_cf'];
+}
+/**
+ * 
+ * Ajax call back to get the value of Criteria field.
+ */
+function ajax_callback_preferred_criteria($form, $form_state) {
+  $options = array();
+  $val_options = array();
+  $delta = isset($form_state['triggering_element']['#field_parents'][2]) ? $form_state['triggering_element']['#field_parents'][2] : '';
+  if (isset($form_state['values']['field_preferred_criteria_set'][LANGUAGE_NONE][$delta]['field_preferred_criteria'][LANGUAGE_NONE][0]['value'])) {
+	      $item_type = get_item_type_by_autocomplete($form_state['values']['field_preferred_criteria_set'][LANGUAGE_NONE][$delta]['field_preferred_criteria'][LANGUAGE_NONE][0]['value']);
+	      if (isset($item_type['dit_idt_type'])) {
+	        $options = get_operator_value($item_type['dit_idt_type']);        
+	      }
+	      if (isset($item_type['dit_cod_item'])  && $item_type['dit_idt_type'] == "5") {
+	      $val_options = get_criteria_filter_list($item_type['dit_cod_item']);
+	      } 
+	    }
+  $commands = array();
+  $form['field_preferred_criteria_set'][LANGUAGE_NONE][$delta]['field_preferred_user_operator'][LANGUAGE_NONE]['#options'] = $options;
+  $form['field_preferred_criteria_set'][LANGUAGE_NONE][$delta]['field_auto_complete_value_type5'][LANGUAGE_NONE]['#options'] = $val_options;
+  $commands[] = ajax_command_replace('#autoc-'. $delta,  render($form['field_preferred_criteria_set'][LANGUAGE_NONE][$delta]['field_preferred_user_operator']));
+  $commands[] = ajax_command_replace('#auto-type5-' . $delta, drupal_render($form['field_preferred_criteria_set'][LANGUAGE_NONE][$delta]['field_auto_complete_value_type5']));
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+/**
+ * 
+ * Function to handle the Ajax submit for Filter
+ */
+function _im_user_form_preferred_form_filter(&$form, $form_state)  {
+  $array = _im_user_form_preferred_form_filter_process($form, $form_state);
+  $form['field_preferred_store_options'][LANGUAGE_NONE]['#default_value'] = $array['default_value'];
+  $form['field_preferred_store_options'][LANGUAGE_NONE]['#options'] = $array['store_options'];
+  $form['field_preferred_store_options'][LANGUAGE_NONE]['#attributes']['class'] = array('field_preferred_store_options_sel ajax_rendered_multiselect_box ajax_rendered_multiselect_box_filtered');
+  $form['field_preferred_store_choice'][LANGUAGE_NONE]['#default_value'] = $array['default_value'];
+  $form['field_preferred_store_choice'][LANGUAGE_NONE]['#options'] = $array['store_options'];
+  
+  //$form['field_preferred_store_choice'][LANGUAGE_NONE]['#attributes']['class'] = array('field_preferred_store_options_sel ajax_rendered_multiselect_box');
+  /*$store_options_prefix = $form['field_preferred_store_options'][LANGUAGE_NONE]['#prefix'];
+  $store_filtered_content = count($store_options);
+  $store_options_prefix = str_replace("Available Options:", t('@span_st@count@span_end Stores found', array("@count" => 0, "@span_st" => '<span id="unavail_filtered_store_count">', "@span_end" => '</span>')), $store_options_prefix);
+  $store_options_prefix = str_replace("Selected Options:", t('@span_st@count@span_end Selected stores', array("@count" => $store_filtered_content, "@span_st" => '<span id="avail_filtered_store_count">', "@span_end" => '</span>')), $store_options_prefix);
+  $store_options_prefix = str_replace("Store options:", t('Resultants: @span_st@count@span_end stores found', array("@count" => $store_filtered_content, "@span_st" => '<span id="total_filtered_store_count">', "@span_end" => '</span>')), $store_options_prefix);
+  $form['field_preferred_store_options'][LANGUAGE_NONE]['#prefix'] = decode_entities($store_options_prefix);*/
+  $purual = '';
+  if (count($array['store_options']) > 1) {
+    $purual = 's';
+  }
+  
+  return array(
+    '#type' => 'ajax',
+    '#commands' => array(
+      ajax_command_replace("#preferred-store-option", render($form['field_preferred_store_options'])),
+      ajax_command_replace("#preferred-store-choice", render($form['field_preferred_store_choice'])),
+      ajax_command_replace("#total_filtered_store_count", count($array['store_options'])),
+      ajax_command_replace("#avail_filtered_store_count", count($array['store_options'])),
+      ajax_command_replace("#store-purual", $purual),
+    )
+  );
+}
+/**
+ * 
+ * Function to handle the filter process and retrive the results
+ */
+function _im_user_form_preferred_form_filter_process($form, $form_state) {	
+  $store_options = array();
+  $default_value = array();
+  $status = $form_state['values']['field_preferred_store_status'][LANGUAGE_NONE];
+  $dr_cf = array();
+  $criteria = array();
+  $usp_autocomplete_value_text = array();  
+  foreach ($form_state['values']['field_preferred_do_dr'][LANGUAGE_NONE] as $key => $value) {  	
+  	if (!empty($value['entity']->field_preferred_do) && !empty($value['entity']->field_preferred_dr_cf)) {
+  	  $do = isset($value['entity']->field_preferred_do[LANGUAGE_NONE][0]['value']) ? $value['entity']->field_preferred_do[LANGUAGE_NONE][0]['value'] : '';
+  	  $dr_df_value = isset($value['entity']->field_preferred_dr_cf[LANGUAGE_NONE][0]['value']) ? $value['entity']->field_preferred_dr_cf[LANGUAGE_NONE][0]['value'] : '';
+  	  if ($do == "All" && $dr_df_value == "All") {
+  	    $dr_cf  =  array('All'); //array_diff($_SESSION['doArray'], $dr_cf);
+  	    break;
+  	   }
+  	  elseif ($do != "All" && $dr_df_value == "All") {
+  	    $dr_cf[] = $do;
+  	  }
+  	  else {
+  	   $dr_cf[] = $dr_df_value;	
+  	  }
+  	}  	
+  }
+  foreach ($form_state['values']['field_preferred_criteria_set'][LANGUAGE_NONE] as $key => $value) {
+  	if (isset($value['entity']->field_preferred_criteria[LANGUAGE_NONE][0]['value'])){
+  	  $criteria[$key]['criteria']= $value['entity']->field_preferred_criteria[LANGUAGE_NONE][0]['value'];	
+  	} 
+  	if (isset($value['entity']->field_preferred_auto_complete[LANGUAGE_NONE][0]['value'])){
+  	  $usp_text = isset($value['entity']->field_preferred_auto_complete[LANGUAGE_NONE][0]['value']) ? $value['entity']->field_preferred_auto_complete[LANGUAGE_NONE][0]['value'] : '';
+      $criteria[$key]['usp_autocomplete_value'] = $usp_text;
+  	}
+  	if (isset($value['entity']->field_preferred_user_operator[LANGUAGE_NONE][0]['value'])){
+  	  $criteria[$key]['usp_operator']= decode_entities($value['entity']->field_preferred_user_operator[LANGUAGE_NONE][0]['value']);	
+  	}
+  	if (isset($value['entity']->field_auto_complete_value_type5[LANGUAGE_NONE])){
+   	  $type5_vals = array();
+  	  foreach ($value['entity']->field_auto_complete_value_type5[LANGUAGE_NONE] as $type5_key => $type5_value) {
+  	  	$type5_vals[] = $type5_value['value'];  	  	
+  	  	$type5_vals_imp = implode("','",$type5_vals);  	  	
+		if($type5_vals_imp){
+		  $criteria[$key]['usp_autocomplete_value']= decode_entities($type5_vals_imp);
+		}
+   	  }
+  	}   	
+  }  
+  $status_value = '';
+  $dr_cf_value = '';
+  foreach ($status as $key =>$value) {
+    if ($value != '0'){
+      $status_value .= "'" . $value['value'] . "',";
+    }
+  }
+  if ($status_value) {
+    $status_value = trim($status_value, ",");
+    $status_value = trim($status_value, "'");
+  }
+ /* foreach ($dr_cf as $key =>$value){
+    if ($value == "All" && $key == "All") {
+  	  $dr_cf  =  array('All'); //array_diff($_SESSION['doArray'], $dr_cf);
+  	  break;
+  	}
+  }*/
+  foreach ($dr_cf as $key =>$value){
+    if(!empty($value)){
+	  $dr_cf_value .= "'" . $value . "',";
+	}
+  }
+  if ($dr_cf_value) {
+    $dr_cf_value = trim($dr_cf_value, ",");
+    $dr_cf_value = trim($dr_cf_value, "'");
+  }
+  if ($usp_autocomplete_value_text) {
+    $usp_autocomplete_value_text = trim($usp_autocomplete_value_text, ",");
+    $usp_autocomplete_value_text = trim($usp_autocomplete_value_text, "'");	
+  }
+  $custom_form_id = $form_state['values']['custom_form_id']; 
+  $custom_user_id= $form_state['values']['custom_user_id'];
+  $store_list =  get_store_results($dr_cf_value, $status_value, $criteria, $custom_form_id, $custom_user_id);
+  foreach ($store_list as $store_id => $store_name) {
+   $store_options[$store_id] = $store_name;
+   $default_value[] = $store_name;
+  } 
+  $array = array();
+  $array['store_options'] = array();
+  $array['default_value'] = array();
+  $array['store_options'] = $store_options;
+  $array['default_value'] = $default_value;
+  return $array;
+}
+/**
+ * 
+ * Function to handle the Ajax submit for Reset
+ */
+function _im_user_form_preferred_form_reset($form, &$form_state)  {
+  $form_state['values'] = "";
+  $form_state['rebuild'] = TRUE;  
+}
+
+
+function im_user_form_preferred_form_submit(&$form, $form_state) {
+if (count($form_state['values']['field_preferred_store_options']['und'][0]['value']) == 0) {
+   unset($_SESSION['selected_store_mandatory']);
+  }
+}
+
+/**
+* Preprocessor for theme('preferred_store_node_form').
+*/
+function im_features_stores_preprocess_preferred_store_node_form(&$variables) {
+
+}
+
+/**
+ * 
+ * Function to display the Preferred store node add form in the Ctools pop-up ...
+ */
+function _im_preferred_node_form_add($js = FALSE) {
+  global $user;
+  drupal_add_js(drupal_get_path('module', 'im_agenda') . '/js/im_agenda.js');
+  drupal_add_css(drupal_get_path('module', 'im_agenda') . '/css/im_agenda.css');
+  drupal_add_js(drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js');
+  if (!$js) {
+    return drupal_goto('node/add/preferred-store');
+  }
+
+  // Get node form defaults.
+  global $user;
+  $type = "preferred_store";
+  $types = node_type_get_types();
+  $node = (object) array(
+    'uid' => $user->uid,
+    'name' => (isset($user->name) ? $user->name : ''),
+    'type' => $type,
+    'language' => LANGUAGE_NONE
+  );
+  $title = t('Create @name', array('@name' => $types[$type]->name));
+ 
+  if (!empty($_SESSION['selected_store_preference_nid_ctools'])) {
+  	_im_preferred_node_form_edit("ajax");
+  }
+  _im_preferred_node_form($node, $title, FALSE);
+}
+/**
+ * 
+ * Function to filter the store result based on user input
+ * @param string $dr_cf_db_value : the value of selected dr cf.
+ * @param string $status_db_value : the value of selected store status
+ * @param array $criteria: list of the criteria items selected.
+ * @param array $custom_form_id: returns the USP accessed page argument .
+ * @param array $custom_user_id: returns the User ID : To be used for the User dashboard page .
+ */
+function get_store_results($dr_cf_db_value, $status_db_value, $criteria, $custom_form_id, $custom_user_id) {
+  $value1 = array();
+  $value2 = array();
+  $value3 = array(); 
+  $store_list = '';  
+   /*If the user store preferred form: To add a Regional role to user- Exclude the stores alreday selected by the other regional role users*/
+  if ($custom_form_id == "add-regional-user" || $custom_form_id == "add-regional-user-dashboard" || $custom_form_id == "regional-user-dashboard-edit") {  	
+  	if ($custom_form_id == "regional-user-dashboard-edit" && is_numeric($custom_user_id)) {  		
+  	  $nid =$custom_user_id;
+  	  $query = "SELECT field_rmp_store_value FROM field_data_field_rmp_store where entity_id != '". $nid ."'";
+  	}
+  	else {
+  	  $query = "SELECT field_rmp_store_value FROM field_data_field_rmp_store";	
+  	}  	
+    $regional_filter = db_query($query);
+    foreach($regional_filter as $result) {
+    $regional_store['store_list'][] = $result;
+   }   
+   if (isset($regional_store['store_list'])) {
+    foreach ($regional_store['store_list'] as $key =>$value){
+     if ($value != '0'){
+       $store_value = explode(",",$value->field_rmp_store_value);
+       if (count($store_value > 1)) {
+       	foreach ($store_value as $key => $value) {       		
+       	  $store_list .= "" . $value. ",";
+       	}
+       }
+       	else {
+       	  $store_list .= "" . $value->field_rmp_store_value . ",";	
+       	}       
+      }
+    }
+   } 
+   //List of the stores selected by other regional users.    
+   if ($store_list) {
+//    $store_list = trim($store_list, ",");
+    $store_list = trim($store_list, "'");
+   }      
+  } 
+//  $query = "SELECT pve_code AS STORE_ID FROM store_item_fields WHERE ite_lib_value IN ('".$dr_cf_db_value ."') AND pve_code IN(SELECT pve_code AS STORE_ID FROM store_item_fields WHERE ite_lib_value IN ('".$status_db_value."'))";
+  if ($dr_cf_db_value == "All") {
+  	$query = "SELECT DISTINCT ste1.pve_code AS STORE_ID FROM {store_item_fields} ste1, {store_item_fields} ste2 WHERE ste1.pve_code=ste2.pve_code and ste2.ite_lib_value IN ('".$status_db_value."')";
+  }
+  else {
+  	$query = "SELECT DISTINCT ste1.pve_code AS STORE_ID FROM {store_item_fields} ste1, {store_item_fields} ste2 WHERE ste1.pve_code=ste2.pve_code and ste1.ite_lib_value IN ('".$dr_cf_db_value ."') and ste2.ite_lib_value IN ('".$status_db_value."')";
+  }
+  $filter1 = db_query($query);
+  foreach($filter1 as $result) {
+    $value1['store_id'][] = $result;
+  }
+  $store_id = '';
+  $store_id_in_query = array();
+  if (isset($value1['store_id'])) {
+    foreach ($value1['store_id'] as $key =>$value){
+      if ($value != '0'){
+        $store_id .= "'" . $value->store_id . "',";
+        $store_id_in_query[] = $value->store_id;
+      }
+    }
+  }
+  if ($store_id) {
+    $store_id = trim($store_id, ",");
+    $store_id = trim($store_id, "'");
+  }   
+  $criteria_set = '';
+  $criteria_start = '';
+  $regional_users = '';
+  //Prepare the query for criteria
+  foreach ($criteria as $key => $value) {
+  	$criteria_start .= "SELECT a.pve_code AS STORE_CODE FROM {store_item_fields_desc} b LEFT JOIN {store_item_fields} a ON b.dit_cod_item=a.dit_cod_item WHERE a.pve_code IN (";
+  	$criteria_set .= ")";
+    if ($value['usp_operator'] == "Starting From") {
+  	  $date = date('m/d/Y',strtotime(str_replace("/", "-", $value['usp_autocomplete_value'])));
+  	  $criteria_set .= " and b.dit_lib='" . $value['criteria'] . "' and a.ite_lib_value >= ('". $date . "')";	
+  	}
+  	elseif ($value['usp_operator'] == "Ending From") {
+  	  $date = date('m/d/Y',strtotime(str_replace("/", "-", $value['usp_autocomplete_value'])));
+  	  $criteria_set .= " and b.dit_lib='" . $value['criteria']. "' and a.ite_lib_value <= ('". $date . "')";
+  	}
+    elseif ($value['usp_operator'] == "greater") {
+  	  $criteria_set .= " and b.dit_lib='" . $value['criteria'] . "' and a.ite_lib_value > ('". $value['usp_autocomplete_value'] . "')";
+  	}
+   elseif ($value['usp_operator'] == "lesser") {
+  	  $criteria_set .= " and b.dit_lib='" . $value['criteria'] . "' and a.ite_lib_value < ('". $value['usp_autocomplete_value'] . "')";
+  	}
+   elseif ($value['usp_operator'] == "lesser_gretaer") {
+  	  $criteria_set .= " and b.dit_lib='" . $value['criteria'] . "' and a.ite_lib_value <> ('". $value['usp_autocomplete_value'] . "')";
+  	}
+    elseif ($value['usp_operator'] == "Like") {
+  	  $criteria_set .= " and b.dit_lib='" . $value['criteria'] . "' and a.ite_lib_value " . $value['usp_operator'] . " '%". $value['usp_autocomplete_value'] ."%'"; 		
+  	}
+    elseif ($value['usp_operator'] == "equals") {
+  	  $criteria_set .= " and b.dit_lib='" . $value['criteria'] . "' and a.ite_lib_value  = ('". $value['usp_autocomplete_value'] . "')"; 		
+  	}  	
+  	else {
+  		if (!empty($value['usp_autocomplete_value'])) {
+  	    	$criteria_set .= " and b.dit_lib='" . $value['criteria'] . "' and a.ite_lib_value " . $value['usp_operator'] . "('". $value['usp_autocomplete_value'] . "')";  	    			    	
+  		}
+  	}
+  }
+  
+  //Add the regional role in user dashboard page exclude the stores already selected by the others users.  
+  if ($custom_form_id == "add-regional-user-dashboard" && isset($_SESSION["dashboard_regional_users"])) {
+     foreach ($_SESSION["dashboard_regional_users"] as $key => $value) {
+       if ($key != $custom_user_id) {
+       	$store_list .= "" . $value['regional_stores']. ",";
+       }  	     	  	 	  	
+  	  }
+   }
+  /*If the user store preferred form: To add a Regional role to user- Exclude the stores alreday selected by the other regional role users
+   Add condition to exclude the list of the users*/
+  if ($custom_form_id == "add-regional-user"  || $custom_form_id == "add-regional-user-dashboard" || $custom_form_id == "regional-user-dashboard-edit") {
+  	$regional_users = " and a.pve_code NOT IN (:store_list)";
+  	$store_list = explode(",", $store_list);  		
+  }
+  $query = $criteria_start . "SELECT DISTINCT a.pve_code STORE_CODE FROM {store_item_fields} a WHERE a.pve_code IN ('".$store_id."')" . $criteria_set . $regional_users . " GROUP BY a.pve_code";      
+  $filter2 = db_query($query, array(':store_list' => $store_list));  
+  foreach($filter2 as $result) {
+    $value2['store_code'][] = $result;   
+  }
+  $store_code = '';
+  if (isset($value2['store_code'])) {
+    foreach ($value2['store_code'] as $key =>$value){
+      if ($value != '0'){
+        $store_code .= "'" . $value->store_code . "',";
+      }
+    }
+  }  
+  $filter3 = array();
+  if ($store_code) {
+    $store_code = trim($store_code, ",");
+    $store_code = trim($store_code, "'");
+    $filter3 = db_query("SELECT pve_code, pve_lib from {store} WHERE pve_code in ('".$store_code."') ORDER BY pve_lib ASC");
+  }
+  foreach($filter3 as $result) {
+  	$value3[$result->pve_code] = $result->pve_lib;   
+  }
+  return $value3;
+}
+/**
+ * Function to handle the display of preferred node edit in the ctools pop-up
+ */
+function _im_preferred_node_form_user_edit($js) {
+  drupal_add_js(drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js');
+  drupal_add_js(array('preferred_node_edit' => 'preferred_node_edit'), 'setting');
+  if (!$js) {
+    return drupal_goto('node/' . arg(4) . '/edit');
+  }
+  $node = node_load(arg(4));
+  $type_name = node_type_get_name($node);
+  $title = t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title));  
+  _im_preferred_node_form($node, $title, TRUE);//$custom_class, 
+}
+
+function _im_preferred_node_form_edit($js) {
+  drupal_add_js(drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js');
+  drupal_add_js(array('preferred_node_edit' => 'preferred_node_edit'), 'setting');
+  if (!empty($_SESSION['selected_store_preference_nid_ctools'])) {
+    $nid = intval($_SESSION['selected_store_preference_nid_ctools']);
+  }
+  else {
+  	$nid = intval(arg(4));
+  }
+  if (!$js) {
+    return drupal_goto('node/'.$nid.'/edit');
+  }
+  $node = node_load($nid);
+  $type_name = node_type_get_name($node);
+  $title = t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title));  
+  _im_preferred_node_form($node, $title, FALSE);//$custom_class, 
+} 
+/**
+ * Function to handle the display of preferred node edit in the ctools pop-up
+ */
+function _im_preferred_node_form_regioanl_edit($js) {
+  unset($_SESSION['selected_store_preference_nid_ctools']);
+  drupal_add_js(drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js');
+  drupal_add_js(array('preferred_node_edit' => 'preferred_node_edit'), 'setting');
+  if (!$js) {
+    return drupal_goto('node/' . arg(4) . '/edit');
+  }
+  $node = node_load(arg(4));
+  $type_name = node_type_get_name($node);
+  $title = t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title));  
+  _im_preferred_node_form($node, $title, TRUE);//$custom_class, 
+}
+/**
+ * Function to display the Preferred node in ctools pop-up.
+ *
+ * @param object $node
+ *   The node Object in edit case. In Add case it's only a pseudo node object.
+ * @param string $title
+ *   The Modal Popup Title.
+ * @param boolean $force_page_reload 
+ *   Indicates if page should be reloaded after form submission.
+ */
+function _im_preferred_node_form($node, $title, $force_page_reload = FALSE) {
+	drupal_add_js(drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js');
+  $commands = array();
+  ctools_include('node.pages', 'node', '');
+  ctools_include('modal');
+  ctools_include('ajax');
+  $form_state = array(
+    'title' => $title,
+    'ajax'  => TRUE,
+    'build_info' => array(
+      'args'  => array($node),
+    ),
+  );
+  $commands = ctools_modal_form_wrapper($node->type . '_node_form', $form_state);
+  if (!empty($form_state['executed']) && empty($form_state['rebuild'])) {
+    $commands = array();
+    ctools_add_js('ajax-responder');
+    $commands[] = ctools_modal_command_dismiss();
+    if ($force_page_reload) {
+      $commands[] = ctools_ajax_command_reload();
+    }   
+  }
+  if ((is_numeric(arg(4)) && arg(5) == "edit") || !empty($_SESSION['selected_store_preference_nid_ctools'])) {
+  	$array = array('custom-module-node-edit custom-module-node-form');
+  }
+  else {
+  	$array = array('custom-module-node-add custom-module-node-form');
+  }
+  // add CSS class to Modal-Frame
+  $commands[] = ajax_command_invoke('#modalContent', 'addClass', $array);
+
+  print ajax_render($commands);
+  
+  exit;
+}
+/**
+ * 
+ * Function to display the Preferred store node add form in the Ctools pop-up ...
+ */
+function _im_preferred_node_form_add_user($js = FALSE) {
+  unset($_SESSION['selected_store_preference_nid_ctools']);
+  global $user;
+  drupal_add_css(drupal_get_path('module', 'im_agenda') . '/css/im_agenda.css');
+  drupal_add_js(drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js');
+  if (!$js) {
+    return drupal_goto('node/add/preferred-store');
+  }
+
+  // Get node form defaults.
+  global $user;
+  $type = "preferred_store";
+  $types = node_type_get_types();
+  $node = (object) array(
+    'uid' => $user->uid,
+    'name' => (isset($user->name) ? $user->name : ''),
+    'type' => $type,
+    'language' => LANGUAGE_NONE
+  );
+  $title = t('Create @name', array('@name' => $types[$type]->name));
+  if (is_numeric(5)) {
+  	$userId = intval(arg(5));
+  }  
+  if (arg(4) == "add-regional-user-dashboard" && !empty($_SESSION["dashboard_regional_users"][$userId]['regional_nid'])) {
+    $node = node_load($_SESSION["dashboard_regional_users"][$userId]['regional_nid']);
+    $type_name = node_type_get_name($node);
+    $title = t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title));
+  }
+  _im_preferred_node_form($node, $title, FALSE);
+}
+/**
+ * 
+ * EFunction to get all the values of the store list to populate the Allowed values for store options.
+ */
+function _get_all_stores() {
+  /*If the user store preferred form: To add a Regional role to user- Exclude the stores alreday selected by the other regional role users*/
+  $regional_users = '';
+  $store_list = '';  
+  if (arg(4) == "add-regional-user"  || arg(4) == "add-regional-user-dashboard" || arg(0) == "regional-user-dashboard-edit") {  	
+  	if (arg(0) == "regional-user-dashboard-edit" && is_numeric(arg(5))) {
+  	  $nid = arg(5);
+  	  $query = "SELECT field_rmp_store_value FROM field_data_field_rmp_store where entity_id != '". $nid ."'";
+  	}   	
+  	else {
+  	  $query = "SELECT field_rmp_store_value FROM field_data_field_rmp_store";
+  	}
+//  	$query = "SELECT field_rmp_store_value FROM field_data_field_rmp_store";
+    $regional_filter = db_query($query);
+    foreach($regional_filter as $result) {
+    $regional_store['store_list'][] = $result;
+   }
+   if (isset($regional_store['store_list'])) {
+   foreach ($regional_store['store_list'] as $key =>$value){
+     if ($value != '0'){
+       $store_value = explode(",",$value->field_rmp_store_value);
+       if (count($store_value > 1)) {
+       	foreach ($store_value as $key => $value) {       		
+       	  $store_list .= "" . $value. ",";
+       	}
+       }
+       	else {
+       	  $store_list .= "" . $value->field_rmp_store_value . ",";	
+       	}       
+      }
+    }
+   }
+   if (arg(4) == "add-regional-user-dashboard" && isset($_SESSION["dashboard_regional_users"])) {
+   	 $userid = arg(5);
+     foreach ($_SESSION["dashboard_regional_users"] as $key => $value) {
+       if ($key != arg(5)) {
+       	$store_list .= "" . $value['regional_stores']. ",";
+       }  	     	  	 	  	
+  	  }
+   }      
+  }
+   //List of the stores selected by other regional users.    
+   if ($store_list) {
+    $store_list = trim($store_list, ",");
+   }    
+   $regional_users = " WHERE pve_code NOT IN (:store_list)";
+   $store_list = explode(",", $store_list);   
+   $stores = db_query("select pve_code, pve_lib from {store}" . $regional_users ." ORDER BY pve_lib ASC",  array(':store_list' => $store_list));
+  $store_list = array();  	
+  foreach($stores as $result) {
+    $store_list[$result->pve_code] = $result->pve_lib;   
+  }
+  return $store_list;
+}
+function im_user_form_preferred_form_validate(&$form, $form_state) {
+	global $user;
+	if(isset($_SESSION['ldap_user_role']) && ($_SESSION['ldap_user_role'] == 'store_director_trainee' || $_SESSION['ldap_user_role'] == 'store_manager_trainee')){
+		if (count($form_state['values']['field_preferred_store_options']['und']) > 1) {
+    		form_set_error('field_agenda_store', t('Please select only one store as the preferred store.'));
+  		}
+	}
+}
+/**
+ * 
+ * Ajax call back function to override the default remove button callback for DO/DR/CF Field set
+ */
+function _im_features_stores_criteria_ajax_remove_submit($form, &$form_state) {
+	drupal_add_js('jQuery(document).ready(function () { jQuery("#field_preferred_dr_cf option:selected").removeAttr("selected"); });', 'inline');
+  // drupal_html_id() very helpfully ensures that all html IDS are unique
+  // on a page. Unfortunately what it doesn't realize is that the IDs
+  // we are generating are going to replace IDs that already exist, so
+  // this actually works against us.
+  if (isset($_POST['ajax_html_ids'])) {
+    unset($_POST['ajax_html_ids']);
+  }
+
+//  list($form, $form_state) = ajax_get_form();
+  drupal_process_form($form['#form_id'], $form, $form_state);
+
+  // Get the information on what we're removing.
+  $button = $form_state['triggering_element'];
+  // Go two levels up in the form, to the whole widget.
+  $element = drupal_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -3));
+  $element['#id'] = "edit-field-preferred-criteria-set";
+  // Now send back the proper AJAX command to replace it.
+  $return = array(
+    '#type' => 'ajax',
+    '#commands' => array(
+      ajax_command_replace('#' . $element['#id'], drupal_render($element))
+    ),
+  );
+
+  // Because we're doing this ourselves, messages aren't automatic. We have
+  // to add them.
+  $messages = theme('status_messages');
+  if ($messages) {
+    $return['#commands'][] = ajax_command_prepend('#' . $element['#id'], $messages);
+  }
+
+  return $return;
+	
+}
+/**
+ * 
+ * Ajax call back function to override the default remove button callback for Criteria Fieldset.
+ */
+function _im_features_stores_dr_cr_ajax_remove_submit($form, &$form_state) {
+	drupal_add_js('jQuery(document).ready(function () { jQuery("#field_preferred_dr_cf option:selected").removeAttr("selected"); });', 'inline');
+  // drupal_html_id() very helpfully ensures that all html IDS are unique
+  // on a page. Unfortunately what it doesn't realize is that the IDs
+  // we are generating are going to replace IDs that already exist, so
+  // this actually works against us.
+  if (isset($_POST['ajax_html_ids'])) {
+    unset($_POST['ajax_html_ids']);
+  }
+
+//  list($form, $form_state) = ajax_get_form();
+  drupal_process_form($form['#form_id'], $form, $form_state);
+
+  // Get the information on what we're removing.
+  $button = $form_state['triggering_element'];
+  // Go two levels up in the form, to the whole widget.
+  $element = drupal_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -3));
+  $element['#id'] = "edit-field-preferred-do-dr";
+  // Now send back the proper AJAX command to replace it.
+  $return = array(
+    '#type' => 'ajax',
+    '#commands' => array(
+      ajax_command_replace('#' . $element['#id'], drupal_render($element))
+    ),
+  );
+
+  // Because we're doing this ourselves, messages aren't automatic. We have
+  // to add them.
+  $messages = theme('status_messages');
+  if ($messages) {
+    $return['#commands'][] = ajax_command_prepend('#' . $element['#id'], $messages);
+  }
+  return $return;	
+}
+/**
+ * 
+ * Function to get the Do for selected DR CF.
+ * @param Numeric $pve_code
+ */
+function _get_do_dr_cf_field($pve_code) {
+//    $doArray = array();
+  $ite_lib_value = '';
+  $query = db_select('store_item_fields','s')
+  ->fields('s',array('ite_lib_value','pve_code'))
+  ->distinct()
+  ->condition('s.dit_cod_item','do')
+  ->condition('s.pve_code',$pve_code);
+  $result = $query->execute();
+  while($record = $result->fetchAssoc()) {  
+    $ite_lib_value = $record['ite_lib_value'];
+  }
+
+  return $ite_lib_value;
+}
+
+function im_features_stores_preprocess_page(&$vars) {
+  if (arg(0) == "agenda" && arg(1) == "list") {
+    $vars['show_messages'] = 0;
+    $_SESSION['messages'] = ''; 
+  }
+} 
+
+function _get_all_stores_in_node_save_mode() {
+  $stores = db_query("select pve_code, pve_lib from {store} ORDER BY pve_lib ASC");   
+  foreach($stores as $result) {
+    $store_list[]['value'] = $result->pve_code;   
+  }
+  return $store_list;
+}
+
+function _get_all_available_stores() {
+  $stores = db_query("select pve_code, pve_lib from {store} ORDER BY pve_lib ASC");   
+  foreach($stores as $result) {
+    $store_list[] = $result->pve_code;   
+  }
+  return $store_list;
+}
+
+/**
+ * To Hide the Preferred Store menu link 
+ * @param unknown_type $menu
+ */
+function im_features_stores_menu_alter(&$menu) {
+ 	unset($menu['node/add/preferred-store']);
+ 	unset($menu['admin/workbench/create/node/add/preferred-store']);
+}

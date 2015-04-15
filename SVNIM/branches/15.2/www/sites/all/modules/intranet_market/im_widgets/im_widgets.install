@@ -1,0 +1,75 @@
+<?php
+/**
+ * @file right side bar install
+/**
+ * Implements hook_install
+ */
+function im_widgets_install() {
+  //set blocks positions
+  $default_theme = variable_get('theme_default', 'im');
+  $blocks = array(
+     array(
+      'module' => 'im_widgets',
+      'delta' => 'im_widget_bar',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 1,
+      'region' => 'sidebar_second',
+     'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => '<front>
+agenda/*
+agenda-day/*',
+      'cache' => DRUPAL_NO_CACHE,
+      'title' => '<none>',
+    ),
+  );
+  foreach ($blocks as $block) {
+    db_merge('block')
+      ->key(array('module' => $block['module']))
+      ->key(array('delta'  => $block['delta']))
+      ->key(array('theme' => $block['theme']))
+      ->fields(array(
+        'status' => (isset($block['status'])) ? $block['status'] : BLOCK_CUSTOM_DISABLED,
+        'weight' => (isset($block['weight'])) ? $block['weight'] : 0,
+        'region' => (isset($block['region'])) ? $block['region'] : -1,
+        'visibility' => (isset($block['visibility'])) ? $block['visibility'] : 0,
+        'pages'  => (isset($block['pages'])) ? $block['pages'] : '',
+        'cache'  => (isset($block['cache'])) ? $block['cache'] : DRUPAL_NO_CACHE,
+      ))
+      ->execute();
+  }
+  drupal_static_reset();
+  cache_clear_all();
+}
+
+function im_widgets_schema() {
+  $schema = array();
+  $schema['saint_day_data'] = array(
+    'description' => 'saint day detail data',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+          'description' => 'serial number',
+        ),
+        'saint_date' => array(
+          'type' => 'varchar',
+          'length' => 255,
+          'default' => '',
+          'description' => 'date and month',
+        ),
+        'saint_of_the_day' => array(
+          'type' => 'varchar',
+          'length' => 500,
+          'default' => '',
+          'description' => 'saint of the day',
+        ),
+      ),
+  'primary key' => array('id'),
+  );
+  return $schema;
+}
+//hook_update to install hook_schema(sprint 4)
+function im_widgets_update_7001(){
+  drupal_install_schema('im_widgets');
+}

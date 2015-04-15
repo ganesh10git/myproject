@@ -1,0 +1,623 @@
+<?php
+
+/**
+ * Implements 	menu()
+ */
+function im_rmp_menu() {
+  $items = array();
+  $items['rmp/%ctools_js/regional_moderator_profile_form/add-rmp'] = array(
+  'title' => 'Regional moderator profiles',
+  'page callback' => '_im_rmp_profile_assign_callback',
+  'access callback' => TRUE,
+  'type' => MENU_CALLBACK,
+  'page arguments' => array(1),
+  );
+  $items['rmp/%ctools_js/regional_moderator_profile_form/add-rmp-user'] = array(
+  'title' => 'Regional moderator profiles',
+  'page callback' => '_im_rmp_profile_assign_callback',
+  'access callback' => TRUE,
+  'type' => MENU_CALLBACK,
+  'page arguments' => array(1),
+  );
+  $items['rmp/%ctools_js/regional_moderator_profile_form/add-rmp/%/edit/%'] = array(
+   'title' => 'Regional moderator profiles',
+   'page arguments' => array(1),
+   'page callback' => '_im_rmp_profile_edit',
+   'access callback' => TRUE,
+   'type' => MENU_CALLBACK,
+  );  
+  return $items;
+}
+/**
+ * Implements hook_theme().
+ */
+function im_rmp_theme($existing, $type, $theme, $path) {
+  return array(
+    'regional_profiles_node_form' => array(
+     'arguments' => array('form' => NULL),
+     'render element' => 'form',
+    'template' => 'theme/regional-profiles-node-form',  	
+    ),
+  );
+}
+
+/**
+ * Implements call back function for rmp add
+ */
+function _im_rmp_profile_assign_callback($js = FALSE) {
+  if (!$js) {
+   return drupal_goto('node/add/regional-profiles');
+  }
+  global $user;    
+  $type = "regional_profiles";
+  $types = node_type_get_types();
+  $node = (object) array(
+    'uid' => $user->uid,
+    'name' => (isset($user->name) ? $user->name : ''),
+    'type' => $type,
+    'language' => LANGUAGE_NONE
+  );
+  $title = t('Create @name', array('@name' => $types[$type]->name));
+
+  _im_regional_profile_node_form($node, $title, FALSE);
+}
+/**
+ * Implementation for _im_regional_profile_node_form
+ * @param unknown $node
+ * @param unknown $title
+ * @param string $force_page_reload
+ */
+function _im_regional_profile_node_form($node, $title, $force_page_reload = FALSE) {
+
+$commands = array();
+  ctools_include('node.pages', 'node', '');
+  ctools_include('modal');
+  ctools_include('ajax');
+  $form_state = array(
+    'title' => $title,
+    'ajax'  => TRUE,
+    'build_info' => array('args'  => array($node)),
+  );
+  $commands = ctools_modal_form_wrapper('regional_profiles_node_form', $form_state);
+  if (!empty($form_state['executed']) && empty($form_state['rebuild'])) {
+    $commands = array();
+    ctools_add_js('ajax-responder');
+    $commands[] = ctools_modal_command_dismiss();
+    if ($force_page_reload) {
+      $commands[] = ctools_ajax_command_reload();
+    }
+   	if (arg(3) == "add-rmp-user") {
+      $commands[] = ctools_ajax_command_redirect('admin/im/user/dashboard');
+  	}
+  }
+  $array = array('custom-module-node-add custom-module-node-form');
+  // add CSS class to Modal-Frame
+  $commands[] = ajax_command_invoke('#modalContent', 'addClass', $array);
+
+  print ajax_render($commands);
+  
+  exit;
+}
+/**
+ * Implements hook_formID_alter for regional_moderator_profile_node_form.
+ */
+function im_rmp_form_regional_moderator_profile_node_form_alter(&$form, &$form_state, $form_id) {
+		global $user;
+		$form['additional_settings']['#access'] = FALSE;
+		$form['title']['#weight'] = -4;
+		$form['#attached']['js'][] = drupal_get_path('module', 'im_agenda') . '/js/jquery.alerts.js';
+		$form['#attached']['js'][] = drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js';
+		$form['#attached']['css'][] = drupal_get_path('module', 'im_features_stores') . '/css/im_features_stores.css';
+		$form['#attached']['js'][] = drupal_get_path('module', 'multiselect') . '/multiselect.js';
+		$form['#attached']['css'][] = drupal_get_path('module', 'multiselect') . '/multiselect.css';
+		$form['#attached']['css'][] = drupal_get_path('module', 'im_agenda') . '/css/im_agenda.css';
+		$form['#attached']['css'][] = drupal_get_path('module', 'im_agenda') . '/css/jquery.alerts.css';
+		if (empty($form_state['input']['form_build_id']) && isset($_SESSION['rmp_selected_store_preference_nid'])) {    
+          unset($_SESSION['rmp_selected_store_preference_nid']);
+        }  
+		im_agenda_add_ctools();
+		$store_options_count = '';
+		$store_preference_nid = 'add-regional-user';
+		$ctools_url = 'preferred/node/form/nojs/' . $store_preference_nid;
+		$_SESSION['rmp_selected_store_preference_nid_ctools'] = isset($_SESSION['rmp_selected_store_preference_nid']) ? $_SESSION['rmp_selected_store_preference_nid'] : '';
+		if (is_numeric(arg(1)) || !empty($_SESSION['rmp_selected_store_preference_nid_ctools'])) {
+			if (is_numeric(arg(1))) {
+				$rmp_nid = intval(arg(1));
+				$node_agenda = node_load($rmp_nid);
+				$nid_value = isset($node_agenda->field_rmp_preference_nid['und'][0]['value']) ? $node_agenda->field_rmp_preference_nid['und'][0]['value'] : '';
+			}
+			else {
+				$nid_value = intval($_SESSION['rmp_selected_store_preference_nid_ctools']);
+			}
+		
+			$node_preference = node_load($nid_value);
+			$store_preference_nid = '';
+			if(isset($node_preference->field_preferred_store_options['und']) && count($node_preference->field_preferred_store_options['und']) > 0){
+				$store_options_count = '(' . count($node_preference->field_preferred_store_options['und']) . ')';
+				$store_preference_nid = $nid_value;
+				$ctools_url = 'regional-user-dashboard-edit/node/form/nojs/' . $store_preference_nid . '/' . $rmp_nid;
+			}			
+		}
+		
+		$form['field_rmp_store']['#attributes']['style'] = 'display:none';
+		$form['field_rmp_preference_nid']['#attributes']['style'] = 'display:none';
+
+		$user_details = user_load($user->uid);
+		if(arg(2)=='edit') {
+			$to_date_value = date('d/m/Y',$form['changed']['#default_value']);
+		}
+		else {
+			$to_date_value = '';
+		}
+		$form['action_from_date'] = array(
+				'#type' => 'item',
+				'#title' => t('Creation Date'),
+				'#markup' => date('d/m/Y',$form['created']['#value']),
+				'#weight' => -3,
+		);
+		$form['action_to_date'] = array(
+				'#type' => 'item',
+				'#title' => t('Date of last modficiation'),
+				'#markup' => $to_date_value,
+				'#weight' => -3,
+		);
+		$form['action_created_by'] = array(
+				'#type' => 'item',
+				'#title' => t('Created by'),
+				'#markup' => $user_details->field_full_name['und'][0]['value'],
+				'#weight' => -5,
+		);
+		$form['action_concered_store'] = array(
+				'#type' => 'item',
+				'#markup' => ctools_modal_text_button(t('Define the criteria of CONCERNED stores'), $ctools_url, t('Define the criteria of CONCERNED stores'),  'ctools-modal-ctools-sample-style'),
+				'#weight' => 25,
+				'#suffix' => '<span id="store-count">' . $store_options_count . '</span>',
+		);
+		if(!is_numeric(arg(1))){
+			$form['actions']['action_cancel_button'] = array(
+					'#type' => 'item',
+					'#prefix' => '<a href="/admin/im/manage/regional_moderator_profile" id="edit-delete" class="form-submit multiselect-processed">Supprimer',
+					'#suffix' => '</a>',
+					'#weight' => 26,
+			);
+		}
+		
+		else{
+		$form['actions']['delete']['#submit'][1] = '_im_rmp_form_delete_submit';
+		}
+   		unset($form['actions']['preview']);
+}
+
+/**
+ * Implements hook_form_alter for regional_profiles_node_form.
+ */
+function im_rmp_form_regional_profiles_node_form_alter(&$form, &$form_state, $form_id) {
+  $form['#attached']['js'][] = drupal_get_path('module', 'im_rmp') . '/js/im_rmp.js';
+  $form['profile_popup_header_title'] = array(
+	    '#type' => 'markup',
+	    '#markup' =>t('Selection of Regional Profiles'),
+	  );
+	$regional_profile_options = fetch_rmp_nodes();
+	$selected_regional_profiles = array();
+	$default_regional_profile = array();	
+    if (is_numeric(arg(4)) && arg(5) == 'edit') {
+	  $selected_regional_profiles = $form['field_regional_profile_options'][LANGUAGE_NONE]['#entity']->field_regional_profile_options['und'];
+      foreach ($selected_regional_profiles as $key => $values) {
+		$default_regional_profile[$values['value']] = $regional_profile_options[$values['value']];
+	  }
+	  drupal_add_js(array('profile_options' => $default_regional_profile), 'setting');
+	  drupal_add_js(array('profile_node_edit' => 'profile_node_edit'), 'setting');
+	}	 
+	$form['field_regional_profile_options']['und']['#options'] = $regional_profile_options;
+	$form['field_regional_profile_options']['und']['#default_value'] = $default_regional_profile;
+//	echo "<pre>"; print_r($form['field_regional_profile_options']['und']);exit;			
+	//$_SESSION['rmp_selected_profiles'] = $form['field_regional_profile_options']['und']['#options'];
+	$profile_options_prefix = $form['field_regional_profile_options']['und']['#prefix'];
+	$profile_options_prefix = rtrim(str_replace(t('Available Options'), t('Profiles'), $profile_options_prefix),":");
+	$profile_options_prefix = str_replace(t('Selected Options'), t('Selection'), $profile_options_prefix);
+	$profile_options_prefix = str_replace('Regional profile options:', t(''), $profile_options_prefix);
+	$form['field_regional_profile_options']['und']['#prefix'] = $profile_options_prefix;
+	 $form['profile_checkbox_avl'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Select all'),
+  );
+  $form['profile_checkbox_sel'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Select all'),
+  );
+	$form['rmp_cancel']=array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    //'#markup' => '<div id="cancel">' . t('Cancel') . '</div>',
+    '#attributes' => array('class' => 'ctools-close-modal'),
+  	);
+  	 $form['actions']['submit']['#attributes'] = array('class' => array('user-profile-submit'));
+  	$form['actions']['submit']['#value'] = t("Validate");
+  	$form['actions']['submit']['#prefix'] = '<div class="edit-rmp-validate">';
+  	$form['actions']['submit']['#suffix'] = '</div>';
+  	$form['title']['#default_value'] = 'Regional Profile - '.arg(4);
+}
+
+/**
+ * Implements function to fetch reginal moderator profile nodes
+ */
+function fetch_rmp_nodes() {
+	$profile_nodes = db_select('node','n')
+						->fields('n',array('nid','title'))
+						->condition('type','regional_moderator_profile');
+						$profile_details = $profile_nodes->execute()->fetchAll();
+	$options = array();
+	foreach($profile_details as $details) {
+		$options[$details->nid] = $details->title;
+	}
+	return $options;
+}
+
+/**
+ * Implements the function to change the filter type for RMP title to selectlist.
+ */
+function im_rmp_form_views_exposed_form_alter(&$form, &$form_state) {
+
+	$view = $form_state['view'];
+	if ($view->name == 'workbench_moderation'){
+		if (isset($form['field_attached_regional_profiles_value'])) {
+			$form['field_attached_regional_profiles_value']['#type'] = 'select';
+			$titles = fetch_rmp_nodes();
+			$any_array = array('All' => t('- Any -'));
+			$form['field_attached_regional_profiles_value']['#size'] = NULL;
+			foreach($titles as $index=>$val){
+				$form['field_attached_regional_profiles_value']['#options'][$val]=$val;
+			}
+			$form['field_attached_regional_profiles_value']['#options'] = $any_array + $form['field_attached_regional_profiles_value']['#options'];
+			$form['field_attached_regional_profiles_value']['#default_value'] = 'All';
+		}
+	}
+
+}
+
+/**
+ * Implementation of hook_node_presave().
+ * Update Unpublish duration based on Publication start date.
+ *
+ */
+function im_rmp_node_presave($node) {
+	global $user;
+	if ($node->type == "preferred_store") {
+		$userProfile = user_load($user->uid);
+		$selected_store_array = $node->field_preferred_store_options['und'];
+		if (empty($selected_store)) {
+			$selected_store = '';
+			unset($_SESSION['rmp_selected_store_list']);
+			//unset($_SESSION['rmp_selected_store_mandatory']);
+		}
+		if (!empty($selected_store_array )) {
+			foreach ($selected_store_array as $key=>$store) {
+				if ($store['value']) {
+					$selected_store .= $store['value'] . ",";
+				}
+			}
+		}
+		$selected_store = trim($selected_store, ",");
+		$_SESSION['rmp_selected_store_list'] = $selected_store;
+		//$_SESSION['rmp_selected_store_mandatory'] = $selected_store;
+		$_SESSION['rmp_selected_store_preference_nid'] = $node->nid;
+		$_SESSION['rmp_selected_store_preference_nid_ctools'] = $node->nid;
+	}
+	if ($node->type == 'regional_moderator_profile') {
+		$node->status = 1;
+		if (!empty($_SESSION['rmp_selected_store_preference_nid'])) {
+			$tmp_store_node = node_load($_SESSION['rmp_selected_store_preference_nid']);
+			$tmp_selected_store_options_array = $tmp_store_node->field_preferred_store_options['und'];
+			$tmp_selected_store_option = '';
+			foreach($tmp_selected_store_options_array as $key => $tmp_selected_store_options) {
+				$tmp_selected_store_option .= $tmp_selected_store_options['value'] . ',';
+			}
+			$tmp_selected_store_option = trim($tmp_selected_store_option, ',');
+			$node->field_rmp_store['und'][0]['value'] = $tmp_selected_store_option;
+			$node->field_rmp_store['und'][0]['safe_value'] = $tmp_selected_store_option;
+			$node->field_rmp_preference_nid['und'][0]['value'] = $_SESSION['rmp_selected_store_preference_nid'];
+			$node->field_rmp_preference_nid['und'][0]['safe_value'] = $_SESSION['rmp_selected_store_preference_nid'];
+		}
+		else{
+			$tmp_store_node = node_load($node->field_rmp_preference_nid['und'][0]['value']);
+			$tmp_selected_store_options_array = $tmp_store_node->field_preferred_store_options['und'];
+			if(isset($tmp_selected_store_options_array)){
+				$tmp_selected_store_option = '';
+				foreach($tmp_selected_store_options_array as $key => $tmp_selected_store_options) {
+					$tmp_selected_store_option .= $tmp_selected_store_options['value'] . ',';
+				}
+				$tmp_selected_store_option = trim($tmp_selected_store_option, ',');
+				$node->field_rmp_store['und'][0]['value'] = $tmp_selected_store_option;
+				$node->field_rmp_store['und'][0]['safe_value'] = $tmp_selected_store_option;
+			}
+			$node->field_rmp_preference_nid['und'][0]['value'] = $node->field_rmp_preference_nid['und'][0]['value'];
+			$node->field_rmp_preference_nid['und'][0]['safe_value'] = $node->field_rmp_preference_nid['und'][0]['value'];
+		}
+		if(empty($_SESSION['rmp_selected_store_preference_nid']) && $node->type == 'regional_moderator_profile' && !isset($node->nid)) {
+			$type = "preferred_store";
+			$new_node = new stdClass();
+			$new_node->type = "preferred_store";
+			$new_node->title = "-superadmin";
+			node_object_prepare($new_node);
+			$new_node->uid = $user->uid;
+			$new_node->name = $user->name;
+			$new_node->status = 1;
+			$new_node->field_preferred_store_options['und'] = _get_all_stores_in_node_save_mode();
+			$new_node->field_preferred_store_status['und'] = _get_status_magasin_options_in_node_save_mode();
+			@node_save($new_node);
+			$_SESSION['rmp_selected_store_preference_nid'] = $new_node->nid;
+		}
+	}
+	if ($node->type == "regional_profiles") {
+		/*
+		$nids = '';
+		foreach($node->field_regional_profile_options['und'] as $index) {
+			$nids.= $index['value'].',';
+		}
+		$nids = rtrim($nids,',');
+		$node->field_regional_profile_nids['und'][0]['value'] = $nids;
+			    $rmp_nodes = explode(',',$nids);
+ 	  	    	$rmp_node_stores = '';
+ 	  	    	foreach($rmp_nodes as $rmp_node_ids) {
+ 	  	    		$rmp_store_details = node_load($rmp_node_ids);
+ 	  	    		if(!empty($rmp_store_details->field_rmp_store['und'][0]['value'])) {
+ 	  	    			$rmp_node_stores.= $rmp_store_details->field_rmp_store['und'][0]['value'].',';
+ 	  	    		}
+ 	  	    	}
+ 	  	    	$rmp_node_stores = rtrim($rmp_node_stores,',');
+ 	  	    	$node->field_regional_stores['und'][0]['value'] = $rmp_node_stores;
+		//$node->field_regional_profile_nids['und'][0]['value'] = $node->field_regional_profile_options['und'][0]['value'];
+		if (arg(2) == "regional_moderator_profile_form" && arg(3) == "add-rmp") {
+			if (is_numeric(arg(4))) {
+				$userId = arg(4);
+				$_SESSION["dashboard_regional_moderator_users"][$userId]['profile_nids'] = $nids;					
+				//$_SESSION["dashboard_regional_users"][$userId]['regional_stores'] = $selected_store;
+			}
+		}
+		*/
+		$nids = '';
+		foreach($node->field_regional_profile_options['und'] as $index) {
+			$nids.= $index['value'].',';
+		}
+		$nids = rtrim($nids,',');
+		$node->field_regional_profile_nids['und'][0]['value'] = $nids;
+		//$node->field_regional_profile_nids['und'][0]['value'] = $node->field_regional_profile_options['und'][0]['value'];
+		if (arg(2) == "regional_moderator_profile_form" && arg(3) == "add-rmp") {
+			if (is_numeric(arg(4))) {
+				$userId = arg(4);
+				$_SESSION["dashboard_regional_moderator_users"][$userId]['profile_nids'] = $nids;
+				$_SESSION["dashboard_regional_moderator_users"][$userId]['profile_user_nid'] = $node->nid;
+			}
+		}
+	}
+}
+
+/**
+ * Implements hook_node_delete for deleting nodes.
+ */
+function im_rmp_node_delete($node) {
+	if($node->type == 'regional_moderator_profile') {
+		$node_details = node_load($node->nid);
+		$node_stores = explode(',',$node_details->field_rmp_store['und'][0]['value']);
+		
+		$results_nodes = db_query("SELECT rpn.entity_id, rpn.field_regional_profile_nids_value
+							 FROM   {node} n,
+								    {field_data_field_regional_profile_nids} rpn
+							 WHERE n.nid = rpn.entity_id
+							 AND n.type = 'regional_profiles'");
+		foreach($results_nodes as $result) {
+			$rp_node = node_load($result->entity_id);
+			if($rp_node->field_regional_profile_nids['und'][0]['value']!=NULL) {
+				$rmp_nodes = explode(',',$rp_node->field_regional_profile_nids['und'][0]['value']);
+				if(($key = array_search($node->nid, $rmp_nodes)) !== false) {
+					unset($rmp_nodes[$key]);
+					$rp_node->field_regional_profile_nids['und'][0]['value'] = implode(',',$rmp_nodes);
+					$rp_node->field_regional_profile_nids['und'][0]['safe_value'] = implode(',',$rmp_nodes);
+					node_save($rp_node);
+				}
+			}
+		}
+		
+		$results_users = db_query("SELECT u.uid, u.name FROM {users} u
+	   								INNER JOIN {users_roles} ur ON u.uid = ur.uid
+	   								WHERE ur.rid = 17");
+		foreach($results_users as $result_user_details) {
+			$user_details = user_load($result_user_details->uid);
+			$user_detail_nodes = explode(',',$user_details->field_user_regional_profile_nids['und'][0]['value']);
+			if(($key = array_search($node->nid, $user_detail_nodes)) !== false) {
+				unset($user_detail_nodes[$key]);
+				$user_details->field_user_regional_profile_nids['und'][0]['value'] = implode(',',$user_detail_nodes);
+				$user_details->field_user_regional_profile_nids['und'][0]['safe_value'] = implode(',',$user_detail_nodes);
+				$user_stores = explode(',',$user_details->field_user_regional_profile_stor['und'][0]['value']);
+				$user_stroes_diff = array_diff($user_stores,$node_stores);
+				$user_details->field_user_regional_profile_stor['und'][0]['value'] = implode(',',$user_stroes_diff);
+				$user_details->field_user_regional_profile_stor['und'][0]['safe_value'] = implode(',',$user_stroes_diff);
+				user_save($user_details);
+			}
+		}
+	}
+}
+
+/**
+ * Implements hook_node_insert for setting Publication end date.
+ */
+function im_rmp_node_insert($node) {
+	global $user;
+	if ($node->type == "preferred_store") {		
+		if (empty($_SESSION['rmp_selected_store_preference_nid'])) {
+			$_SESSION['rmp_selected_store_preference_nid'] = $node->nid;
+			$_SESSION['rmp_selected_store_preference_nid_ctools'] = $node->nid;
+		}
+
+		$selected_store_array = $node->field_preferred_store_options['und'];
+		if (empty($selected_store)) {
+			$selected_store = '';
+		}
+		foreach ($selected_store_array as $key=>$store) {
+			if ($store['value']) {
+				$selected_store .= $store['value'] . ",";
+			}
+		}
+		$selected_store = trim($selected_store, ",");
+		$_SESSION['rmp_selected_store_list'] = $selected_store;
+		$_SESSION['rmp_selected_store_preference_nid'] = $node->nid;
+	}
+	if ($node->type == 'regional_moderator_profile') {
+		$node->status = 1;
+		if (!empty($_SESSION['rmp_selected_store_preference_nid'])) {
+			$tmp_store_node = node_load($_SESSION['rmp_selected_store_preference_nid']);
+			$tmp_selected_store_options_array = $tmp_store_node->field_preferred_store_options['und'];
+			$tmp_selected_store_option = '';
+			foreach($tmp_selected_store_options_array as $key => $tmp_selected_store_options) {
+				$tmp_selected_store_option .= $tmp_selected_store_options['value'] . ',';
+			}
+			$tmp_selected_store_option = trim($tmp_selected_store_option, ',');
+			$node->field_rmp_store['und'][0]['value'] = $tmp_selected_store_option;
+			$node->field_rmp_store['und'][0]['safe_value'] = $tmp_selected_store_option;
+			$node->field_rmp_preference_nid['und'][0]['value'] = $_SESSION['rmp_selected_store_preference_nid'];
+			$node->field_rmp_preference_nid['und'][0]['safe_value'] = $_SESSION['rmp_selected_store_preference_nid'];
+		}
+		//Duplication of Regional Action content setting up the selected store value.
+		if (isset($_SESSION['selected_store_list_regional'])) {
+			$selected_stores_array = array();
+			$nodeobj = node_load($_SESSION['rmp_selected_store_preference_nid']);
+			$nodeobj->field_preferred_store_options['und'] = array();
+			$selected_stores = $_SESSION['rmp_selected_store_list_regional'];
+			foreach ($selected_stores as $selected_store) {
+				$selected_stores_array[]['value'] = $selected_store;
+			}
+			$nodeobj->field_preferred_store_options['und'] = $selected_stores_array;
+			node_save($nodeobj);
+			if(!empty($_SESSION['rmp_selected_store_preference_nid'])){
+				$tmp_store_node = node_load($_SESSION['rmp_selected_store_preference_nid']);
+				$tmp_selected_store_options_array = $tmp_store_node->field_preferred_store_options['und'];
+				$tmp_selected_store_option = '';
+				foreach($tmp_selected_store_options_array as $key => $tmp_selected_store_options) {
+					$tmp_selected_store_option .= $tmp_selected_store_options['value'] . ',';
+				}
+				$tmp_selected_store_option = trim($tmp_selected_store_option, ',');
+				$node->field_rmp_store['und'][0]['value'] = $tmp_selected_store_option;
+				$node->field_rmp_store['und'][0]['safe_value'] = $tmp_selected_store_option;
+			}
+		}
+		$node->unpublish_on = strtotime($node->field_rmp_to_date['und'][0]['value']);
+		unset($_SESSION['rmp_selected_store_preference_nid']);
+		//unset($_SESSION['rmp_selected_store_mandatory']);
+	}
+	if ($node->type == "regional_profiles") {
+		$nids = '';
+		foreach($node->field_regional_profile_options['und'] as $index) {
+			$nids.= $index['value'].',';
+		}
+		$nids = rtrim($nids,',');
+		$node->field_regional_profile_nids['und'][0]['value'] = $nids;
+		//$node->field_regional_profile_nids['und'][0]['value'] = $node->field_regional_profile_options['und'][0]['value'];
+		if (arg(2) == "regional_moderator_profile_form" && arg(3) == "add-rmp") {
+			if (is_numeric(arg(4))) {
+				$userId = arg(4);
+				$_SESSION["dashboard_regional_moderator_users"][$userId]['profile_nids'] = $nids;
+				$_SESSION["dashboard_regional_moderator_users"][$userId]['profile_user_nid'] = $node->nid;	
+			}
+		}
+		if (arg(3) == "add-rmp-user") {
+			$user_mail = $user->mail;
+			$register_id = $_SESSION["regional_user_details"]['register_id'];
+			$user_details =  $_SESSION["regional_user_details"];
+			module_load_include('inc', 'im_user', 'includes/im_user_homepage');
+			_im_user_external_login_register($user_details,$register_id, 'im_user_dashboard');
+			$userProfile = user_external_load($register_id);
+			$userProfile->roles[$_SESSION["regional_user_rid"]] = $_SESSION["regional_user_rid"];
+			$userProfile->field_full_name[LANGUAGE_NONE][0]['value']  = $_SESSION["regional_user_details"]['cn'];
+			$userProfile = user_external_load($register_id);
+			$userProfile->field_user_regional_profile_nids[LANGUAGE_NONE][0]['value'] = $node->nid;
+			//$userProfile->field_user_regional_profile_stor[LANGUAGE_NONE][0]['safe_value'] = fetch_rmp_nodes();
+			$rmp_nodes = explode(',',$node->field_regional_profile_nids['und'][0]['value']);
+			$rmp_node_stores = '';
+			foreach($rmp_nodes as $rmp_node_ids) {
+				$rmp_store_details = node_load($rmp_node_ids);
+				if(!empty($rmp_store_details->field_rmp_store['und'][0]['value'])) {
+					$rmp_node_stores.= $rmp_store_details->field_rmp_store['und'][0]['value'].',';
+				}
+			}
+			$rmp_node_stores = rtrim($rmp_node_stores,',');
+			$userProfile->field_user_regional_profile_stor[LANGUAGE_NONE][0]['value'] = $rmp_node_stores;
+			user_save($userProfile);
+			unset($_SESSION["regional_user_details"]);
+			unset($_SESSION["regional_user_rid"]);
+		}
+	}
+	
+}
+/**
+ * Implements ctools function for profiles pop-up
+ */
+function regional_profile_popup_settings() {
+  // Include the CTools tools that we need.
+  ctools_include('ajax');
+  ctools_include('modal');  
+  // Add CTools' javascript to the page.
+  ctools_modal_add_js();
+
+  // Create our own javascript that will be used to theme a modal.
+  $sample_style = array(
+    'ctools-sample-style' => array(
+      'modalSize' => array(
+        'type' => 'fixed',
+        'width' => 750,
+        'height' => auto,
+        'addWidth' => 20,
+        'addHeight' => 15,
+      ),
+      'modalOptions' => array(
+        'opacity' => .5,
+        'background-color' => '#000',
+      ),
+      'animation' => 'fadeIn',
+      'modalTheme' => 'ProfilePopup',
+      'throbber' => theme('image', array('path' => ctools_image_path('ajax-loader.gif', 'ctools_ajax_sample'), 'alt' => t('Loading...'), 'title' => t('Loading'))),
+    ),
+  );
+
+  drupal_add_js($sample_style, 'setting');
+
+  // Since we have our js, css and images in well-known named directories,
+  // CTools makes it easy for us to just use them without worrying about
+  // using drupal_get_path() and all that ugliness.
+  ctools_add_js('ctools-ajax-sample', 'ctools_ajax_sample');
+  ctools_add_css('ctools-ajax-sample', 'ctools_ajax_sample');
+}
+/**
+ * Implements call back function for rmp edit
+ */
+function _im_rmp_profile_edit($js) {
+  $nid = intval(arg(6));
+  drupal_add_js(array('profile_node_edit' => 'profile_node_edit'), 'setting');
+  if (!$js) {
+    return drupal_goto('node/'.$nid.'/edit');
+  }
+  $node = node_load($nid);
+  $type_name = node_type_get_name($node);
+  $title = t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title));  
+  _im_regional_profile_node_form($node, $title, FALSE);
+}
+/**
+ * Implements hook_menu_alter()
+ */
+function im_rmp_menu_alter(&$menu) {
+ 	//unset($menu['node/add/regional-profiles']);
+}
+/**
+ * Implementation of alter function for RMP node delete
+ */
+function _im_rmp_form_delete_submit($form, &$form_state) {
+	node_delete($form_state['values']['nid']);
+  	$form_state['redirect'] = 'admin/im/manage/regional_moderator_profile';
+}
+function _im_rmp_cancel_submit($form, &$form_state){
+	if(isset($_SESSION['rmp_selected_store_preference_nid'])){
+		node_delete($_SESSION['rmp_selected_store_preference_nid']);
+		unset($_SESSION['rmp_selected_store_preference_nid']);
+	}
+	unset($_SESSION['messages']['status']);
+	$form_state['redirect'] = 'admin/im/manage/regional_moderator_profile';
+}

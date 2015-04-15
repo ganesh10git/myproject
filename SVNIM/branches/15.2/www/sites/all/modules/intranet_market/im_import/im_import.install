@@ -1,0 +1,87 @@
+<?php
+ /**
+ * @file
+ * im_import.install
+ */
+
+ /**
+ * Implements hook_install
+ */ 
+function im_import_install() {
+	// Import Domain, Subdomain, Macro and procedures setup folder & variable creation
+  variable_set('file_public_path', 'sites/default/files/public');
+  variable_set('file_private_path', 'sites/default/files/private');
+  _im_import_file_system_create_directory_system_install('im_import', 'domain_xml_source_path', 'private://import_domain_subdomain');
+  _im_import_file_system_create_directory_system_install('im_import', 'domain_xml_dest_path', 'private://imported_domain_subdomain');
+  _im_import_file_system_create_directory_system_install('im_import', 'domain_xml_dest_file_path', 'public://operational_model');
+  // Import Store setup folder & variable creation
+  _im_import_file_system_create_directory_system_install('im_import', 'store_data_import_path', 'private://store_import/input');
+  _im_import_file_system_create_directory_system_install('im_import', 'store_data_imported_path', 'private://store_import/archive');
+  _im_import_file_system_create_directory_system_install('im_import', 'store_data_rejected_path', 'private://store_import/reject');
+  _im_import_file_system_create_directory_system_install('im_import', 'store_data_logs_path', 'private://store_import/logs');
+  _im_import_file_system_create_directory_system_install('im_import', 'store_data_backup_path', 'private://store_import/backup');
+}
+
+ /**
+ * Implements hook_uninstall
+ */ 
+function im_import_uninstall() {
+	 // Import Domain, Subdomain, Macro and procedures setup folder deletion
+  _im_import_file_system_delete_directory_system_install(drupal_realpath('private://import_domain_subdomain'), TRUE);
+  _im_import_file_system_delete_directory_system_install(drupal_realpath('private://imported_domain_subdomain'), TRUE);
+  _im_import_file_system_delete_directory_system_install(drupal_realpath('public://operational_model'), TRUE);
+  // Import Store setup folder deletion
+  _im_import_file_system_delete_directory_system_install(drupal_realpath('private://store_import/input'), TRUE);
+  _im_import_file_system_delete_directory_system_install(drupal_realpath('private://store_import/archive'), TRUE);
+  _im_import_file_system_delete_directory_system_install(drupal_realpath('private://store_import/reject'), TRUE);
+  _im_import_file_system_delete_directory_system_install(drupal_realpath('private://store_import/logs'), TRUE);
+  _im_import_file_system_delete_directory_system_install(drupal_realpath('private://store_import/backup'), TRUE);
+}
+
+
+/**
+ *
+ * Creates a directory if it is not existing and modify the folder permission ug+w
+ *  Set the variable for this folder path.
+ * @param STRING $module_name
+ * @param STRING $variable_name
+ * @param STRING $folder_path
+ */
+function _im_import_file_system_create_directory_system_install($module_name, $variable_name, $folder_path) {
+  ini_set('memory_limit','-1');
+  $path = $folder_path;
+  if (file_exists(drupal_realpath($path))) {
+    rmdir(drupal_realpath($path));
+  }
+  if (file_prepare_directory($path, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+    variable_set($module_name. '_'. $variable_name, $path);
+  }
+}
+
+/**
+ * Deletes the directory(if $remove_dir is TRUE) and all its files.
+ * @param STRING $path
+ * @param STRING $remove_dir
+ */
+function _im_import_file_system_delete_directory_system_install($path, $remove_dir = FALSE) {
+  ini_set('memory_limit','-1');
+  $path = $path . '/';
+  if (!is_dir($path)) {
+    return;
+  }
+  $files = scandir($path);
+  foreach ($files as $file) {
+    if ($file != '.' && $file != '..') {
+      $file_path = $path . $file;
+      if (is_dir($file_path)) {
+        _im_import_file_system_delete_directory_system_install($file_path, TRUE);
+      }
+      else {
+        file_unmanaged_delete($file_path);
+      }
+    }
+  }
+  if ($remove_dir) {
+    rmdir($path);
+  }
+}

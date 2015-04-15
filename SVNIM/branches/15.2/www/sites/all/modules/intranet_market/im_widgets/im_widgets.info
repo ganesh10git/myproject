@@ -1,0 +1,8 @@
+core = "7.x"
+description = "IM widgets module. Contain widgets function."
+name = "im_widgets"
+package = "Intranet Market"
+project = "im_widgets"
+version = "7.x-1.0"
+
+dependencies[] = im_sales_plan

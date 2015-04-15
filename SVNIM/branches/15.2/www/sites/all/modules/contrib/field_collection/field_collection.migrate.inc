@@ -1,0 +1,103 @@
+<?php
+/**
+ * @file
+ * Support for the Migrate API.
+ */
+
+/**
+ * Destination class implementing migration into field_collection.
+ */
+class MigrateDestinationFieldCollection extends MigrateDestinationEntity {
+  static public function getKeySchema() {
+    return array(
+      'cid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'ID of field collection item',
+      ),
+    );
+  }
+
+  /**
+   * Basic initialization.
+   *
+   * @param array $options
+   *  Options applied to collections.
+   */
+  public function __construct($bundle, array $options = array()) {
+    parent::__construct('field_collection_item', $bundle, $options);
+    $this->hostEntityType = $options['hostEntityType'];
+  }
+
+  /**
+   * Returns a list of fields available to be mapped for this collection (bundle).
+   *
+   * @return array
+   *  Keys: machine names of the fields (to be passed to addFieldMapping).
+   *  Values: Human-friendly descriptions of the fields.
+   */
+  public function fields() {
+    $fields = array();
+    $fields = migrate_handler_invoke_all('Entity', 'fields', $this->entityType, $this->bundle);
+
+    $fields['hostEntityId'] = t('Field collection host ID');
+    $fields['hostEntityType'] = t('Field collection host type');
+    return $fields;
+  }
+
+  /**
+   * Import a single term.
+   *
+   * @param $collection
+   *  Collection object to build. Pre-filled with any fields mapped in the migration.
+   * @param $row
+   *  Raw source data object - passed through to prepare/complete handlers.
+   *
+   * @return array
+   *  Array of key fields (item_id only in this case) of the collection that was saved if
+   *  successful. FALSE on failure.
+   */
+  public function import(stdClass $collection, stdClass $row) {
+    $entity = entity_create('field_collection_item', array('field_name' => $this->bundle));
+    $host_entity = entity_load_single($this->hostEntityType, $collection->hostEntityId);
+    $entity->setHostEntity($this->hostEntityType, $host_entity);
+
+    unset($collection->hostEntityId);
+
+    foreach ((array) $collection as $field => $value) {
+      $entity->{$field} = $value;
+    }
+
+    $this->prepare($entity, $row);
+    $status = entity_save('field_collection_item', $entity);
+    $this->complete($entity, $row);
+    if ($status) {
+      return array($entity->item_id);
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  /**
+   * Delete a migrated term
+   *
+   * @param $ids
+   *  Array of fields representing the key.
+   */
+  public function rollback(array $key) {
+    $item_id = reset($key);
+    
+    $this->prepareRollback($item_id);
+    $field_collection_item = field_collection_item_load($item_id);
+    // If the collection wasn't imported we can't roll it back so check if the
+    // loaded object matches the fieldcollection item class.
+    if ($field_collection_item instanceof  FieldCollectionItemEntity) {
+      $field_collection_item->delete();
+    }
+
+    $this->completeRollback($item_id);
+    return TRUE;
+  }
+}

@@ -1,0 +1,14 @@
+core = "7.x"
+name = "Intranet Market Blocks"
+description = "Module which holds all the blocks belonging to Intranet market."
+package = "Intranet Market"
+project = "im_blocks"
+version = "7.x-1.0"
+dependencies[] = nice_menus
+dependencies[] = im_user
+dependencies[] = im_sales_plan
+dependencies[] = im_feature_holiday
+dependencies[] = im_feature_sales_plan
+dependencies[] = im_features_application
+dependencies[] = im_features_message
+dependencies[] = im_product_guide

@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the im_theme module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function im_theme_install() {
+  // enable default theme
+  _im_theme_enable_theme();
+}
+
+/*
+ * Enable default theme
+ */
+function _im_theme_enable_theme() {
+  // enable adaptivetheme base theme and CRFR core sub theme
+  theme_enable(array('adaptivetheme', THEME_CRFR_IM));
+
+  // configure default blocks
+  variable_set('theme_default', THEME_CRFR_IM);
+  $values = array(
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => THEME_CRFR_IM,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'cache' => -1,
+    ),
+  );
+  im_utilities_block_enable($values);
+
+  // disable bartik theme
+  theme_disable(array('bartik'));
+}

@@ -1,0 +1,518 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Agenda Home page 
+#User header block
+msgid "Administration"
+msgstr "Administration"
+
+#Agenda Home page
+msgid "Future Action"
+msgstr "Action future"
+
+#Agenda Home page
+msgid "select_department"
+msgstr "selection_rayon"
+
+#Agenda Home page
+msgid "All Department"
+msgstr "Tous les rayons"
+
+#Agenda Home page - to display current week
+msgid "Week"
+msgstr "Semaine"
+
+#Agenda Home page - Date in agenda home page
+msgid "Sun"
+msgstr "dim"
+
+#Agenda Home page - Date in agenda home page
+msgid "Sat"
+msgstr "sam"
+
+#Agenda Home page - Date in agenda home page
+msgid "Fri"
+msgstr "ven"
+
+#Agenda Home page - Date in agenda home page
+msgid "Thu"
+msgstr "jeu"
+
+#Agenda Home page - Date in agenda home page
+msgid "Wed"
+msgstr "mer"
+
+#Agenda Home page - Date in agenda home page
+msgid "Tue"
+msgstr "mar"
+
+#Agenda Home page - Date in agenda home page
+msgid "Mon"
+msgstr "lun"
+
+#Agenda Home page - Date in the agenda home page
+msgid "Details"
+msgstr "Details"
+
+#Agenda Home page To display month in agenda home page 
+msgid "Jan"
+msgstr "jan"
+
+#Agenda Home page To display month in agenda home page
+msgid "Feb"
+msgstr "fév"
+
+#Agenda Home page To display month in agenda home page
+msgid "Mar"
+msgstr "mar"
+
+#Agenda Home page To display month in agenda home page
+msgid "Apr"
+msgstr "avr"
+
+#Agenda Home page To display month in agenda home page
+msgid "May"
+msgstr "mai"
+
+#Agenda Home page To display month in agenda home page
+msgid "Jun"
+msgstr "juin"
+
+#Agenda Home page To display month in agenda home page
+msgid "Jul"
+msgstr "juil"
+
+#Agenda Home page To display month in agenda home page
+msgid "Aug"
+msgstr "aoû"
+
+#Agenda Home page To display month in agenda home page
+msgid "Sep"
+msgstr "sept"
+
+#Agenda Home page To display month in agenda home page
+msgid "Oct"
+msgstr "oct"
+
+#Agenda Home page To display month in agenda home page
+msgid "Nov"
+msgstr "nov"
+
+#Agenda Home page To display month in agenda home page
+msgid "Dec"
+msgstr "déc"
+
+#Agenda Home page - benchmark displayed with agenda for that day
+msgid "Benchmark"
+msgstr "Benchmark"
+
+#Agenda Home page - display news market for the day.
+msgid "News Market"
+msgstr "Actu Market"
+
+#Agenda Home page To display month in agenda home page
+msgid "Dec"
+msgstr "déc"
+
+#Agenda for the day page
+##agenda-day/20131011/all/all
+msgid "Back to full agenda"
+msgstr "Retour agenda"
+
+#Agenda for the day page
+##agenda-day/20131011/all/all
+msgid "Action"
+msgstr "Action"
+
+#Agenda for the day page
+##agenda-day/20131011/all/all
+msgid "Print"
+msgstr "Imprimer"
+
+#Agenda for the day page.
+##agenda-day/20131011/all/all
+msgid "Alert"
+msgstr "Alerte"
+
+#Agenda detailed page - Functions section
+msgid "Functions Concerned"
+msgstr "Fonctions concernées"
+
+#Agenda detailed page - relay store section
+msgid "Relay Store"
+msgstr "Relais en magasin"
+
+#Agenda detailed page - documents section
+msgid "Documents"
+msgstr "Documents"
+
+#Agenda detailed page - close link
+msgid "Close"
+msgstr "Fermer"
+
+#Agenda detailed page - previous alert content
+msgid "alert Previous"
+msgstr "Alerte précédente"
+
+#Agenda detailed page - previous action content
+msgid "action Previous"
+msgstr "Action précédente"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Your draft will be placed in moderation."
+msgstr "Votre document va être mis en modération."
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Created by"
+msgstr "Créé par "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Create Action"
+msgstr "Créer une action"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Created Date"
+msgstr "Date de Création "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Last Modified Date"
+msgstr "Date de dernière modification "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Info"
+msgstr "Info "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Agenda date"
+msgstr "Date agenda "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Date"
+msgstr "Date "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Publication From Date"
+msgstr "Date début de publication "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Attachments"
+msgstr "Fichiers joints"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Add a new file"
+msgstr "Ajouter un nouveau fichier "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Files must be less than"
+msgstr "Les fichiers doivent peser moins de "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Allowed file types:"
+msgstr "Types de fichiers autorisés : "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Description"
+msgstr "Description "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Text format"
+msgstr "Format du texte "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Switch to plain text editor"
+msgstr "Passer à l'éditeur de texte"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Full HTML"
+msgstr "HTML complet"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Filtered HTML"
+msgstr "HTML filtré"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Plain text"
+msgstr "Texte"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Change User"
+msgstr "Changer d'utilisateur"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Source"
+msgstr "Source "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Director of the store or its delegate"
+msgstr "Directeur ou son délégué "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Store Manager"
+msgstr "Manageur magasin "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Store Employees"
+msgstr "Employés magasin "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Department"
+msgstr "Rayon "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Define the criteria of CONCERNED stores"
+msgstr "Définir les magasins concernés"
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Provide a menu link"
+msgstr "Fournir un lien de menu "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "URL alias"
+msgstr "URL alias "
+
+#Action Content type contribution page url path settings.
+##node/add/action
+msgid "Optionally specify an alternative URL by which this content can be accessed. For example, type "about" when writing an about page. Use a relative path and don't add a trailing slash or the URL alias won't work."
+msgstr "Spécifiez une URL alternative par laquelle il est possible d'accéder à ce contenu. Par exemple, saisissez "apropos" lorsque que vous écrivez une page qui décrit votre site. Utilisez un chemin relatif et n'ajoutez pas de slash à la fin sans quoi l'alias d'URL ne fonctionnera pas."
+
+#Action Content type contribution page.  scheduling options
+##node/add/action
+msgid "Unpublish on"
+msgstr "Dépublication activée "
+
+#Action Content type contribution page.
+##node/add/action
+msgid "Leave blank to disable scheduled unpublishing."
+msgstr "Ne pas remplir pour désactiver la dépublication automatique."
+
+#Action Content type contribution page. Authoring information.
+##node/add/action
+msgid "Authored by"
+msgstr "Écrit par "
+
+#Action Content type contribution page. Authoring information.
+##node/add/action
+msgid "Authored on"
+msgstr "Écrit le "
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Promoted to front page"
+msgstr "Promu en page d'accueil "
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Sticky at top of lists"
+msgstr "Epinglé en haut des listes "
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Moderation notes"
+msgstr "Remarques modérateur "
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Explication des modifications que vous avez effectuées. Cela peut aider les autres auteurs à mieux comprendre vos motivations."
+msgstr "Explication des modifications que vous avez effectuées. Cela peut aider les autres auteurs à mieux comprendre vos motivations."
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Moderation state"
+msgstr "Statut modération "
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Current draft"
+msgstr "En cours: Brouillon"
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Needs Review"
+msgstr "A valider"
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Published"
+msgstr "Publié"
+
+#Action Content type contribution page. publishing options.
+##node/add/action
+msgid "Set the moderation state for this content."
+msgstr "Mettre à jour le statut de modération pour ce contenu."
+
+#Action Content type contribution page. To save the changes.
+##node/add/action
+msgid "Save"
+msgstr "Sauver"
+
+#Action Content type contribution page. Error messages while saving.
+##node/add/action
+msgid "Titre field is required."
+msgstr "Le champ Titre est requis."
+
+#alert Content type contribution page. 
+#node/add/alert
+msgid "Create Alert"
+msgstr "Créer une alerte"
+
+#alert Content type contribution page.  Revision information.
+#node/add/alert
+msgid "Create new revision"
+msgstr "Créer une nouvelle révision "
+
+#alert Content type contribution page.  Revision information.
+#node/add/alert
+msgid "Revision log message"
+msgstr "Message du journal de révision "
+
+#alert Content type contribution page.  Revision information.
+#node/add/alert
+msgid "Provide an explanation of the changes you are making. This will help other authors understand your motivations."
+msgstr "Explication des modifications que vous avez effectuées. Cela peut aider les autres auteurs à mieux comprendre vos motivations."
+
+#alert Content type contribution page.  
+#node/add/alert
+msgid "Published"
+msgstr "Publié "
+
+#News Content type contribution page.  Create News.
+#node/add/news
+msgid "Create News"
+msgstr "Créer une actu Market"
+
+#getdynamics page. Title
+#admin/im/getdynamics
+msgid "getDynamics"
+msgstr "Fonctions pour le role directeur de magasin"
+
+#getdynamics page. 
+#admin/im/getdynamics
+msgid "search function"
+msgstr "Fonction à rechercher"
+
+#getdynamics page.  get dynamics button
+#admin/im/getdynamics
+msgid "getDynamic"
+msgstr "Recherche des fonctions"
+
+#getdynamics page. 
+#admin/im/getdynamics
+msgid "Code"
+msgstr "Code"
+
+#getdynamics page. 
+#admin/im/getdynamics
+msgid "Description"
+msgstr "Description"
+
+#User management page
+#admin/user/add
+msgid "User Management"
+msgstr "Gestion utilisateur"
+
+#User management page
+#admin/user/add
+msgid "Back"
+msgstr "Retour"
+
+#User management page
+#admin/user/add
+msgid "First Name"
+msgstr "Prénom"
+
+#User management page
+#admin/user/add
+msgid "Last Name"
+msgstr "Nom de famille "
+
+#User management page
+#admin/user/add
+msgid "Email Address"
+msgstr "Adresse mail "
+
+#User management page
+#admin/user/add
+msgid "Search for Carrefour Market User Only"
+msgstr "Rechercher uniquement les utilisateurs Carrefour Market "
+
+#User management page
+#admin/user/add
+msgid "Search"
+msgstr "Rechercher"
+
+#User management page
+#admin/user/add
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#User management page
+#admin/user/add
+msgid "Update options"
+msgstr "Mettre à jour les options"
+
+#User management page
+#admin/user/add
+msgid "Update"
+msgstr "Mettre à jour"
+
+#User management page
+#admin/user/add
+msgid "Email"
+msgstr "Courriel"
+
+#User management page
+#admin/user/add
+msgid "Complete Name"
+msgstr "Nom complet"
+
+#User management page
+#admin/user/add
+msgid "Type"
+msgstr "Type"
+
+#Action, Alerts and News
+msgid "Save and publish"
+msgstr "Sauver et publier"
+
+#Action, Alerts and News
+msgid "Save as draft"
+msgstr "Sauver comme brouillon"

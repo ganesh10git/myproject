@@ -1,0 +1,194 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-12-20 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Agenda homepage
+msgid "Anuaire"
+msgstr "Annuaire"
+
+#Agenda homepage
+msgid "My application"
+msgstr "Mes applications"
+
+#Agenda homepage
+msgid "Manage user dashboard"
+msgstr "Gestion des utilisateurs"
+
+#Agenda homepage
+msgid "Manage taxonomy"
+msgstr "Gestion taxonomie"
+
+#Agenda homepage
+msgid "Manage Agenda Content"
+msgstr "Gestion agenda"
+
+#Agenda homepage
+msgid "Modele Operationnel"
+msgstr "Modèle opérationnel"
+
+#Operational Model
+msgid "Operational Model"
+msgstr "Procédure"
+
+#Operational Model
+msgid "Domain"
+msgstr "Domaine"
+
+#Operational Model
+msgid "Subdomain"
+msgstr "Sous domaine"
+
+#Operational Model
+msgid "Macro Activity"
+msgstr "Macro activité"
+
+#Operational Model
+msgid "Validity period of Publication"
+msgstr "Période de publication"
+
+#Operational Model
+msgid "From"
+msgstr "Du"
+
+#Operational Model
+msgid "to" 
+msgstr "au"
+
+#Operational Model
+msgid "To" 
+msgstr "au"
+
+#Operational Model
+msgid "Available options"
+msgstr "Disponibles"
+
+#Operational Model
+msgid "Available Options"
+msgstr "Disponibles"
+
+#Operational Model
+msgid "Selected Options"
+msgstr "Sélectionnés"
+
+#Operational Model
+msgid "Expert Validation"
+msgstr "Experts de la procédure"
+
+#Operational Model
+msgid "Location"
+msgstr "Emplacement"
+
+#Operational Model
+msgid "Duration"
+msgstr "Durée"
+
+#Operational Model
+msgid "Status Magasin"
+msgstr "Ciblage statut du magasin"
+
+#Operational Model
+msgid "Attachments"
+msgstr "Fichiers joints"
+
+#Operational Model
+msgid "Material"
+msgstr "Matériel nécessaire"
+
+#Operational Model
+msgid "Content limited to @limit characters, remaining: <strong>@remaining</strong>"
+msgstr "contenu limité à @limit caractères, reste: <strong>@remaining</strong>"
+
+#Operational Model
+msgid "Objective"
+msgstr "Objectif"
+
+#Operational Model
+msgid "Content"
+msgstr "Contenu"
+
+#Operational Model
+msgid "Save as Draft"
+msgstr "Enregistrer"
+
+#Operational Model
+msgid "Publish Now"
+msgstr "Publier"
+
+#Operational Model
+msgid "Publish"
+msgstr "Publier"
+
+#Operational Model
+msgid "View Draft"
+msgstr "Pévisualisation" 
+
+#Operational Model
+msgid "View draft"
+msgstr "Pévisualisation"
+
+#Operational Model
+msgid "Edit Draft"
+msgstr "Modifier"
+
+#Operational Model
+msgid "Edit draft"
+msgstr "Modifier"
+
+#Operational Model
+msgid "Moderate"
+msgstr "Modération"
+
+#Operational Model
+msgid "Create new operational model"
+msgstr "Créer une nouvelle procédure"
+
+#Operational Model
+msgid "Create new operational_model"
+msgstr "Creation d'une procédure"
+
+#Operational Model
+msgid "Distribution executives"
+msgstr "Diffusion limitée aux cadres"
+
+#Operational Model
+msgid "Fonctions concernees"
+msgstr "Fonctions concernées"
+
+#Operational Model
+msgid "End date of the validity"
+msgstr "Date de fin de validité"
+
+#Operational Model
+msgid "Duration estimate"
+msgstr "Durée Estimée"
+
+#Operational Model
+msgid "Experts the procedure"
+msgstr "Experts de la procédure"
+
+#Operational Model
+msgid "Material necessary"
+msgstr "Matériel nécessaire"
+
+#Preferred store page - node form
+#User header block
+msgid "Resultants: @span_st@count@span_end store@puspan_st@purual@span_end found"
+msgstr "Résultats: @span_st@count@span_end magasin@puspan_st@purual@span_end trouvés"
+
+#Preferred store page - node form
+msgid "@span_st@count@span_end Selected store@puspan_st@purual@span_end"
+msgstr "@span_st@count@span_end magasin@puspan_st@purual@span_end retenus"
+
+#Preferred store page - node form
+msgid "@span_st@count@span_end Store@puspan_st@purual@span_end found"
+msgstr "@span_st@count@span_end magasin@puspan_st@purual@span_end trouvés"

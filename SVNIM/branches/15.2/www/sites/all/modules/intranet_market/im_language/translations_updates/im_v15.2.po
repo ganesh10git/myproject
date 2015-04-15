@@ -1,0 +1,217 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#MANAGE QUESTIONNAIRE
+msgid "Create Questionnaire"
+msgstr "Créer un questionnaire"
+
+msgid "Webform"
+msgstr "Formulaire"
+
+msgid "Drag a field from the palette to add it to this form."
+msgstr "Glisser les éléments depuis la palette pour les ajouter au formulaire."
+
+msgid "Properties"
+msgstr "Propriétés"
+
+msgid "Label display"
+msgstr "Affichage du titre"
+
+msgid "Determines the placement of the component's label."
+msgstr "Détermine l’emplacement du titre."
+
+msgid "Private fields are shown only to users with results access."
+msgstr "Les champs privés ne sont visible que par les utilisateur qui ont accès aux résultats."
+
+msgid "Disabled (read-only)"
+msgstr "Désactivé (lecture seule)"
+
+msgid "Private"
+msgstr "Privé"
+
+msgid "Max length"
+msgstr "Longueur Maximum"
+
+msgid "Remove option"
+msgstr "Retirer une option"
+
+msgid "Add new option"
+msgstr "Ajouter une option"
+
+msgid "Add item"
+msgstr "Ajouter une ligne"
+
+msgid "Manual entry"
+msgstr "Saisie manuelle"
+
+msgid "Normal entry"
+msgstr "Saisie normale"
+
+msgid "Normal entry"
+msgstr "Saisie normale"
+
+msgid "Customizing the keys will allow you to save one value internally while showing a different option to the user."
+msgstr "Permet de gérer des codes internes différents des valeurs affichées aux utilisateurs."
+ 
+msgid "Customize keys"
+msgstr "Personalisation de codes internes"
+
+msgid "Option settings"
+msgstr "Paramétrage des options"
+
+msgid "No default"
+msgstr "Pas de valeur par défaut"
+
+msgid "New checkboxes"
+msgstr "Nouveau champ case à cocher"
+
+msgid "new_checkboxes"
+msgstr "nouveau_champ_case_cocher"
+
+msgid "Start date"
+msgstr "Date de début" 
+
+msgid "End date"
+msgstr "Date de fin" 
+
+msgid "The earliest date that may be entered into the field."
+msgstr "La date la plus ancienne autorisée." 
+
+msgid "The latest date that may be entered into the field."
+msgstr "La date la plus récente autorisée."
+
+msgid "GNU Date Input Format"
+msgstr "formats GNU"
+
+msgid "Upload directory"
+msgstr "Repertoire cible"
+ 
+msgid "You may optionally specify a sub-directory to store your files."
+msgstr "Vous pouvez indiquer un sous répertoire pour vos fichiers si nécessaire." 
+
+msgid "Max upload size"
+msgstr "Taille maximum"
+
+msgid "Enter the max file size a user may upload such as 2 MB or 800 KB. Your server has a max upload size of"
+msgstr "Entrez la taille maxiimum sous la forme 2 Mo ou 800 Ko. La taille maximum pour votre serveur est"
+
+msgid "Web images"
+msgstr "Images web"
+
+msgid "Desktop images"
+msgstr "Images bureau"
+
+msgid "Additional extensions"
+msgstr "Autres extensions"
+
+msgid "Enter a list of additional file extensions for this upload field, separated by commas."
+msgstr "Entrez la liste des autres extensions admises pour ce champ en les séparant par des virgules."
+
+msgid "Entered extensions will be appended to checked items above."
+msgstr "Elles seront ajoutées après celles qui sont cochées ci dessus."
+
+msgid "Collapsible"
+msgstr "Repliable"
+
+msgid "Collapsed"
+msgstr "Replié"
+
+msgid "This property will not affect the preview immediately."
+msgstr "Cette propriété n’affecte pas immédiatement la prévisualisation"
+
+msgid "Default value timezone"
+msgstr "Fuseau horaire par défaut"
+
+msgid "User timezone"
+msgstr "Fuseau horaire de l’utilisateur"
+
+msgid "Website timezone"
+msgstr "Fuseau horaire du serveur"
+
+msgid "If using relative dates for a default value (e.g. "now") base the current time on this timezone."
+msgstr "En cas d’utilisation d’une valeur par défaut variable (i.e. "maintenant")."
+
+msgid "12-hour (am/pm)"
+msgstr "12 heures (am/pm)"
+
+msgid "24-hour"
+msgstr "24 heures"
+
+msgid "Time format"
+msgstr "Format horaire"
+
+msgid "Columns"
+msgstr "Colonnes"
+
+msgid "Rows"
+msgstr "Lignes"
+
+msgid "Hide label"
+msgstr "Cacher le titre"
+
+msgid "Do not display the label of this component."
+msgstr "Permet de ne pas afficher le titre."
+
+msgid "The width of the textarea. This property might not have a visual impact depending on the CSS of your site."
+msgstr "Largeur de la zone de texte. Selon la feuille style appliquée sur votre site, cette propriété peut ne pas être prise en compte."
+
+msgid "Randomize Options"
+msgstr "Option aléatoire"
+
+msgid "Randomize Questions"
+msgstr "Question aléatoire"
+
+msgid "Randomizes the order of options on the top when they are displayed in the form."
+msgstr "Affiche les options dans un odre aléatoire"
+
+
+msgid "Randomize the order of the questions on the side when they are displayed in the form."
+msgstr "Affiche les questions dans un odre aléatoire"
+
+msgid "Options to select across the top. Usually these are ratings such as "poor" through "excellent" or "strongly disagree" through "strongly agree"."
+msgstr "Option affichées en entête de colonne. Généralement il s’agit de notation du type : "d'accord", "pas d’accord"."
+
+msgid "Questions list down the side of the grid."
+msgstr "Questions affichées en lignes."
+
+msgid "Enable popup calendar"
+msgstr "Activer le calendrier"
+
+msgid "Use a textfield for year"
+msgstr "Utiliser un champ texte pour l’année"
+
+msgid "If checked, the generated date field will use a textfield for the year. Otherwise it will use a select list."
+msgstr "Si la case est cochée, on présentera un champ texte pour l’année, sinon ce sera un champ liste."
+
+
+msgid "Enable a JavaScript date picker next to the date field."
+msgstr "Afficher le calendrier  JavaScript date picker next to the date field."
+
+msgid "Clear"
+msgstr "Effacer"
+
+msgid "+2 years"
+msgstr "+2 ans"
+
+msgid "-2 years"
+msgstr "-2 ans"
+
+msgid "Accepts any date in any"
+msgstr "Toutes les dates qui respectent les "
+
+msgid "GNU Date Input Format"
+msgstr "formats GNU sont autorisée"
+
+msgid "Browse"
+msgstr "Parcourir"

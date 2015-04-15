@@ -1,0 +1,64 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Operational Model in search page drop down
+msgid "Operational Model"
+msgstr "Wiki Market"
+
+# Operational Model in search page drop down
+msgid "Sales plan"
+msgstr "Plan de Ventes"
+
+#Dashboard : Manage Questionnaire
+msgid "Manage Questionnaire"
+msgstr "Gestion Questionnaire"
+
+# Sales plan field 
+msgid "IM Sales Plan Settings"
+msgstr "Paramétrage Plan de Vente"
+
+#Manage Links in FO
+msgid "Manage Messages"
+msgstr "Gestion Message"
+
+#My Workbench
+msgid "Create content"
+msgstr "Créer Contenu"
+
+#My Workbench
+msgid "Needs review"
+msgstr "A valider"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+#Head Banner - Admin menu
+msgid "Log out"
+msgstr "Déconnexion"
+
+#Action and OM workflow
+msgid "Return the Publication"
+msgstr "Refuser la publication"
+
+#Questionnaire - Webform 
+msgid "Thank you, your submission has been received."
+msgstr "Vos résponses ont bien été envoyées. Merci pour votre retour."
+
+#Questionnaire - Webform 
+msgid "Go back to the form"
+msgstr "Retourner à l'agenda"
+
+# Questionnaire : Agenda for the day page.
+msgid "Save Draft"
+msgstr "Enregistrer et finaliser plus tard"

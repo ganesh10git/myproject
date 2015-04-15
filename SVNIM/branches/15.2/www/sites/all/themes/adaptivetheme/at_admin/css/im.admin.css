@@ -1,0 +1,146 @@
+@CHARSET "ISO-8859-1";
+body { font-size: 0.923em;}
+body #admin-menu { font-size: 12px; }
+table { font-size: 100%;}
+ul.primary { padding: 0 0 2.1em 0\9;} /** IE8 BO tabs fix ****/
+
+/**** store preference form Backend LINK ****/
+#edit-action-concered-store, #edit-action-concered-store--2 {
+	background: url(images/blue-button.png) no-repeat 0 bottom transparent;
+	min-width: 100px;
+	display: table;
+	padding: 5px;
+}
+#edit-action-concered-store a, #edit-action-concered-store--2 a{
+	color: #fff;
+	font-weight: bold;
+	padding: 0 10px;
+}
+
+/**** Manage links ****/
+.block a.create-function-link,
+#edit-user-back-url  {
+	background: url(images/blue-button.png) no-repeat 0 bottom transparent;
+	display: inline-block;
+	padding: 5px 10px;
+	color: #fff;
+	font-weight: bold;
+	outline: 1px solid #9babb0;
+	border: 1px solid #fff;
+}
+#edit-user-back-url {
+	background-color: #7BCB29;
+	background-image: none;
+}
+#edit-submit-sales-plan-management,
+#edit-submit-manage-messages {
+	margin-top: 2.3em;
+} 
+#edit-submit-manage-operational-model, 
+#edit-submit-manage-applications {
+	margin-top: 2.1em;
+}
+#edit-agenda-submit {
+	margin-top: 0.6em;
+}
+
+/***** OM Backend  *****/
+#edit-field-om-location,#edit-field-om-location--2,
+#edit-field-om-actuers,#edit-field-om-actuers--2  {
+  display: inline-block;
+  width: 100%;
+}
+#edit-field-om-actuers  {
+  margin-bottom: 15px;
+}
+#edit-field-om-location .form-type-checkbox,#edit-field-om-location--2 .form-type-checkbox,
+#edit-field-om-actuers .form-type-checkbox,#edit-field-om-actuers--2 .form-type-checkbox {
+	float: left;
+	min-width: 230px;
+	padding-right: 10px;
+}
+#edit-field-om-attachments {
+	width: 100%;
+	display: table;
+}
+.page-admin-im-manage ul.tabs.primary,
+.page-admin-im-settings ul.tabs.primary,
+.page-admin ul.tabs.primary  {
+  display: inline-block\9;
+  width: 100%\9;
+  padding-bottom: 0px\9;
+}
+
+/******* Manage Directory  BO**************/
+.page-admin-im-manage-directory #autocomplete{
+  top: 24px !important;
+  left: 0px !important;
+}
+/*** Chrome hack ***/
+@media screen and (-webkit-min-device-pixel-ratio:0) { 
+    .page-admin-im-manage-directory #autocomplete {
+			top: 26px !important;
+			left: 2px !important;
+		}
+}
+.page-admin-im-manage-directory input.form-autocomplete {  height: 16px; }
+.page-admin-im-manage-directory #edit-submit-manage-directory { margin-top: 2.08em; }
+
+/******* BO  Modifier Procédure *********/
+.node-type-operational-model  ul.tabs.primary {
+	display: table\9;
+}
+form#views-exposed-form-manage-questionnaire-page #edit-title {	width: auto;}
+
+/********* BO POPUP **************/
+#edit-rmp-cancel, 
+#user-store-preference .edit-rmp-validate input.form-submit {
+  background: url("images/green-buttons.png") no-repeat scroll 0px -255px transparent;
+  display: inline-block;
+  height: 30px;
+  margin: 0 0 0 432px;
+  width: 109px;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 11px;
+  line-height: 30px;
+  text-align: center;
+  cursor: pointer;
+}
+#user-store-preference .edit-rmp-validate input.form-submit {
+  margin: 0 40px 0 0;
+  width: 109px;
+  height: 30px;
+  padding: 0;
+}
+/**** BO Reginal Moderator popup****/
+.im-profile-popup .popups-body {
+	width: 754px !important;
+	height: auto !important; 
+}
+#edit-submit-management-regional-moderator-profiles {
+  margin-top: 2.6em;
+}
+.page-node-add-regional-moderator-profile a#edit-delete {
+  height: 15px;
+  color: #fff;
+  padding: 2px 6px;
+  font-weight: bold;
+  outline: 1px solid #9babb0;
+  border: 1px solid #fff;
+  position: absolute;
+  left: 120px;
+  margin-top: 3px;
+  line-height: 15px;
+  background: url(images/red-button.png) no-repeat 0 0 transparent;
+  -moz-outline-radius: 4px;
+  -khtml-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+}
+.page-node-add-regional-moderator-profile a#edit-delete:hover {
+  text-decoration: none;
+  background-position: 0 -45px;
+}
+.page-node-add-regional-moderator-profile a#edit-delete div { margin: 0px;}

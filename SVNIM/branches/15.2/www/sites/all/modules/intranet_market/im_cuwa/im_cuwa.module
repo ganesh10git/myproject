@@ -1,0 +1,270 @@
+<?php
+/**
+ * @file
+ *
+ */
+
+/**
+* Implements hook_preprocess_page
+*/
+function im_cuwa_preprocess_page(&$variable) {
+	if(variable_get('search_noresult')=='noresult'){
+		variable_del('search_noresult');
+		return;
+	}
+  global $user;
+  if (file_exists(DRUPAL_ROOT . '/sites/default/custom_settings.php')) {
+    include DRUPAL_ROOT . '/sites/default/custom_settings.php';
+  }
+  $im_cuwa_x2 = '';
+  if (!empty($_SESSION['profil']['store'])) {
+      $im_cuwa_x2 = 1;
+  }
+  else {
+    $im_cuwa_x2 = 2;
+  }
+  //Test or default mode
+  $cuwa_mode = variable_get('core_custom_im_cuwa_mode', 'test');
+
+  //We can add cuwa scripts only if configurations is avalaible
+  if (!isset($cuwa) || !(isset($cuwa[$cuwa_mode]))) {
+    return;
+  }
+  //Prepare xtn2 var if 404 or 403
+  $headers = drupal_get_http_header();
+  
+  //Prepare xt variable
+  $xt = array();
+  $xt = im_cuwa_get_cuwa_page_from_url();
+  $im_cuwa_x1 = '';
+  $im_cuwa_x3 = '';
+  $xt_an = '';
+  $xtn2 = '';
+  $im_cuwa_x5 = '';
+  $xtpage = '';
+  //$xt_mtcl = '';
+  $im_cuwa_x6 = '';
+  $im_cuwa_x4 = '';
+  // CUWA for 404 error
+  if (isset($headers['status']) && !empty($headers['status'])) {
+    $status = $headers['status'];
+    //if (substr($status, 0, 3) == '404' || substr($status, 0, 3) == '403') {
+    if (substr($status, 0, 3) == '404') {
+      $xtn2 = 8;
+      //$xtpage = str_replace('-', '_', pathauto_cleanstring(drupal_get_title()));
+      $xtpage = '404_error';
+    }
+  }
+  if (isset($xt['xt_mtcl'])) {
+    $xt_mtcl = $xt['xt_mtcl'];
+   //Add cuwa scripts for search
+   drupal_add_js(drupal_get_path('module', 'im_cuwa') . '/js/im_cuwa_search.js');  
+  }
+  if (isset($xt['xt_npg'])) {
+    $xt_npg = $xt['xt_npg'];
+  }
+  
+  if (isset($xt['page'])) {
+    $xtpage = $xt['page'];
+  }
+  if (!empty($xt['xtn2'])) {
+    $xtn2 = $xt['xtn2'];
+  }
+  if (!empty($xt['x5'])) {
+    $im_cuwa_x5 = $xt['x5'];
+  }
+  if ($user->uid != '') {
+    $xt_an = $user->uid;
+  }
+  if (!empty($xt['x6'])) {
+    $im_cuwa_x6 = $xt['x6'];
+  }
+  if (!empty($xt['x4'])) {
+    $im_cuwa_x4 = $xt['x4'];
+  }
+  $cuwa_mode = variable_get('core_custom_im_cuwa_mode', 'test');
+  //$_SESSION['ldap_user_role'] = 'store_director';
+  if (isset($_SESSION['ldap_user_role'])) {
+    if ($_SESSION['ldap_user_role'] != 'salarie_siege') {
+      if (isset($_SESSION['profil']['store'])) {
+        $im_cuwa_x3 = $_SESSION['profil']['store'];
+      }
+    }
+    if ($_SESSION['ldap_user_role'] == 'store_director'){
+      $im_cuwa_x1 = 1;
+    }
+    if ($_SESSION['ldap_user_role'] == 'store_manager') {
+      $im_cuwa_x1 = 2;
+    }
+    if ($_SESSION['ldap_user_role'] == 'store_employee') {
+      $im_cuwa_x1 = 3;
+    }
+    if ($_SESSION['ldap_user_role'] == 'store_director_trainee') {
+      $im_cuwa_x1 = 4;
+    }
+    if ($_SESSION['ldap_user_role'] == 'store_manager_trainee') {
+      $im_cuwa_x1 = 5;
+    }
+  }
+  //Add variables in Drupal settings
+  drupal_add_js(array(
+    'im_cuwa' => array(
+      'xtpage' => $xtpage,
+      'xtn2' => $xtn2,
+      'xt_an' => $xt_an,
+      'xtsite' => $cuwa[$cuwa_mode]['xtsite'],//xsite value
+      'x1' => $im_cuwa_x1,//DD,MM,EMP, DMS,MMS
+      'x2' => $im_cuwa_x2,//MAGASIN,SEIGE
+      'x3' => $im_cuwa_x3,//SHOP ID
+      'x4' => $im_cuwa_x4,//Content id
+      'x5' => $im_cuwa_x5,//DEPT
+      'xt_mtcl' => $xt_mtcl,
+      'xt_npg' => $xt_npg,
+      'x6' => $im_cuwa_x6,
+    )
+  ), 'setting');
+  //Add cuwa scripts
+  drupal_add_js(drupal_get_path('module', 'im_cuwa') . '/js/im_cuwa.js');
+  
+  //As xtcore.js is called asynchronously, put it's path on Drupal.settings
+  drupal_add_js(array(
+    'im_cuwa' => array(
+      'xtcore_path' => drupal_get_path('module', 'im_cuwa') . '/js/xtcore.js'
+    )
+  ), 'setting');
+  
+  //Prepare variables for noscript in page.tpl.php
+  $variable['cuwa_xtpage'] = $xtpage;
+  $variable['cuwa_xtn2'] = $xtn2;
+  $variable['cuwa_xt_an'] = isset($xt_an) ? $xt_an : '';
+  $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
+  $variable['cuwa_xtsd'] = $cuwa[$cuwa_mode]['xtsd'][$protocol];
+  $variable['cuwa_xtsite'] = $cuwa[$cuwa_mode]['xtsite'];
+}
+
+/**
+ * Get the cuwa_page of the page (ie breadcrumb)
+ */
+function im_cuwa_get_cuwa_page_from_url() {
+	$xt = array();
+	$args = arg(0);
+  if (!empty($args)) {
+    //Agenda home page
+    if(arg(0) == 'agenda' && arg(1) == 'list') {
+      $xt['page'] = 'diary_page';
+      $xt['xtn2'] = '1';//level
+      $xt['x3'] = '';//shop id
+      $xt['x4'] = '';//content id -empty
+      $xt['x5'] = '';//Department id
+      $arg4 = arg(4);
+      if (isset($arg4)) {
+        if(strstr($arg4, ",") || arg(4) == 'all') {
+          $xt['x5'] = 'multi-departments';
+        }
+        else{
+          $tid = arg(4);
+          $xt['x5'] = taxonomy_term_load($tid)->name;
+        }
+      }
+    }
+    //Agenda for the day
+    if(arg(0) == 'agenda-day') {
+      $xt['page'] = 'aganda_day';
+      $xt['xtn2'] = '1';
+      $args3  = arg(3);
+     if (isset($args3)) {
+        if(strstr($args3, ",") || arg(3) == 'all') {
+          $xt['x5'] = 'multi-departments';
+        }
+        else{
+          $tid = arg(3);
+          $xt['x5'] = taxonomy_term_load($tid)->name;
+        }
+      }
+    }
+    $arg1 = arg(1);
+    //Operational model
+    /*if(arg(0) == 'modele-operationnel' && $arg1 == '') {
+      $xt['page'] = 'documentation_page';
+      $xt['xtn2'] = '2';
+      if (arg(1) == '') {
+        $xt['x5'] = 'accueil';
+      }
+    }*/
+    //Operational model display 
+    if(arg(0) == 'modele-operationnel' && isset($arg1) && is_numeric($arg1)) {
+      $nodeObj = node_load(arg(1));
+      $node_title  = trim($nodeObj->title);
+      $xt['page'] = "display::documentation::$node_title";
+      $xt['xtn2'] = '2';
+      $xt['x4'] = $arg1;
+      if (arg(2) != '' && is_numeric(arg(2))) {
+        $term_id =  taxonomy_term_load(arg(2));
+        $xt['x5'] = $term_id->name;
+      }
+    }
+    if(arg(0) == 'node' && isset($arg1) && is_numeric($arg1) && arg(2)!= 'edit' && arg(2) != 'webform') {
+      $nodeObj = node_load(arg(1));
+      if(isset($nodeObj->type) && !empty($nodeObj->type)){
+        if ($nodeObj->type == 'operational_model') {
+        	$xt['x4'] = arg(1);
+          $node_title  = trim($nodeObj->title);
+          $xt['page'] = "display::documentation::$node_title";
+          $xt['xtn2'] = '2';
+         if (arg(2) != '' && is_numeric(arg(2))) {
+           $term_id =  taxonomy_term_load(arg(2));
+           $xt['x5'] = $term_id->name;
+        }
+        }
+        
+      }
+    }
+    //Sales plan
+    if(arg(0) == 'sales-plan') {
+      $xt['xtn2'] = '3';
+      if (arg(4) != '') {
+        $nodeobj = node_load(arg(4));        
+        $node_title  = $nodeobj->title;
+        $xt['page'] = "display::sales_plan_page::$node_title";
+        if (isset($nodeobj->field_sp_type['und'][0]['value'])) {
+          $xt['x6'] = $nodeobj->field_sp_type['und'][0]['value'];
+        }
+      }
+      if (arg(4) == '' && arg(2) == 'all') {
+        $nodeobj = node_load(arg(4));        
+        $node_title  = $nodeobj->title;
+        $xt['page'] = "display::sales_plan_page";
+        if (isset($nodeobj->field_sp_type['und'][0]['value'])) {
+          $xt['x6'] = $nodeobj->field_sp_type['und'][0]['value'];
+        }
+      }
+    }
+   //Product guide
+    if(arg(0) == 'guide-produits') {
+      $xt['page'] = 'products_guide_page';
+      $xt['xtn2'] = '4';
+    }
+    //Application
+    if(arg(0) == 'applications') {
+      $xt['page'] = 'application_page';
+      $xt['xtn2'] = '5';
+    }
+    //Directory
+    if(arg(0) == 'annuaire') {
+      $xt['page'] = 'directory_page';
+      $xt['xtn2'] = '6';
+    }
+    //Directory
+    if(arg(0) == 'annuaire') {
+      $xt['page'] = 'directory_page';
+    }    
+    return $xt;
+  }
+  else if(arg(0) == NULL) {
+    $xt['page'] = "diary_page";
+    $xt['xtn2'] = '1';
+    $xt['x5'] = 'multi-departments';
+    return $xt; 
+  }
+}
+

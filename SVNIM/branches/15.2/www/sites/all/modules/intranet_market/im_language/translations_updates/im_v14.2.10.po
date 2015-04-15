@@ -1,0 +1,25 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Salesplan page Create Copy link
+msgid  "Create a link to Salesplan"
+msgstr "Créer un lien vers cette opération"
+
+#Salesplan page help message
+msgid  "Link to Sales plan:"
+msgstr "Lien d'accès direct à l'opération :"
+
+#Salesplan page help message
+msgid  "Here is the link to the current salesplan:"
+msgstr "Vous pouvez accéder directement à cette opération en copiant le lien ci-dessous :"

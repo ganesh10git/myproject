@@ -1,0 +1,44 @@
+<?php
+function im_stores_is_store_exist($store_name) {
+  $query = db_select('store_item_fields', 's');
+  $query->condition('s.ite_lib_value', $store_name, '=')
+      ->fields('s', array('pve_code'));
+  $result = $query->execute();
+  if($result->fetchAssoc()) {
+    return TRUE;
+  }
+  else {
+  	return FALSE;
+  }
+}
+function map_stores_profile($store_names,$account) {
+  //Removed condition empty($user->field_user_store_nid['und'][0]['value']) || 
+  if(isset($_SESSION['profil']['store'])) {
+    $pve_codes = array(); 
+	  $query = db_select('store_item_fields', 's')
+	         ->fields('s', array('pve_code'))
+	         ->distinct()
+	         ->condition('ite_lib_value', $store_names, 'IN');
+	  $results = $query->execute();
+	  if($results){
+	    foreach($results as $result) {
+	      $pve_codes[] = $result->pve_code;
+	    }
+	    $ldap_stores = implode(",", $pve_codes);
+	    //Created New session $_SESSION['profil']['stores'] in plural and used in im_agenda.module to save in user profile
+	    $_SESSION['profil']['stores'] = $ldap_stores;
+	    global $user;
+	    $user->field_user_store_nid['und'][0]['value'] = '';
+	    $user->field_user_stores['und'][0]['value'] = $ldap_stores;
+	    user_save($user);
+	  }
+  }else{
+  	//global $user;
+	  $userProfile = user_load($account->uid);
+    if(isset($userProfile->field_user_stores[LANGUAGE_NONE][0]['value']) && $userProfile->field_user_stores[LANGUAGE_NONE][0]['value'] != '' && $userProfile->field_user_store_nid[LANGUAGE_NONE][0]['value'] == '') {
+    	$userProfile->field_user_store_nid['und'][0]['value'] = '';
+	    $userProfile->field_user_stores['und'][0]['value'] = '';
+	    user_save($userProfile);
+    }
+  }
+}

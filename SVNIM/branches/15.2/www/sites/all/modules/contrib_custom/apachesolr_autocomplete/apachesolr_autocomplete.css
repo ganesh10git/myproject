@@ -1,0 +1,29 @@
+/**
+ * @file
+ *   Adds some styles to the standard Drupal autocomplete widget.
+ */
+.apachesolr_autocomplete {
+	padding-left: 10px;
+}
+.apachesolr_autocomplete.message {
+  font-size:80%;
+  color:#888;
+}
+.apachesolr_autocomplete.count {
+  float:right;
+}
+div.apachesolr_autocomplete.suggestion {
+	line-height: 22px;
+}
+div.ac_results li {
+  list-style:none;
+  background-image: none !important;
+}
+#autocomplete {
+	background-color: #FFFFFF;
+	left: 15px !important;
+	top: 36px !important;
+	padding-right: 35px ;
+	border: 1px solid #AE9490 !important;
+}
+.selected {	width: 120%; }

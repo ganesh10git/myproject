@@ -1,0 +1,10 @@
+core = "7.x"
+description = "IM utilities module. Contain utils function."
+name = "im_utilities"
+package = "Intranet Market"
+project = "im_utilities"
+version = "7.x-1.0"
+
+dependencies[] = "file"
+dependencies[] = "image"
+

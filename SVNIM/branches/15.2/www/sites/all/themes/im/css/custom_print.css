@@ -1,0 +1,57 @@
+/********** Agends of the day Print CSS ****************/
+
+#header, 
+.go_top_link,
+.page-agenda-day #columns .region-sidebar-second,
+#agenda-user-input-date,
+.agenda-date-selection .previous-date,
+.agenda-date-selection .next-date,
+.print-agenda-today,
+.alert-icon,
+.action-icon,
+.action-info-icon,
+#skip-link,
+#messages  { display: none !important;}
+
+#page, 
+.page-agenda-day #content-column,
+.agenda-date-selection .present-date { width: 100% !important;}
+
+#columns { margin: 0px; }
+
+.page-agenda-day #content-column { border: 0px !important;}
+
+.agenda-day-image-block, .documents, .action_image {   border: 1px solid #000;}
+
+.agenda-date-selection { float: left;}
+.agenda-date-selection-data { float: left; clear: both;}
+
+.agenda-date-selection-data, .agenda-date-selection, .news-benchmark-grouping-content { background: none !important;}
+
+.agenda-date-selection-data .agendatype-detailAction,
+.agenda-date-selection-data .agendatype-detailAction-info,
+.agenda-date-selection-data .agendatype-detailAlert,
+.agenda-date-selection-data .agendatype-detailNews {
+  overflow: visible !important;  /*****  Left widget over flow  hide ****/
+}
+
+/******** MOZ  HACK ***********/
+@-moz-document url-prefix() { 
+	marquee { -moz-binding: none; }
+	body, .agenda-date-selection-data, .view-grouping, .agenda-date-selection {
+		overflow-x: visible;
+		overflow-y: visible;
+		display: inline;
+	}
+	.front #content-column, 
+	.page-agenda-list-all #content-column, 
+	.page-agenda-list #content-column, 
+	.page-agenda-day #content-column, 
+	.agenda-date-selection-data	{ display:  inline !important;}
+	.agenda-date-selection, .agenda-date-selection-data { float: none;}
+  .agendatype-detailAction .views-row, 
+  .agendatype-detailAction-info .views-row, 
+  .agendatype-detailAlert .views-row, 
+  .agendatype-detailNews .views-row { display:  inline !important;}
+} 
+/******** MOZ  HACK END***********/

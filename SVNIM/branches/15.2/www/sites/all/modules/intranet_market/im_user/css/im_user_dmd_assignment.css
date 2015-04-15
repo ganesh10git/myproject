@@ -1,0 +1,144 @@
+/*===================================================*/
+/****************************** DMD ************************************/
+/*==================================================*/
+.page-admin-im-user-dmd-assignment #columns {
+	background: #FAF9F9;
+	/*margin: 0px;*/
+}
+.page-admin-im-user-dmd-assignment #main-content { margin: 0px;}
+.page-admin-im-user-dmd-assignment #content {  padding: 0; }
+.dmd-assignment-wrapper { color: #72544F; }
+.assignment-store {
+	border-bottom: 2px solid #9A7D78;
+	color: #37211C;
+	font-size: 13px;
+	height: 20px;
+	display: inline-block;
+	width: 97.5%;
+	padding-top: 6px;
+	margin: 0 15px;
+}
+.dmd-filter-form .dmd-search-form-sec,
+.dmd-filter-form .assignment-search-result-sec {
+	padding: 25px 15px;
+}
+.dmd-assignment-wrapper .assignment-first-name label, 
+.dmd-assignment-wrapper	.assignment-last-name label, 
+.dmd-assignment-wrapper	.assignment-mail label{
+  display: inline-block;
+  width: 120px;
+  font-weight: 400;
+}
+.dmd-assignment-wrapper .assignment-first-name .form-text, 
+.dmd-assignment-wrapper	.assignment-last-name .form-text, 
+.dmd-assignment-wrapper	.assignment-mail .form-text,
+#edit-dmd-begin-date .form-item-dmd-begin-date-date .form-text,
+#edit-dmd-end-date .form-item-dmd-end-date-date .form-text {
+	border: 1px solid #D6C6C4;
+	height: 26px;
+	padding: 0;
+}
+.assignment-search, .assignment-cancel {
+	display: inline-block;
+	margin: 5px 0 0 125px;
+}
+.assignment-cancel { margin-left: 15px;}
+.assignment-search .form-submit, 
+.assignment-search .form-submit:hover,
+.assignment-cancel a,
+.assignment-assign #edit-dmd-assign {
+  background: url("/sites/all/themes/adaptivetheme/at_admin/css/images/green-buttons.png") no-repeat scroll 0 -254px transparent;
+  border: 0 none;
+  font-weight: normal;
+  height: 30px;
+  line-height: 30px;
+  outline: none;
+  padding: 0;
+  text-align: center;
+  width: 108px;
+  display: inherit;
+  margin: 0px;
+  text-transform: uppercase;
+	font-size: 11px;
+	color: #FFF;
+}
+.assignment-assign #edit-dmd-assign {
+  background-position: 0 -442px;
+  width: 210px;
+}
+.dmd-filter-form .assignment-cancel a { color: #fff !important; }
+.dmd-filter-form .assignment-cancel a:hover, .dmd-filter-form .assignment-cancel a:active { text-decoration: none;  color: #fff; }
+.dmd-assignment-wrapper .assignment-search-result-sec{
+  background-color: #F0EBEA;
+  margin-bottom: 20px;
+}
+.assignment-search-result-sec .assignment-search-result-title {
+  background: none repeat scroll 0 0 #F5F5F5;
+  font-weight: bold;
+  line-height: 33px;
+  text-indent: 10px;
+  width: 49.95%;
+}
+.assignment-search-result-sec .mail-title.assignment-search-result-title { width: 100%;}
+.assignment-search-result-sec .assignment-search-result,
+.assignment-search-result-sec  .assignment-search-result-mail {
+  float: left;
+  width: 33%;
+}
+.assignment-search-result-sec  .assignment-search-result-mail { margin-top: -33px;}
+.assignment-search-result-sec .assignment-search-result .form-type-radio,
+.assignment-search-result-sec  .assignment-search-result-mail .email-ids .mail  {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #F0EBEA;
+  float: left;
+  font-size: 12px;
+  height: 33px;
+  line-height: 30px;
+  margin: 0;
+  padding: 0 0 0 10px;
+  width: 98.3%;
+}
+.assignment-search-result-sec .dmd-date {
+	width: 100%;
+	display: inline-block;
+}
+.assignment-search-result-sec .assignment-begin-date, 
+.assignment-search-result-sec .assignment-end-date,
+.assignment-search-result-sec	.assignment-assign  {
+  float: left;
+  width: 300px;
+  margin: 15px 0 0 15px;
+}
+.assignment-search-result-sec .form-item-dmd-begin-date, 
+.assignment-search-result-sec .form-item-dmd-end-date {
+	margin: 0px;
+}
+.assignment-search-result-sec .form-item-dmd-begin-date label, 
+.assignment-search-result-sec .form-item-dmd-end-date label {
+  float: left;
+  font-weight: normal;
+  line-height: 28px;
+  margin: 0;
+  padding-right: 10px;
+}
+#edit-dmd-begin-date , #edit-dmd-end-date { padding: 0;}
+#edit-dmd-begin-date .form-item-dmd-begin-date-date label,
+#edit-dmd-begin-date .form-item-dmd-begin-date-date .description,
+#edit-dmd-end-date .form-item-dmd-end-date-date label,
+#edit-dmd-end-date .form-item-dmd-end-date-date .description {
+	display: none;
+}
+.dmd-assigned-records-wrapper {
+  padding: 0 15px;
+}
+.dmd-assigned-records-wrapper .assignment-store {
+  margin: 0 0 20px;
+  width: 100%;
+}
+.dmd-assigned-records-wrapper  .edit a {
+	color: #7BCB29
+}
+.dmd-assigned-records-wrapper th, .dmd-assigned-records-wrapper td {
+  border-right: 1px solid #F0EBEA;
+  border-bottom: 1px solid #F0EBEA;
+}

@@ -1,0 +1,145 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#Create Action
+msgid "Save and Prepare for Regional Moderation"
+msgstr "Enregistrer et préparer à la modération régional"
+
+#Export OM and its assets
+msgid "Successfully exported the om_roles vocabulary taxonomy terms in a .inc file format"
+msgstr "Succès exporté les om_roles vocabulaire termes de taxonomie dans un format de fichier. Inc"
+
+#Export OM and its assets
+msgid "Successfully exported the operational_model_location vocabulary taxonomy terms in a .inc file format"
+msgstr "Succès exporté les termes de taxonomie operational_model_location de vocabulaire dans un format de fichier. Inc"
+
+#Export OM and its assets
+msgid "Successfully exported the om_domains vocabulary taxonomy terms in a .inc file format"
+msgstr "Succès exporté les om_domains vocabulaire termes de taxonomie dans un format de fichier. Inc"
+
+#Export OM and its assets
+msgid "Successfully Exported the Operational Model (Procedure type) contents"
+msgstr "Exporté avec succès le modèle opérationnel (type de procédure) de contenu"
+
+#Import OM and its Taxonomy
+msgid "Creating vocabulary taxonomy term of @num operations"
+msgstr "Création terme de taxonomie vocabulaire de @num opérations"
+
+#Import OM and its Taxonomy
+msgid "Operation - importing the @vocabulary terms"
+msgstr "Fonctionnement - importer les @vocabulary termes"
+
+#Import OM and its Taxonomy
+msgid "@count results processed in @requests HTTP requests."
+msgstr "@count résultats traités dans @requests des demandes HTTP."
+
+#Import OM and its Taxonomy
+msgid "An error occurred while processing @operation with arguments : @args"
+msgstr "Une erreur s'est produite lors du traitement de @operation avec des arguments:"
+
+#Import OM content files
+msgid "Importing procedure files @num operations"
+msgstr "Procédure Importation de fichiers de @num opérations"
+
+#Import OM content files
+msgid "Operation - importing the procedure files"
+msgstr "Opération - l'importation des fichiers de la procédure"
+
+#Import OM contents
+msgid "Importing procedure node contents @num operations"
+msgstr "Importation de contenu du nœud de procédure @num opérations"
+
+#Import OM contents
+msgid "Operation - importing the procedure node contents"
+msgstr "Fonctionnement - importer le contenu nœud de procédure"
+
+#Import OM contents and assets settings page
+msgid "Import Procedure assets"
+msgstr "Actifs importation de procédure"
+
+#Import OM contents and assets settings page
+msgid "@st_strongStep 1: Import the procedure taxonomy (Roles, Location and Domains)@ed_strong"
+msgstr "@st_strongÉtape 1: Importation de la procédure taxonomie (rôles, Lieu et Domaines)@ed_strong"
+
+#Import OM contents and assets settings page
+msgid "Import Taxonomy"
+msgstr "Importer taxonomie"
+
+#Import OM contents and assets settings page
+msgid "@st_strongStep 2: Import the procedure attachment files@ed_strong"
+msgstr "@st_strongÉtape 2: Importer les fichiers procédure de fixation@ed_strong"
+
+#Import OM contents and assets settings page
+msgid "Import Procedure Files"
+msgstr "Fichiers procédure d'importation"
+
+#Import OM contents and assets settings page
+msgid "@st_strongStep 3: Import the procedure node contents@ed_strong"
+msgstr "@st_strongÉtape 3: Importer le contenu du nœud de procédure@ed_strong"
+
+#Import OM contents and assets settings page
+msgid "Import Procedures Contents"
+msgstr "Les procédures d'importation matières"
+
+#Serach default text
+msgid "@li1Check if your spelling is correct, or try removing filters.@li2@li1Remove quotes around phrases to match each word individually: @em1blue drop @em1 will match less than @em1blue drop@em2.@li2@li1You can require or exclude terms using + and -: @em1big +blue drop@em2 will require a match on @em1blue@em2 while @em1big blue -drop@em2 will exclude results that contain @em1drop@em2.@li2@li2"
+msgstr "@li1Vérifiez votre orthographe ou essayez d'enlever des filtres.@li2@li1Retirez les guillemets pour rechercher les mots séparément: @em1rouge et bleu @em1 ramène moins de résultats que @em1rouge et bleu@em2.@li2@li1Vous pouvez exclure des mots en utilisant + et - : @em1rouge +et bleu@em2 va imposer la présence du mot @em1et@em2 Alors que @em1rouge -et bleu@em2 will exclude results that contain @em1et@em2.@li2@li2"
+
+#OM node add/edit page
+msgid "OM None"
+msgstr "Aucune"
+
+#action node add/edit page
+msgid "Scope of Content"
+msgstr ""
+
+#user edit page
+msgid "Regional Stores"
+msgstr ""
+
+#user edit page
+msgid "Regional Stores Nid"
+msgstr ""
+
+#manage om page
+msgid "Macro-Activite"
+msgstr "Macro activité"
+
+#user Add page
+msgid "Please select only one user to this role"
+msgstr ""
+
+#user Add page
+msgid "The User is already taken"
+msgstr ""
+
+#user Add page
+msgid "Added the selected users"
+msgstr ""
+
+#user Add page
+msgid "Please select any one user"
+msgstr ""
+
+#user dashboard page
+msgid "Please attach the stores to the selected user for the regioanl role."
+msgstr ""
+
+#DMD Assignment
+msgid "Please enter the value for any one of the field."
+msgstr ""
+
+#DMD Assignment
+msgid "Please enter the value for Last name or Employee Id."
+msgstr ""

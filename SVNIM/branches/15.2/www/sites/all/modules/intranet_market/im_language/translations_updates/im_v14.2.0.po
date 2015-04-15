@@ -1,0 +1,409 @@
+# $Id$
+# fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-10-12 08:39+0000\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "First Name"
+msgstr ""
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "Family Name"
+msgstr ""
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "Employee Id"
+msgstr "Matricule"
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "End Date"
+msgstr ""
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "Select user"
+msgstr ""
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "Provide Begin Date"
+msgstr ""
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "Provide End Date"
+msgstr ""
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "Delegation exists for this period or part of this period"
+msgstr ""
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "Record exist for the same period"
+msgstr ""
+
+#DMD Assignment page
+#admin/im/user/dmd-assignment
+msgid "Full Name"
+msgstr ""
+
+#Operational Model
+msgid "Create new version"
+msgstr "Créer nouvelle version"
+
+msgid "Allows a user to create a new version of content."
+msgstr ""
+
+#operational model Landing page
+msgid "Print procedure"
+msgstr "Imprimer La procedure"
+
+#operational model Landing page
+msgid "Print"
+msgstr "Imprimer"
+
+#operational model Landing page 
+msgid "Search procedure"
+msgstr "Rechercher une procédure"
+
+#operational model Landing page
+msgid "Procedures of the selected area"
+msgstr "Procedures de la zone selectionnee"
+
+#operational model Landing page
+msgid "Fontions Concernees"
+msgstr "Functions Concernees"
+
+#operational model Landing page
+msgid "Auters the procedure"
+msgstr "Auteurs de la procedure"
+
+#operational model Landing page
+msgid "Ciblage"
+msgstr "Ciblage"
+
+#operational model Landing page
+msgid "Documents"
+msgstr "Documents"
+
+#operational model Landing page
+msgid "Summary"
+msgstr "Sommaire"
+
+#Node add of directory
+msgid "Category"
+msgstr "Catégorie"
+
+msgid 'Should not change the character case. Space " " replace with "_" and "/" replace with "-"'
+msgstr ""
+
+#Operational Model
+msgid "View Draft"
+msgstr "Pévisualisation" 
+
+#Operational Model
+msgid "View draft"
+msgstr "Prévisualisation"
+
+#Operational Model
+msgid "Edit Draft"
+msgstr "Modification du brouillon"
+
+#Operational Model
+msgid "Edit draft"
+msgstr "Modification du brouillon"
+
+#Operational Model
+msgid "Create new operational_model"
+msgstr "Créer une nouvelle procédure"
+
+#Sales plan detailed page
+msgid "all"
+msgstr "tous"
+
+#Sales plan detailed page
+msgid "Non Food"
+msgstr "NON ALIMENTAIRE"
+
+#Sales plan detailed page
+msgid "to"
+msgstr "au"
+
+#Sales plan detailed page
+msgid "No document available"
+msgstr "Pas de document disponible"
+
+#Agenda homepage
+msgid "MODELE OPERATIONNEL MENU"
+msgstr "MODÉLE OPÉRATIONNEL"
+
+#Agenda homepage
+msgid "Assigned & Past"
+msgstr ""
+
+#Manage Links in FO
+msgid "IM Custom Settings"
+msgstr "Paramétrage du portail"
+
+#Search page 
+msgid "Categories"
+msgstr "Catégories"
+
+#Search page 
+msgid "Filter the list of search results"
+msgstr "Filtrer la liste de résultat de recherche"
+
+#Search page 
+msgid "All portals"
+msgstr "Tout le portail"
+
+#Search page 
+msgid "All"
+msgstr "Tous"
+
+#Search page 
+msgid "Contents"
+msgstr "Contenu"
+
+#Search page 
+msgid "Files"
+msgstr "Fichier"
+
+#Search page 
+msgid "No selection"
+msgstr "Pas de sélection"
+
+#Search page 
+msgid "One week"
+msgstr "Une semaine"
+
+#Search page 
+msgid "One month"
+msgstr "Un mois"
+
+#Search page 
+msgid "A quarter"
+msgstr "Un trimestre"
+
+#Search page 
+msgid "One semester"
+msgstr "Un semestre"
+
+#Search page 
+msgid "One year"
+msgstr "Un an"
+
+#Search page 
+msgid "Date Of Publication"
+msgstr "Date de publication"
+
+#Search page 
+msgid "Between"
+msgstr "Entre le"
+
+#Search page 
+msgid "And"
+msgstr "Et le"
+
+#Search page 
+msgid "Filter"
+msgstr "FILTRER"
+
+#Search page 
+msgid "Filter the list of search results"
+msgstr "Filtrer la liste de résultat de recherche"
+
+#taxonomy add term page
+msgid "Save term"
+msgstr "Enregistrer"
+
+#taxonomy add term page
+msgid "Delete term"
+msgstr "Supprimer"
+
+#taxonomy add term page
+msgid "Save vocabulary"
+msgstr "Enregistrer"
+
+#taxonomy add term page
+msgid "Delete vocabulary"
+msgstr "Supprimer"
+
+#search page
+msgid "The end date should be greater than the start date"
+msgstr "La date de fin doit être supérieure à la date de début"
+
+#Sales plan admin settings page
+msgid "Enter the value for Catalogue"
+msgstr "Indiquez la valeur pour Catalogue"
+
+#Sales plan admin settings page
+msgid "Enter the value for Help Control"
+msgstr "Indiquez la valeur pour Aides à la commande"
+
+#Sales plan admin settings page
+msgid "Enter the value for PLV"
+msgstr "Indiquez la valeur pour PLV"
+
+#Sales plan admin settings page
+msgid "Enter the value for Visual"
+msgstr "Indiquez la valeur pour Affichages PLV"
+
+#Sales plan admin settings page
+msgid "Enter the value for Others"
+msgstr "Indiquez la valeur pour Autres"
+
+#taxonomy vocabulary listing page
+msgid "Annuaire Category"
+msgstr "Catégorie annuaire"
+
+#taxonomy vocabulary listing page
+msgid "Application Category"
+msgstr "Catégorie d'application"
+
+#taxonomy vocabulary listing page
+msgid "Department"
+msgstr "Rayons"
+
+#taxonomy vocabulary listing page
+msgid "Fonctions"
+msgstr "Interlocuteurs"
+
+#taxonomy vocabulary listing page
+msgid "Operational Model Domains"
+msgstr "Domaines modèle opérationnel"
+
+#taxonomy vocabulary listing page
+msgid "Operational Model Location"
+msgstr "Emplacement modèle opérationnel"
+
+#taxonomy vocabulary listing page
+msgid "Operational Model roles"
+msgstr "Acteur procédure modèle opérationnel"
+
+#taxonomy vocabulary listing page
+msgid "Regions"
+msgstr "Régions pour plan de vente"
+
+#Dashboard : Manage Questionnaire
+msgid "Manage Questionnaire"
+msgstr ""
+
+#Dashboard : Manage Questionnaire
+msgid "Create Questionnaire"
+msgstr ""
+
+#Dashboard : Manage Questionnaire
+msgid "Description"
+msgstr "Description"
+
+# Questionnaire : Agenda for the day page.
+msgid "Questionnaire for this action has been already submitted by you."
+msgstr ""
+
+# Operational Model
+msgid "No procedure available."
+msgstr "Aucune procédure disponible."
+
+# Sales Plan : BO
+msgid "National"
+msgstr "Nationale"
+
+# Sales Plan : BO
+msgid "Regional"
+msgstr "Regionale"
+
+# Sales Plan : BO
+msgid "Noon Food"
+msgstr "Non Alimentaire"
+
+#BO manage Om
+msgid "Macro Activity"
+msgstr "Macro-Activite"
+
+#BO manage Om
+msgid "Macro Activity Term"
+msgstr "Macro-Activite"
+
+#Agenda For the day page
+msgid "Multi"
+msgstr "Multi"
+
+#Homepage Searchbar
+msgid "Enter your search"
+msgstr "Entrez votre recherche"
+
+#Search result page
+msgid "Search Refresh"
+msgstr "Reinitialiser les filtres"
+
+#Search result page
+msgid "@st_span@num_results@end_span result@pural found"
+msgstr "@st_span@num_results@end_span résultat@pural trouvé"
+
+#Search result page
+msgid "Results to be shown per page"
+msgstr "Résultats à affichés par page"
+
+#Search result page
+msgid "Types of media"
+msgstr "Types de medias"
+
+#Search result page
+msgid "Resume"
+msgstr "Résume"
+
+#Directory page
+msgid "Manage Directory"
+msgstr "Gestion Annuaire"
+
+#Directory page
+msgid "Create Directory"
+msgstr "Créer Annuaire"
+
+#Back Office
+msgid "Directory"
+msgstr "Annuaire"
+
+#Back Office
+msgid "Create new directory"
+msgstr "Créer une nouvelle annuaire"
+
+# Questionnaire : Agenda for the day page.
+msgid "OK"
+msgstr "OK"
+
+# Questionnaire : Agenda for the day page.
+msgid "Cancel"
+msgstr "Annuler"
+
+# Questionnaire : Agenda for the day page.
+msgid "Do you really want to close the questionnaire?"
+msgstr "Si vous cliquez sur OK les modifications que vous n'avez pas sauvegardees seront perdues."
+
+# Holiday : Create Content
+msgid "Calender year"
+msgstr "Calendrier Année"
+
+# Regional manager Email Configuration
+msgid "Email Configuration Updated Successfully."
+msgstr ""
+
+# Apache solr Autocompletetheme_apachesolr_autocomplete_spellcheck
+msgid "Did you mean"
+msgstr "Vous cherchez peut-être:"

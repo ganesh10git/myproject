@@ -1,0 +1,259 @@
+@CHARSET "ISO-8859-1";
+body { margin: 0; padding: 0; }
+.def {
+  background-color: #F0EBEA;
+  font: bold 12px arial;
+  color: #ff0000;
+}
+.def center {
+  background-color: #F9F9FA;
+  border: 1px solid #D5C9C8;
+  overflow: hidden;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: auto;
+  height: 312px;
+  width: 345px;
+}
+.def img, .def hr { display: none;}
+#tabTop {
+  background: url("images/login-sprite.png") no-repeat scroll center -9px transparent;
+  height: 80px;
+  margin: 15px 0;
+}
+#frmLogin, #frmPertePassword { margin-top: -83px; position: relative; }
+#tabMain { margin-top: 0px;}
+#imgLogin, #imgPassword { display: none; }
+#frmLogin input[type=text], 
+#frmPertePassword input[type=text] {
+  border: 1px solid #D5C9C8;
+  height: 38px;
+  left: 49px;
+  position: absolute;
+  width: 248px;
+  text-indent: 10px;
+  background: url("images/login-sprite.png") no-repeat scroll right -99px #FFFFFF;
+}
+#frmPertePassword input[name=stremail] {
+  top: 70px;
+  background: url("images/login-sprite.png") no-repeat scroll right -290px #FFFFFF;
+}
+#frmLogin input[type=password]{
+  border: 1px solid #D5C9C8;
+  height: 38px;
+  left: 49px;
+  position: absolute;
+  top: 70px;
+  width: 248px;
+  text-indent: 10px;
+  background: url("images/login-sprite.png") no-repeat scroll right -154px #FFFFFF;
+}
+#btnValid {
+  background: url("images/login-sprite.png") no-repeat scroll left -234px transparent;
+  height: 41px;
+  left: 48px;
+  position: absolute;
+  top: 147px;
+  width: 251px;
+  cursor: pointer;
+}
+#frmLogin #btnDemandePassword {
+  background: url("images/login-sprite.png") no-repeat scroll left -206px transparent;
+  height: 14px;
+  left: 49px;
+  position: absolute;
+  right: 0;
+  top: 122px;
+	cursor: pointer;
+}
+#frmLogin #btnChangePassword {
+  background: url("images/login-sprite.png") no-repeat scroll left -206px transparent;
+  height: 14px;
+  left: 49px;
+  position: absolute;
+  right: 0;
+  top: 122px;
+	cursor: pointer;
+}
+#btnDemandePassword {
+	top: 125px;
+	position: absolute;
+  background: url("images/login-sprite.png") no-repeat scroll left -337px transparent;
+	height: 41px;
+	left: 50px;
+	width: 135px;
+	cursor: pointer;
+}
+#btnReturn {
+  background: url("images/login-sprite.png") no-repeat scroll right -337px transparent;
+	height: 41px;
+	width: 103px;
+	position: absolute;
+	top: 125px;
+	right: 48px;
+	cursor: pointer;
+}
+#frmPassword {
+	margin-top: -95px;
+	position: relative;
+}
+#frmPassword input[type=text],
+#frmPassword input[type=password] {
+  border: 1px solid #D5C9C8;
+  height: 30px;
+  left: 157px;
+  position: absolute;
+  width: 170px;
+  width: 160px\9;
+  padding: 0 0 0 10px;
+}
+#frmPassword #btnReturn {
+	background: url("images/login-sprite.png") no-repeat scroll right -337px transparent;
+	height: 41px;
+	width: 103px;
+	position: absolute;
+	top: 185px;
+	right: 16px;
+	cursor: pointer;
+}
+#frmPassword #imgLogin,
+#frmPassword #imgPassword,
+#frmPassword #imgNewPassword,
+#frmPassword #imgConfirmPassword {
+	display: block;
+	background: url("images/login-sprite.png") no-repeat scroll left -427px transparent;
+	width: 137px;
+	height: 30px;
+	position: absolute;
+	left: 12px;
+}
+#frmPassword #imgPassword {
+	background: url("images/login-sprite.png") no-repeat scroll left -480px transparent;
+}
+#frmPassword #imgNewPassword {
+	background: url("images/login-sprite.png") no-repeat scroll left -537px transparent;
+}
+#frmPassword #imgConfirmPassword {
+	background: url("images/login-sprite.png") no-repeat scroll left -592px transparent;
+}
+#frmPassword input[name=strpassword],
+#frmPassword #imgPassword {
+	top: 60px;
+}
+#frmPassword input[name=strpasswordnew],
+#frmPassword #imgNewPassword {
+	top: 102px;
+}
+#frmPassword input[name=strpasswordnew2],
+#frmPassword #imgConfirmPassword {
+	top: 142px;
+}
+#frmPassword #btnChangePassword {
+	background: url("images/login-sprite.png") no-repeat scroll left -657px transparent;
+	height: 41px;
+	width: 136px;
+	position: absolute;
+	top: 185px;
+	left: 12px;
+	cursor: pointer;
+}
+/************************************************
+************* IE8 Quirks Mode HACK **************
+*************************************************/
+#frmLogin input[type=text], 
+#frmLogin input[type=password] {
+  height: 26px\9;
+  padding-top: 12px\9;
+  width: 238px\9;
+  padding-left: 10px\9;
+  text-indent: 0px\9;
+}
+.def center  { 
+	*position : static;
+	*margin-top: 13%;
+}
+#frmLogin input, #frmPertePassword input { 
+	*width: 248px;
+	*height: 38px;
+	*border: 1px solid #D5C9C8;
+	*margin-bottom: 3px;
+	*position: relative;
+	*left: -217px;
+	*line-height: 35px;
+	*text-indent: 10px;
+}
+#frmPertePassword input { 
+	*margin-left: -4px;
+	*position: static;
+}
+#frmLogin #btnChangePassword {
+  *width: 130px;
+  *position: relative;
+  *top: -9;
+  *left: -90px;
+  *background-position: -123px -206px; 
+}
+#frmLogin #btnDemandePassword {
+  *left: -470px;
+  *position: relative;
+  *top: -9px;
+  *width: 110px;
+}
+#btnValid {
+  *position: relative;
+  *top: 24px;
+  *height: 43px;
+  *clear: both
+}
+#imgLogin, #imgPassword, #imgEmail { 
+	*background: url("images/login-sprite.png") no-repeat scroll right -99px #fff;
+	*display: block;
+	*width: 34px;
+	*height: 34px;
+	*position: absolute;
+	*left: 92px;
+	*top: 5px;
+	*z-index: 2;
+}
+#imgPassword { 
+	*background: url("images/login-sprite.png") no-repeat scroll right -154px #FFFFFF;
+	*left: 92px;
+	*top: 53px;
+}
+#imgEmail { 
+	*background: url("images/login-sprite.png") no-repeat scroll right -290px #FFFFFF;
+	*top: 52px;
+}
+#btnDemandePassword {
+  *top: 103px;
+  *left: -123px;
+}
+#btnReturn {
+  *top: 103px;
+  *right: 44px;
+}
+#frmPassword input {
+  *border: 1px solid #D5C9C8;
+  *height: 30px;
+  *padding: 0 0 0 10px;
+  *margin-bottom: 2px;
+  *position: static;
+  *width: 170px;
+  *float: left;
+  *line-height: 27px;
+}
+#frmPassword #imgLogin,
+#frmPassword #imgPassword,
+#frmPassword #imgNewPassword,
+#frmPassword #imgConfirmPassword {
+	*width: 137px;
+	*height: 30px;
+	*position: static;
+}
+#frmPassword { *margin-top: -106px;}
+#frmPassword #tabMain { *width: 95%;}
+#frmPassword #btnChangePassword { *position: static; }
+#frmPassword #btnReturn { *top: 147px; }

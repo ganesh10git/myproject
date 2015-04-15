@@ -1,0 +1,1220 @@
+<?php
+/**
+ * @file
+ * Code for the Im Features Questionnaire feature.
+ */
+
+include_once 'im_features_questionnaire.features.inc';
+include_once drupal_get_path('module', 'webform') . '/includes/webform.submissions.inc';
+ 
+/**
+ * hook_form_form_id_alter in action node page
+ */
+
+function im_features_questionnaire_form_action_node_form_alter(&$form, &$form_state, $form_id) {
+  drupal_add_js(drupal_get_path('module', 'im_features_questionnaire') . '/js/im_features_questionnaire.js');
+  
+  //hiding the webform_nid field
+  $form['field_action_webform_nid']['#attributes']['style'] = 'display:none';
+  //removed n/a button form Type of display field
+  $form['field_webform_display_type']['und']['#options'] = array(
+    'embedded' => t('Embedded'),
+    'url' => t('Accessible via URL link'),
+  );
+
+  //Node Add pages
+//  if (empty($form['nid']['value']) && arg(1)== 'add' && arg(2) == 'action') {  
+    $form['field_webform_list'] = array(
+      '#type' => 'select',
+      '#title' =>t('Questionnaire'),
+      '#options' => _im_features_questionnaire_webform_list(),
+      '#weight' => '12',
+    );    
+//  }
+  //edit page with webform id .
+  if ($form['nid']['#value'] != '' ) {
+    if (!empty($form['#node']->field_action_webform_nid['und'][0]['value'])) {
+      if (is_numeric($form['#node']->field_action_webform_nid['und'][0]['value'])) {
+        $webform_nid = '';
+        $webform_nid = $form['#node']->field_action_webform_nid['und'][0]['value'];
+        $webform_list = _im_features_questionnaire_webform_list();
+        $result_query = db_query("SELECT n.nid,n.title FROM node AS n INNER JOIN field_data_field_action_webform_nid AS f ON (n.nid=CAST(f.field_action_webform_nid_value As INT)) WHERE CAST(f.field_action_webform_nid_value As INT) = :webform_nid AND n.status = 1 AND f.field_action_webform_nid_value != ''",array(':webform_nid' => $webform_nid))->fetchAssoc();
+        $webform_list[$result_query['nid']]= $result_query['title'];
+        $form['field_webform_list'] = array(
+          '#type' => 'select',
+          '#title' =>t('Questionnaire'),
+          '#default_value' => $webform_nid,
+          '#options' => $webform_list,
+          '#weight' => '12',
+        );
+      }
+    }
+    //None is present in the webform nid textbox 
+    //edit page without webform id
+    else {
+      $webform_list = _im_features_questionnaire_webform_list();
+      $form['field_webform_list'] = array(
+        '#type' => 'select',
+        '#title' =>t('Questionnaire'),
+        '#options' => $webform_list,
+        '#weight' => '12',
+      );
+    }
+  }
+  return $form;
+}
+/**
+ * Questionnaire drop down in action content type 
+ */
+
+function _im_features_questionnaire_webform_list($webform_nid= NULL) {
+    $webform_nid_count = db_query("SELECT * from field_data_field_action_webform_nid")->FetchAll();
+    $webform_node_count = db_query("SELECT nid from node WHERE type= 'questionnaire'")->fetchAll();
+    $result = array();
+    $options = array();
+    //If no webform is mapped to action.
+    if (empty($webform_nid)) {
+	    if (empty($webform_nid_count)) {
+	     $result = db_query("SELECT DISTINCT n.nid,n.title FROM node AS n WHERE n.type = 'questionnaire' AND n.status =1");
+	    }
+	    //If only some webform are mapped to action content
+	    else { //if (count($webform_node_count) != count($webform_nid_count)) {
+	      $result = db_query("SELECT n.nid,n.title FROM node as n WHERE n.nid NOT IN (SELECT CAST(f.field_action_webform_nid_value As INT) FROM field_data_field_action_webform_nid as f where f.field_action_webform_nid_value != '') AND n.type = 'questionnaire' AND n.status = 1");
+	    }
+	
+	    $options = array();
+	    $results = array();
+	    $options['-none-'] = t("None");
+	    foreach ($result as $results) {
+	      $options[$results->nid] = $results->title;
+	    }
+    }
+    //Return webform_title,concern aciton title,action_node_status adn user id who created it.
+    if (!empty($webform_nid)) {
+      $webform_result = db_query("SELECT n.title FROM node AS n WHERE n.nid = :webform_nid AND n.type='questionnaire'",array(':webform_nid' => $webform_nid))->fetchAssoc();
+      $node_result = db_query("SELECT n.status,n.title,n.uid FROM node AS n WHERE n.nid IN(SELECT f.entity_id FROM field_data_field_action_webform_nid AS f WHERE CAST(f.field_action_webform_nid_value As INT) = :webform_nid AND f.field_action_webform_nid_value != '')",array(':webform_nid' => $webform_nid))->fetchAssoc();
+      $node_result['node_title'] = $node_result['title'];
+      unset($node_result['title']);
+      if (is_array($webform_result) && is_array($node_result)) {
+        $options = array_merge($webform_result,$node_result);
+      }
+    }
+
+  return $options;
+}
+
+/**
+ * Function to handle the questionnaire workflow.
+ * hook_form_form_id_alter for questionnaire content type
+ */
+
+function im_features_questionnaire_form_questionnaire_node_form_alter(&$form, &$form_state) {
+  if ($form['#node']->type == 'questionnaire') {
+  	
+    //unsetting the Publishing options field in quesitonnaire.
+    unset($form['options']);
+
+    global $user;
+    $author_name = $form['#node']->name;
+    $status = '';
+    if (isset($form['#node']->nid)) {
+      $author = _im_user_get_data($form['#node']->uid);
+      $status = im_sales_plan_node_status($form['#node']->nid);
+      $default_name = $author['full_name'];
+      $created_time = date('d/m/Y', $form['#node']->created);
+      $modified_time = date('d/m/Y', $form['#node']->changed);
+    }
+    else {
+      $author = _im_user_get_data($user->uid);
+      $default_name = $author['full_name'];
+      $created_time = date('d/m/Y');
+      $modified_time = date('d/m/Y');
+    }
+    $form['questionnaire_created_by'] = array(
+      '#type' => 'item',
+      '#title' => t('Created by'),
+      '#markup' => $default_name,
+      '#weight' => -5,
+    );
+    $form['questionnaire_created_date'] = array(
+      '#type' => 'item',
+      '#title' => t('Created Date'),
+      '#markup' => $created_time,
+      '#weight' => -5,
+    );
+    $form['questionnaire_status'] = array(
+      '#type' => 'item',
+      '#title' => t('Status'),
+      '#markup' => t($status),
+      '#weight' => -5,
+    );
+    $form['questionnaire_last_modified_date'] = array(
+      '#type' => 'item',
+      '#title' => t('Last Modification Date'),
+      '#markup' => $modified_time,
+      '#weight' => -5,
+    );
+    //to unset the default submit and preview buttons.
+    unset($form['actions']['submit']);
+    unset($form['actions']['preview']);
+   
+    //hiding node_archive and node draft status field.
+    $form['field_node_archive']['#attributes']['style'] = 'display:none';
+    $form['field_draft_status']['#attributes']['style'] = 'display:none';
+
+    $form['#attached']['js'][] = drupal_get_path('module', 'im_features_questionnaire') .'/js/im_features_questionnaire.js';
+    if ($form['#node']->type == 'questionnaire') {
+      $form['actions']['save_draft'] = array (
+        '#type' => 'submit',
+        '#value' => t('Save as Draft'),
+        '#access' => TRUE,
+        '#submit' => array('im_features_questionnaire_save_as_draft'),
+      );
+      $form['actions']['q_publish'] = array(
+        '#type' => 'submit',
+        '#value' => t('Publish'),
+        '#access' => TRUE,
+        '#submit' => array('_im_features_questionnaire_publish'),
+      );
+    }
+    if (!in_array('administrator', $user->roles) && !in_array('content_manager_action', $user->roles) && !in_array('contributor_action', $user->roles)) {
+      $form['actions']['q_publish']['#attributes']['style'] = 'display:none';
+    }
+
+    $action_attached = array();
+    //Below is for edit page of webform.
+    if (arg(0) == "node" && is_numeric(arg(1)) && arg(2) == 'edit') {
+      if ($form['#node']->type == 'questionnaire') {
+        if (in_array('administrator', $user->roles) || in_array('content_manager_action', $user->roles) || in_array('contributor_action', $user->roles)){
+          if ($form_state['node']->status == 1) {
+            //To provide the unpublish option
+            $form['actions']['q_unpublish'] = array(
+              '#type' => 'submit',
+              '#value' => t('Unpublish'),
+              '#access' => TRUE,
+              '#submit' => array('_im_features_questionnaire_unpublish'),
+            );
+            $form['actions']['save'] = array (
+              '#type' => 'submit',
+              '#value' => t('Publish modification (Save)'),
+              '#access' => TRUE,
+              '#submit' => array('_im_questionnaire_node_submit'),
+            );
+            $form['actions']['save_draft']['#attributes']['style'] = 'display:none'; 
+            $form['actions']['q_publish']['#attributes']['style'] = 'display:none';            
+          }
+        }
+        else {
+          if($form_state['node']->status == 1) {
+            $form['actions']['delete']['#attributes']['style'] = 'display:none';
+            $form['actions']['save_draft']['#attributes']['style'] = 'display:none';
+          }
+        }
+        $action_attached = _im_features_questionnaire_webform_list(arg(1));
+        if(!empty($action_attached['node_title']) ){
+          $form['actions']['#attributes']['style'] = 'display:none';
+        }
+      }
+    }
+  }
+
+}
+
+/**
+ * Custom Function to handle the save as draft functionality.
+ */
+
+function im_features_questionnaire_save_as_draft($form, &$form_state) {
+  if (isset($form_state) && !empty($form_state)) {
+  	$form_state['values']['field_draft_status']['und'][0]['value'] = 1;
+    $form_state['values']['field_node_archive']['und'][0]['value'] = 0;
+    $form_state['values']['status'] = 0;
+    //To set the save as draft and save and submit text.
+    $form_state['values']['webform']['allow_draft'] = 1;
+    $form_state['values']['webform']['submit_text'] = 'Save and Submit';
+    node_form_submit($form, $form_state);
+  }
+}
+
+/**
+ * Custom Function to handle the publish functionality.
+ */
+
+function _im_features_questionnaire_publish($form, &$form_state) {
+  if (isset($form_state) && !empty($form_state)) {
+    $form_state['values']['field_draft_status']['und'][0]['value'] = 0;
+    $form_state['values']['field_node_archive']['und'][0]['value'] = 0;
+    $form_state['values']['status'] = 1;
+    //To set the save as draft and save and submit text.
+    $form_state['values']['webform']['allow_draft'] = 1;
+    $form_state['values']['webform']['submit_text'] = 'Save and Submit';
+    node_form_submit($form, $form_state);
+  }
+}
+
+
+/**
+ * Custom Function to handle the unpublish functionality.
+ */
+
+function _im_features_questionnaire_unpublish($form, &$form_state) {
+  if (isset($form_state) && !empty($form_state)) {
+    $form_state['values']['status'] = 0;
+    $form_state['values']['field_draft_status']['und'][0]['value'] = 0;
+    $form_state['values']['field_node_archive']['und'][0]['value'] = 1;
+    node_form_submit($form, $form_state);
+  }
+}
+
+/**
+ * Custom Function to handle the save functionality.
+ */
+function _im_questionnaire_node_submit($form, &$form_state) {
+  if (isset($form_state) && !empty($form_state)) {
+    //To set the save as draft and save and submit text.
+    $form_state['values']['webform']['allow_draft'] = 1;
+    $form_state['values']['webform']['submit_text'] = 'Save and Submit';
+    node_form_submit($form, $form_state);
+  }
+}
+
+/**
+ * Imepementation of hook_views_pre_render 
+ */
+function im_features_questionnaire_views_pre_render(&$view) {
+  $results = &$view->result;
+  foreach ($results as $key => $result) {
+    if ($view->name == 'manage_questionnaire') {      
+    	$action_details = _im_features_questionnaire_webform_list($result->nid);    	
+    	$result->nid = $action_details['node_title'];
+    }   
+  }
+}
+
+function im_features_questionnaire_menu (){
+  $item['node/%webform_menu/chartresult'] = array(
+  'title' => t("Result As Chart"),
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('_im_features_questionnaire_chartresult'),
+  'access callback' => '_im_features_questionnaire_chartdisplay_useracess',
+  'type' => MENU_LOCAL_TASK,  
+  'weight' =>4,
+  'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  // Node webform results.
+  $item['node/%webform_menu/webform-results'] = array(
+    'title' => 'Results',
+    'page callback' => 'questionnaire_webform_results_submissions',
+    'page arguments' => array(1, FALSE, '50'),
+    'access callback' => '_im_features_questionnaire_chartdisplay_useracess',
+    'access arguments' => array(1),
+    'file' => 'includes/im_features_questionnaire.report.inc',
+    'weight' => 2,
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  $item['node/%webform_menu/webform-results/table'] = array(
+    'title' => 'Table',
+    'page callback' => 'questionnaire_webform_results_table',
+    'page arguments' => array(1, '50'),
+    'access callback' => 'webform_results_access',
+    'access arguments' => array(1),
+    'file' => 'includes/im_features_questionnaire.report.inc',
+    'weight' => 6,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $item['node/%webform_menu/submission/%im_features_questionnaire_webform_menu_submission'] = array(
+    'title' => 'Webform submission',
+    'load arguments' => array(1),
+    'page callback' => 'questionnaire_webform_submission_page',
+    'page arguments' => array(1, 3, 'html'),
+    'title callback' => 'webform_submission_title',
+    'title arguments' => array(1, 3),
+    'access callback' => 'webform_submission_access',
+    'access arguments' => array(1, 3, 'view'),
+    'file' => 'includes/im_features_questionnaire.report.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $item['node/%webform_menu/submission/%im_features_questionnaire_webform_menu_submission/edit'] = array(
+    'title' => 'Edit',
+    'load arguments' => array(1),
+    'page callback' => 'questionnaire_webform_submission_page',
+    'page arguments' => array(1, 3, 'form'),
+    'access callback' => 'webform_submission_access',
+    'access arguments' => array(1, 3, 'edit'),
+    'weight' => 1,
+    'file' => 'includes/im_features_questionnaire.report.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $item['node/%webform_menu/submission/%im_features_questionnaire_webform_menu_submission/delete'] = array(
+    'title' => 'Delete',
+    'load arguments' => array(1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('questionnaire_webform_submission_delete_form', 1, 3),
+    'access callback' => 'webform_submission_access',
+    'access arguments' => array(1, 3, 'delete'),
+    'weight' => 2,
+    'file' => 'includes/im_features_questionnaire.report.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $item['node/%webform_menu/webform-results/download'] = array(
+    'title' => 'Download',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('questionnaire_webform_results_download_form', 1),
+    'access callback' => 'webform_results_access',
+    'access arguments' => array(1),
+    'file' => 'includes/im_features_questionnaire.report.inc',
+    'weight' => 7,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $item['node/%webform_menu/webform-results/clear'] = array(
+    'title' => 'Clear',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('questionnaire_webform_results_clear_form', 1),
+    'access callback' => 'webform_results_clear_access',
+    'access arguments' => array(1),
+    'file' => 'includes/im_features_questionnaire.report.inc',
+    'weight' => 8,
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $item;
+}
+
+function _im_questionnaire_data ($xaxis = '', $yaxis ='', $nid ='', $chart = ''){
+	if ($xaxis == '-none-' || empty($yaxis) || empty($nid) || empty($chart)) {
+		return;
+	}
+	$user_id = array();
+  $pie_select_result = '';
+  $bar_select_result = '';
+  $line_select_result = '';
+  $x_value_select = array();
+  $select_right_side_value = array();
+  $value = array();
+  $unserialize_result ='';
+  $counting_value = '';
+  if(is_numeric($xaxis)){
+  $pie_select_result = db_query("select extra from webform_component where nid = :nid and type ='select' and cid= :xaxis",array(':nid' => $nid,':xaxis' =>$xaxis))->FetchAll();
+  }
+  if($chart == 'pie_chart' && !empty($pie_select_result)) {
+  	//Select or radio.
+  foreach($pie_select_result as $pie_select_results) {
+    $unserialize_result = unserialize($pie_select_results->extra);
+    $value = array_values(array_filter(preg_split('/[\d|]/',(string)$unserialize_result['items'])));
+    $select_right_side_value = $value; 
+   }
+   $count_select_value = count($select_right_side_value);
+   for ($i=1;$i<=$count_select_value;$i++) {
+   $selected_value =  db_query("select sd.nid,sd.data,s.uid,sd.cid from webform_submitted_data AS sd INNER JOIN webform_submissions AS s on (sd.sid= s.sid) where sd.nid = :nid and sd.cid= :xaxis and CAST(sd.data As INT) = :i and s.is_draft= 0",array(':nid' => $nid,':i'=> $i,':xaxis'=>$xaxis))->FetchAll();
+    $counting_value = count($selected_value);
+   if(empty($counting_value)){
+   $counting_value = 0;
+   }
+   $x_value_select[] = $counting_value;
+   }
+   $output = pchart_piechart_callback($x_value_select,$select_right_side_value,$nid,$xaxis);
+   return $output;
+  }
+  if(is_numeric($xaxis)){
+  $bar_select_result = db_query("select extra from webform_component where nid = :nid and type ='select' and cid= :xaxis",array(':nid'=> $nid, ':xaxis'=> $xaxis))->FetchAll();
+  }
+ if($chart == 'bar_chart' && !empty($bar_select_result)) {
+ 	//Select or radio.
+  foreach($bar_select_result as $bar_select_results) {
+    $unserialize_result = unserialize($bar_select_results->extra);
+    $value = array_values(array_filter(preg_split('/[\d|]/',(string)$unserialize_result['items'])));
+    $select_right_side_value = $value; 
+   }
+   $count_select_value = count($select_right_side_value);
+   for ($i=1;$i<=$count_select_value;$i++) {
+   $selected_value =  db_query("select sd.nid,sd.data,s.uid,sd.cid from webform_submitted_data AS sd INNER JOIN webform_submissions AS s on (sd.sid= s.sid) where sd.nid = :nid and sd.cid=:xaxis and CAST(sd.data As INT) = :i and s.is_draft= 0",array(':nid'=>$nid,':i'=>$i,':xaxis'=>$xaxis))->FetchAll();
+    $counting_value = count($selected_value);
+   if(empty($counting_value)){
+   $counting_value = 0;
+   }
+   $x_value_select[] = $counting_value;
+   }
+   $output = pchart_barchart_callback($x_value_select,null,$select_right_side_value,$nid,$xaxis,$yaxis);
+   return $output;
+  }
+  if(is_numeric($xaxis)){
+  $line_select_result = db_query("select extra from webform_component where nid = :nid and type ='select' and cid= :xaxis",array(":nid" =>$nid,":xaxis" => $xaxis))->FetchAll();
+  }
+ if($chart == 'line_chart' && !empty($line_select_result)) {
+  //Select or radio.
+    
+  foreach($line_select_result as $line_select_results) {
+    $unserialize_result = unserialize($line_select_results->extra);
+    $value = array_values(array_filter(preg_split('/[\d|]/',(string)$unserialize_result['items'])));
+    $select_right_side_value = $value; 
+   }
+   $count_select_value = count($select_right_side_value);
+   for ($i=1;$i<=$count_select_value;$i++) {
+   $selected_value =  db_query("select sd.nid,sd.data,s.uid,sd.cid from webform_submitted_data AS sd INNER JOIN webform_submissions AS s on (sd.sid= s.sid) where sd.nid = :nid and sd.cid=:xaxis and CAST(sd.data As INT) = :i and s.is_draft= 0",array(':nid'=>$nid,':i' => $i,':xaxis'=>$xaxis))->FetchAll();
+    $counting_value = count($selected_value);
+   if(empty($counting_value)){
+   $counting_value = 0;
+   }
+   $x_value_select[] = $counting_value;
+   }
+   $output = pchart_linechart_callback($x_value_select,null,$select_right_side_value,$nid,$xaxis);
+   return $output;
+  }
+
+	else{
+  $user_id = array(); 
+	$xaxis_value = array();
+if($xaxis != '-none-') {
+  $result1 = db_query("select sd.nid,sd.data,s.uid,sd.cid from webform_submitted_data AS sd INNER JOIN webform_submissions AS s on (sd.sid= s.sid) where sd.nid = :nid and sd.cid=:xaxis and s.is_draft= 0",array(':nid'=>$nid,':xaxis'=>$xaxis))->FetchAll();
+  foreach ($result1 as $results1) {
+    $xaxis_value[] = $results1->data;
+    $user_id[] = $results1->uid;
+  }
+}
+
+$yaxis_value = array();
+if($yaxis != '-none-') {
+  $result2 = db_query("select sd.nid,sd.data,s.uid,sd.cid from webform_submitted_data AS sd INNER JOIN webform_submissions AS s on (sd.sid= s.sid) where sd.nid = :nid and sd.cid=:yaxis and s.is_draft= 0",array(':nid'=>$nid,':yaxis'=>$yaxis))->FetchAll();
+  foreach ($result2 as $results2) {
+    $yaxis_value[] = $results2->data;
+    $user_id[] = $results2->uid;
+  }
+}
+  $user_name_arrays = array_values(user_load_multiple($user_id));
+  $user_name = array();
+  foreach($user_name_arrays as $user_name_array){
+    if(isset($user_name_array->field_full_name['und']['0']['value'])) {
+      $user_name[] = $user_name_array->field_full_name['und']['0']['value'];
+    }
+  }
+  if($chart== 'bar_chart') {
+    if(!empty($xaxis_value) || !empty($yaxis_value)) {
+      $output = pchart_barchart_callback($xaxis_value,$yaxis_value,$user_name,$nid,$xaxis,$yaxis);
+    }
+    else{
+      return t("No Data to Analysis");
+    }
+  }
+  if($chart == 'pie_chart') {
+    if(!empty($xaxis_value)) {
+      $output = pchart_piechart_callback($xaxis_value, $user_name, $nid, $xaxis);
+    }
+    else{
+      return t("No Data to Analysis");
+    }
+  }
+  if($chart == 'line_chart') {
+    if(!empty($xaxis_value) || !empty($yaxis_value)) {
+      $output = pchart_linechart_callback($xaxis_value,$yaxis_value,$user_name,$nid,$xaxis,$yaxis);
+    }
+    else{
+      return t("No Data to Analysis");
+    }
+  }
+  //$output = 'Testing...';
+  return $output;
+	}
+}
+
+function pchart_barchart_callback($xaxis_value='',$yaxis_value='',$user_name='',$nid='',$xaxis='',$yaxis='') {
+  pchart_add();
+  $MyData = new pData();
+  $trimed_username = array();
+  foreach($user_name as $user_names){
+    $trimed_username[] = substr($user_names,0,9);
+  }
+  if(!empty($xaxis_value)){
+  $MyData->addPoints($xaxis_value,"Value1");
+  }
+  if(!empty($yaxis_value)) {
+  $MyData->addPoints($yaxis_value,"Value2");
+  }
+ $MyData->addPoints($trimed_username,"Labels");
+ $MyData->setSerieDescription("Labels","Months");
+ $MyData->setAbscissa("Labels");
+ /* Create the pChart object */
+ $myPicture = new pImage(700,230,$MyData);
+ /* Overlay with a gradient */
+ $myPicture->drawGradientArea(0,0,800,250,DIRECTION_HORIZONTAL,array("StartR"=>220,"StartG"=>220,"StartB"=>220,"EndR"=>180,"EndG"=>180,"EndB"=>180,"Alpha"=>100));
+ $myPicture->drawRectangle(0,0,699,229,array("R"=>0,"G"=>0,"B"=>0));
+ 
+ /* Write the picture title */ 
+ $myPicture->setFontProperties(pchart_get_font_properties('GeosansLight.ttf', 17, array('R' => 0, 'G' => 0, 'B' => 0)));
+ /* Write the chart title */ 
+ $myPicture->setFontProperties(pchart_get_font_properties('GeosansLight.ttf', 10, array('R' => 0, 'G' => 0, 'B' => 0)));
+ $myPicture->drawText(250,55,"Bar Chart",array("FontSize"=>20,"Align"=>TEXT_ALIGN_BOTTOMMIDDLE));
+ /* Draw the scale and the 1st chart */
+ $myPicture->setGraphArea(60,60,450,190);// bounding box that will be used for all charting
+ $myPicture->drawFilledRectangle(60,60,450,190,array("R"=>255,"G"=>255,"B"=>255,"Surrounding"=>-200,"Alpha"=>10));//bg for graph alone
+ $myPicture->drawScale();
+ $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>10));
+ $myPicture->setFontProperties(pchart_get_font_properties('GeosansLight.ttf', 10, array('R' => 0, 'G' => 0, 'B' => 0)));
+ $myPicture->drawBarChart(array("DisplayValues"=>TRUE,"DisplayColor"=>DISPLAY_AUTO,"Rounded"=>TRUE,"Surrounding"=>60));
+ $myPicture->drawLegend(210,215,array("Style"=>LEGEND_NOBORDER ,"Mode"=>LEGEND_HORIZONTAL));//identification marking
+ $myPicture->setShadow(FALSE);
+ 
+  if(empty($yaxis)) {
+    $yaxis = 0;
+  }
+  $actual_path = $nid . "_" .$xaxis ."_".$yaxis. "_barchart.png";
+  $fpath = drupal_realpath("public://") . "/". $actual_path; 
+  if (file_exists($fpath)) {
+    unlink($fpath);
+  }
+ $myPicture->render($fpath);
+ $ie8 = 'MSIE 8.0';
+ $browser = $_SERVER['HTTP_USER_AGENT'];  
+ $browser = substr("$browser", 25, 8); 
+ if($browser == $ie8){
+ 	/*$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:';
+    $_SESSION['chart_image_download_path'] = $protocol.file_create_url("public://"). $actual_path;*/
+    $_SESSION['chart_image_download_path'] = file_create_url("public://"). $actual_path;
+ }
+ else{
+   $_SESSION['chart_image_download_path'] = file_create_url("public://"). $actual_path;
+ }
+ return '<img src ="'.file_create_url("public://") . $actual_path . "?" . microtime() . '" />';
+}
+
+function pchart_piechart_callback($xaxis_value='', $user_name='', $nid='', $xaxis='') {
+pchart_add();
+pchart_add("pPie");
+ /* pData object creation */
+ $MyData = new pData();
+ /* Data definition */
+ $MyData->addPoints($xaxis_value,"Value"); 
+  /* Labels definition */ 
+ $MyData->addPoints($user_name,"Legend");
+ $MyData->setAbscissa("Legend");
+ /* Create the pChart object */
+ $myPicture = new pImage(500,250,$MyData);
+ /* Draw a gradient background */ 
+  $myPicture->drawGradientArea(0,0,500,250,DIRECTION_HORIZONTAL,array("StartR"=>220,"StartG"=>220,"StartB"=>220,"EndR"=>180,"EndG"=>180,"EndB"=>180,"Alpha"=>100));
+
+ /* Add a border to the picture */
+ $myPicture->drawRectangle(0,0,499,249,array("R"=>0,"G"=>0,"B"=>0));
+ /* Create the pPie object */ 
+ $PieChart = new pPie($myPicture,$MyData);
+ /* Enable shadow computing */ 
+ $myPicture->setShadow(FALSE);
+ /* Set the default font properties */ 
+ $myPicture->setFontProperties(pchart_get_font_properties('GeosansLight.ttf', 10, array('R' => 0, 'G' => 0, 'B' => 0)));
+  $myPicture->drawText(210,30,"Pie Chart",array("FontSize"=>20,"Align"=>TEXT_ALIGN_BOTTOMMIDDLE));
+ /* Draw a splitted pie chart */ 
+ $PieChart->draw3DPie(200,125,array("Radius"=>80,"DrawLabels"=>TRUE,"DataGapAngle"=>10,"DataGapRadius"=>6,"Border"=>TRUE));
+  $PieChart->drawPieLegend(10,210,array("Style"=>LEGEND_NOBORDER,"Mode"=>LEGEND_HORIZONTAL));
+  /* Render the picture (choose the best way) */
+ $actual_path = $nid . "_" . $xaxis . "_piechart.png";
+ $fpath = drupal_realpath("public://") . "/" . $actual_path; 
+  if (file_exists($fpath)) {
+   unlink($fpath);
+ }
+ $myPicture->render($fpath);
+ $ie8 = 'MSIE 8.0';
+ $browser = $_SERVER['HTTP_USER_AGENT'];  
+ $browser = substr("$browser", 25, 8); 
+ if($browser == $ie8){
+ 	/*$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:'; 
+    $_SESSION['chart_image_download_path'] = $protocol.file_create_url("public://"). $actual_path;*/
+ 	$_SESSION['chart_image_download_path'] = file_create_url("public://"). $actual_path;
+ }
+ else{
+   $_SESSION['chart_image_download_path'] = file_create_url("public://"). $actual_path;
+ }
+ return '<img src ="'.file_create_url("public://") . $actual_path . "?" . microtime() . '" />';
+ }
+/**
+ * Line chart
+ */
+function pchart_linechart_callback($xaxis_value ='',$yaxis_value='',$user_name='',$nid='',$xaxis='',$yaxis='') {
+pchart_add();
+ $MyData = new pData(); 
+ if(!empty($xaxis_value)){
+  $MyData->addPoints($xaxis_value,"Value1");
+  }
+  if(!empty($yaxis_value)) {
+  $MyData->addPoints($yaxis_value,"Value2");
+  };
+ $MyData->setSerieWeight("xaxis",2);
+ $MyData->setSerieWeight("yaxis",2);
+ $MyData->addPoints($user_name,"Labels");
+ $MyData->setSerieDescription("Labels","Username");
+ $MyData->setAbscissa("Labels");
+ 
+ $myPicture = new pImage(700,230,$MyData);
+$myPicture->drawGradientArea(0,0,800,250,DIRECTION_HORIZONTAL,array("StartR"=>220,"StartG"=>220,"StartB"=>220,"EndR"=>180,"EndG"=>180,"EndB"=>180,"Alpha"=>100));
+ /* Add a border to the picture */
+ $myPicture->drawRectangle(0,0,699,229,array("R"=>0,"G"=>0,"B"=>0));
+ 
+ /* Create the 1st chart*/
+ $myPicture->setFontProperties(pchart_get_font_properties('GeosansLight.ttf', 12, array('R' => 0, 'G' => 0, 'B' => 0)));
+ $myPicture->drawText(250,55,"Line Chart",array("FontSize"=>20,"Align"=>TEXT_ALIGN_BOTTOMMIDDLE));
+ $myPicture->setGraphArea(60,60,450,190);
+ $myPicture->drawFilledRectangle(60,60,450,190,array("R"=>255,"G"=>255,"B"=>255,"Surrounding"=>-200,"Alpha"=>10));
+ $myPicture->drawScale(array("DrawSubTicks"=>TRUE));
+ $myPicture->setShadow(TRUE,array("X"=>1,"Y"=>1,"R"=>0,"G"=>0,"B"=>0,"Alpha"=>10));
+ $myPicture->setFontProperties(pchart_get_font_properties('GeosansLight.ttf', 10, array('R' => 0, 'G' => 0, 'B' => 0)));
+ $myPicture->drawLineChart(array("DisplayValues"=>TRUE,"DisplayColor"=>DISPLAY_AUTO,"Rounded"=>TRUE,"Surrounding"=>60));
+ $myPicture->setShadow(FALSE);
+ /* Write the legend*/
+ $myPicture->drawLegend(210,215,array("Style"=>LEGEND_NOBORDER,"Mode"=>LEGEND_HORIZONTAL));
+ 
+   if(empty($yaxis)) {
+    $yaxis = 0;
+  }
+ $actual_path = $nid . "_" . $xaxis ."_".$yaxis. "_linechart.png";
+ 
+ $fpath = drupal_realpath("public://") . "/" . $actual_path; 
+  if (file_exists($fpath)) {
+   unlink($fpath);
+ }
+ $myPicture->render($fpath);
+ $ie8 = 'MSIE 8.0';
+ $browser = $_SERVER['HTTP_USER_AGENT'];  
+ $browser = substr("$browser", 25, 8); 
+ if($browser == $ie8){
+ 	/*$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:'; 
+    $_SESSION['chart_image_download_path'] = $protocol.file_create_url("public://"). $actual_path;*/
+ 	$_SESSION['chart_image_download_path'] = file_create_url("public://"). $actual_path;
+ }
+ else{
+   $_SESSION['chart_image_download_path'] = file_create_url("public://"). $actual_path;
+ }
+ return '<img src ="'.file_create_url("public://") . $actual_path . "?" . microtime() . '" />';
+ }
+/**
+ * Questionnaire Chart result display form 
+ */
+function _im_features_questionnaire_chartresult() { 
+  $axis_value_result = '';
+  $axis_value = array();
+  $nid = arg(1); 
+  $axis_value_result = db_query("SELECT wc.nid,wc.cid,wc.name,wc.type,wc.value FROM webform_component AS wc WHERE wc.nid= :nid and (wc.type ='number' or wc.type ='select')",array(':nid'=>$nid))->FetchAll();
+  foreach ($axis_value_result as $axis_value_results) {
+    $axis_value['-none-'] = 'none';
+    $axis_value[$axis_value_results->cid] = $axis_value_results->name;
+  }
+  if(empty($_SESSION['chart_type'])) {
+    $_SESSION['chart_type'] = 'bar_chart';
+  }
+if(empty($_SESSION['x_axis_value'])) {
+    $_SESSION['x_axis_value'] = '-none-';
+  }
+if(empty($_SESSION['y_axis_value'])) {
+    $_SESSION['y_axis_value'] = '-none-';
+  }
+  $form = array();
+  $form['type_of_chart'] = array(
+    '#type' => 'select',
+  '#prefix' => '<div class ="Type of chart">',
+    '#title' => t("Type of Chart"),
+    '#default_value' => $_SESSION['chart_type'],
+    '#options' => array('bar_chart' => t("Bar Chart"), 'line_chart' => t("Line Chart"),'pie_chart' => t('Pie Chart')),
+  '#suffix' => '</div>',
+  );
+    $form['x_axis_field'] = array (
+      '#type' => 'select',
+      '#title' => t("Value 1"),
+      '#default_value' => $_SESSION['x_axis_value'],
+     '#options' => $axis_value,
+    );
+    $form['y_axis_field'] = array (
+      '#type' => 'select',
+      '#title' => t("Value 2"),
+      '#default_value' => $_SESSION['y_axis_value'],
+      '#options' => $axis_value,
+  );
+
+  $form['anaylsis'] = array(
+    '#type' => 'submit',
+    '#value' => t("Analysis"),
+  );
+  $form['chart_display'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div class ="chart">',
+    '#markup' => _im_questionnaire_data($_SESSION['x_axis_value'], $_SESSION['y_axis_value'], $nid, $_SESSION['chart_type']),
+    '#suffix' => '</div>',
+  );
+  if(!empty($_SESSION['chart_image_download_path'])) {
+    $form['chart_download_link'] = array(
+      '#type' => 'markup',
+      '#value' => t('Download Chart Image'),
+      '#prefix' => '<div class = "chart_image">',
+      '#markup' => '<a href="'.$_SESSION['chart_image_download_path'].'">Download Chart Image</a>',
+      '#suffix' => '</div>',
+    );
+  }
+  unset($_SESSION['chart_image_download_path']);
+    unset($_SESSION['chart_type']);
+  unset($_SESSION['x_axis_value']);
+  unset($_SESSION['y_axis_value']);
+  return $form;
+}
+function _im_features_questionnaire_chartresult_submit($form,&$form_state) {
+  if (isset($form_state['values']['type_of_chart'])) {
+    $chart_type = $form_state['values']['type_of_chart'];
+    $_SESSION['chart_type'] = $chart_type;
+  }
+  if (isset($form_state['values']['x_axis_field'])) {
+    $x_axis_value = $form_state['values']['x_axis_field'];
+    $_SESSION['x_axis_value'] = $x_axis_value;
+  }
+  if (isset($form_state['values']['y_axis_field'])) {
+    $y_axis_value = $form_state['values']['y_axis_field'];
+    $_SESSION['y_axis_value'] = $y_axis_value;
+  }
+  $nid = arg(1);
+  drupal_goto($_GET['q'], array('query' => array('show' => 'chart'), 'html' => true));
+}
+
+function _im_features_questionnaire_chartdisplay_useracess(){
+global $user;
+  if(in_array('content_manager_action',$user->roles) || in_array('administrator',$user->roles) || in_array('technical_director',$user->roles) || $user->uid == 1){
+    return TRUE;
+  }
+  //UATIM-527 Contributor action should access Result as chart tab for his own content.
+ else if(in_array('contributor_action',$user->roles)) {
+   if(user_access('edit own questionnaire content',$account = NULL)) {
+     return TRUE;
+    }
+  }
+}
+/**
+ * chart form validate
+ */
+function _im_features_questionnaire_chartresult_validate($form,&$form_state) {
+ // print "<pre>";print_r($form_state['values']);exit;
+  if ($form_state['values']['x_axis_field'] == '-none-') {
+     form_set_error('x_axis_field',t('Value1 field is empty'));
+  }
+} 
+
+/**
+ * Implements hook_admin_paths().
+ */
+function im_features_questionnaire_admin_paths() {
+  if (variable_get('node_admin_theme')) {
+    return array(
+      'node/*/chartresult' =>TRUE,
+    );
+  }
+}
+//[FATIM-558-fixes]-Questionnaire(webform page) cannot be modified when it is Attached to an Action.
+function im_features_questionnaire_form_alter(&$form, &$form_state, $form_id) {
+	drupal_add_js(drupal_get_path('module', 'im_features_questionnaire') . '/js/im_features_questionnaire.js');	
+	
+	if($form_id == 'form_builder_field_configure'){
+	foreach ($form as $k => $val) {		
+		if ($val['#type'] == 'date') {
+			$form['default_value']['#attributes']['class'][] = 'webform-date';	
+			}		
+		 }
+		}
+	//echo "<pre>";print_r($form);exit;	
+  if (($form_id == 'form_builder_preview' || strstr($form_id, 'webform_client_form_')) && (isset($form['new_date']) || isset($form['nouvelle_date']) || isset($form['submitted']['new_date']) || isset($form['submitted']['nouvelle_date']))) {
+  	if (isset($form['nouvelle_date']['#default_value'])) {
+			$form['new_date']['#default_value'] = $form['nouvelle_date']['#default_value'];
+		}
+		else {
+			$form['new_date']['#default_value'] = $form['new_date']['#default_value'];
+		}    
+	 if (isset($form['new_date']) && is_string($form['new_date']['#default_value'])) {	  	
+	  	$datemonthyear = explode("/", $form['new_date']['#default_value']);
+	  	if (isset($form['nouvelle_date']['#default_value'])) {
+	  		$form['nouvelle_date']['#default_value'] = $datemonthyear[1] . '/' . $datemonthyear[0] . '/' . $datemonthyear[2];
+	  	}	else {  	
+	    	$form['new_date']['#default_value'] = $datemonthyear[1] . '/' . $datemonthyear[0] . '/' . $datemonthyear[2];
+	  	}
+	 } 
+	  else if (isset($form['submitted']['new_date']) && is_string($form['submitted']['new_date']['#default_value'])) {
+	  	$datemonthyearq = explode("/", $form['submitted']['new_date']['#default_value']);
+	  	$form['submitted']['new_date']['#default_value'] = $datemonthyearq[1] . '/' . $datemonthyearq[0] . '/' . $datemonthyearq[2];
+	  }	
+	  else if (isset($form['submitted']['nouvelle_date']) && is_string($form['submitted']['nouvelle_date']['#default_value'])) {
+	  	$datemonthyearq = explode("/", $form['submitted']['nouvelle_date']['#default_value']);
+	  	$form['submitted']['nouvelle_date']['#default_value'] = $datemonthyearq[1] . '/' . $datemonthyearq[0] . '/' . $datemonthyearq[2];
+	  }	  
+  }
+  global $user;
+  $node_nid = arg(1);   
+  if ($form_id == 'form_builder_webform_save_form') {
+    $action_attached = _im_features_questionnaire_webform_list(arg(1));
+    $node_published = db_query("Select status from node where nid = :node_nid",array(':node_nid' => $node_nid))->FetchAssoc(); 
+    if (!empty($action_attached['node_title']) || ($node_published['status'] == 1 && !in_array('contributor_action', $user->roles) && !in_array('administrator', $user->roles) && !in_array('technical_director', $user->roles) && !in_array('content_manager_action', $user->roles) && !in_array('content_manager_action_regional', $user->roles))) {
+      $form['actions']['save']['#attributes']['style'] = "display:none";
+      $form['actions']['cancel']['#attributes']['style'] = "display:none";
+    }
+  }
+  
+  //[FATIM-565]-user is allowed to submit the questionnaire only once
+  if ($form_id == 'webform_client_form_'.arg(1)) {
+
+
+    global $user;
+    $user_store = _questionnaire_get_user_profile_store();
+  	if($user_store){
+    	$str_value = $user_store['store'];
+    }else{
+    	$str_value = '';
+    }
+
+
+    $user_submitted_data = db_query("select ws.uid from webform_submissions AS ws 
+    								 inner join webform_custom_data AS wc ON ws.sid=wc.sid
+    								 where ws.nid = :node_nid and 
+    								 ws.uid = :user_id and ws.is_draft = 0 and
+    								 wc.store = :store_val",
+    								 array(':node_nid'=> $node_nid,':user_id' => $user->uid,':store_val' => $str_value))->FetchAssoc();
+    if(isset($user_submitted_data['uid'])) {
+      if(!empty($user_submitted_data)) { 
+        $form['actions']['draft']['#attributes']['style'] = "display:none";
+        $form['actions']['submit']['#attributes']['style'] = "display:none";
+      }
+    }    
+  }
+   
+}
+/**
+ *  To Hide the webform menu link 
+ * @param unknown_type $menu
+ */
+  function im_features_questionnaire_menu_alter(&$menu) {
+  unset($menu['node/add/webform']);
+  unset($menu['admin/workbench/create/node/add/webform']);
+}
+
+/**
+ * Check whether user is attached to stores or not 
+ * and retrieve the profile and store value based on the no.of stores attached and store selected
+ * Enter description here ...
+ */
+function _questionnaire_get_user_profile_store(){
+	$profile_data = array();
+	global $user;
+	$userProfile = user_load($user->uid);
+
+//IF LDAP STORES not present - SIEGE USER $profile_data['profile'] = 'SIEGE'; and $profile_data['store'] = 'Multiple';or $profile_data['store'] = 'SELECTED STORE';
+  if(empty($_SESSION['profil']['stores']) && !empty($userProfile->field_user_stores[LANGUAGE_NONE][0]['value'])){
+	  $profile_data['profile'] = 'Siège';
+	  $user_stores = $userProfile->field_user_stores[LANGUAGE_NONE][0]['value'];
+	  $split_stores = explode(',',$user_stores);
+	  $count_stores = count($split_stores);
+	  if($count_stores == 1){
+	    $selected_store = $userProfile->field_user_stores[LANGUAGE_NONE][0]['value'];
+	  }
+	  else if($_SESSION['user_selected_store'] == 'all' && $count_stores > 1){
+	    $selected_store = 'Multiple';
+	  }
+	  else{
+	    $selected_store = $_SESSION['user_selected_store'];
+	  }
+	  $profile_data['store'] = $selected_store;
+  }
+
+//IF LDAP Stores present - Display Magasin $profile_data['profile'] = 'Magasin'; and $profile_data['store'] = 'Multiple';;or $profile_data['store'] = 'SELECTED STORE';
+  if(!empty($_SESSION['profil']['stores'])){
+	  $profile_data['profile'] = 'Magasin';
+	  $user_stores = $_SESSION['profil']['stores'];
+	  $split_stores = explode(',',$user_stores);
+	  $count_stores = count($split_stores);
+	  if($count_stores == 1){
+	    $selected_store = $_SESSION['profil']['store'];
+	  }
+	  else if($_SESSION['user_selected_store'] == 'all' && $count_stores > 1){
+	    $selected_store = 'Multiple';
+	  }
+	  else{
+	    $selected_store = $_SESSION['user_selected_store'];
+	  }
+	  $profile_data['store'] = $selected_store;
+  }	
+
+ /* 
+	global $user;
+	$obj = new imldapSoapService();
+	$profile = $obj->soapRequest('getProfil', array('id' => $_SESSION['ldap_login_key']));
+	if($profile->status == 'success') {
+		$profile = simplexml_load_string($profile->data);
+		$user_stores = _get_user_stores($profile);
+		$user_fields = user_load($user->uid);
+		if($user_stores){
+			//If user has attached to only one store
+			if(count($user_stores) == 1){
+				$store_value = $user_fields->field_user_stores['und'][0]['value'];
+				$str_value = db_select('store_item_fields','s') 
+	           		->fields('s',array('ite_lib_value'))
+	           		->condition('s.pve_code',$store_value,'=')
+	           		->condition('s.dit_cod_item', 'magasin', '=')
+	           		->execute()->fetchField();
+	
+	        	$profile_data['store'] = $str_value;
+	        	$profile_data['profile'] = 'Magasin';
+			}
+			//If user has attached to multiple stores
+			elseif(count($user_stores) > 1){
+				if(isset($_SESSION['user_selected_store']) && $_SESSION['user_selected_store']!='all'){
+		  			$str_value = db_select('store_item_fields','s') 
+		           		->fields('s',array('ite_lib_value'))
+		           		->condition('s.pve_code',$_SESSION['user_selected_store'],'=')
+		           		->condition('s.dit_cod_item', 'magasin', '=')
+		           		->execute()->fetchField();
+		           	$profile_data['store'] = $str_value;
+	  			}else{
+	  				$profile_data['store'] = 'Multiple';
+	  			}
+	        	$profile_data['profile'] = 'Si�ge';   
+			}
+		}else{
+			//If user is not attached to any store
+			if(isset($_SESSION['user_selected_store']) && $_SESSION['user_selected_store']!='all'){
+	  			$str_value = db_select('store_item_fields','s') 
+	           		->fields('s',array('ite_lib_value'))
+	           		->condition('s.pve_code',$_SESSION['user_selected_store'],'=')
+	           		->condition('s.dit_cod_item', 'magasin', '=')
+	           		->execute()->fetchField();
+	           	$profile_data['store'] = $str_value;
+  			}else{
+  				$profile_data['store'] = 'Multiple';
+  			}
+        	$profile_data['profile'] = 'Si�ge'; 
+		}
+	} */
+
+  	return $profile_data;
+}
+/**
+ * Implementation of hook_webform_submission_insert
+ * Inserting profile and magasing details to the webform_custom_data table
+ * @param $node
+ * @param $submission
+ */
+function im_features_questionnaire_webform_submission_insert($node, $submission) {
+	$profile_store = _questionnaire_get_user_profile_store();
+	$store_name = $profile_store['store'];
+	if($profile_store['store'] != 'Multiple'){
+ 	  $store_name = db_query("SELECT s.ite_lib_value from {store_item_fields} s WHERE s.pve_code IN (:store_id) AND s.dit_cod_item ='magasin' ORDER BY s.ite_lib_value ASC", array(':store_id' => $profile_store['store']))->fetchField();
+	}
+	db_insert('webform_custom_data')
+    ->fields(array(
+    'nid' => $node->nid, 
+    'sid' => $submission->sid, 
+    'profile' => $profile_store['profile'],
+    'store' => $store_name,
+   // 'profile' => mb_convert_encoding($profile_store['profile'],'UTF-8', 'ISO-8859-1'),
+   // 'store' => mb_convert_encoding($store_name,'UTF-8', 'ISO-8859-1'),
+  ))
+    ->execute(); 
+}
+function im_features_questionnaire_webform_submission_update($node, $submission) {
+  $profile_store = _questionnaire_get_user_profile_store();
+	$store_name = $profile_store['store'];
+	if($profile_store['store'] != 'Multiple'){
+ 	  $store_name = db_query("SELECT s.ite_lib_value from {store_item_fields} s WHERE s.pve_code IN (:store_id) AND s.dit_cod_item ='magasin' ORDER BY s.ite_lib_value ASC", array(':store_id' => $profile_store['store']))->fetchField();
+	}
+	db_update('webform_custom_data')
+    ->fields(array(
+    'store' => $store_name,   
+  ))
+    ->condition('sid', $submission->sid, '=')
+    ->execute();
+}
+
+function im_features_questionnaire_theme(){
+	$theme = array(
+		'questionnaire_webform_results_submissions_header' => array(
+      		'variables' => array('node' => NULL),
+      		'file' => 'includes/im_features_questionnaire.report.inc',
+    	),
+    	'webform_submission_information' => array(
+      		'variables' => array('node' => NULL, 'submission' => NULL, 'mode' => 'display'),
+      		'template' => 'templates/webform-submission-information',
+      		'file' => 'includes/im_features_questionnaire.report.inc',
+    	),
+    	'questionnaire_webform_results_table_header' => array(
+      		'variables' => array('node' => NULL),
+      		'file' => 'includes/im_features_questionnaire.report.inc',
+    	),
+    	'questionnaire_webform_results_table' => array(
+      		'variables' => array('node' => NULL, 'components' => NULL, 'submissions' => NULL, 'node' => NULL, 'total_count' => NULL, 'pager_count' => NULL),
+      		'file' => 'includes/im_features_questionnaire.report.inc',
+    	),
+	);
+		
+	return $theme;
+}
+
+/**
+ * Menu loader callback. Load a webform submission if the given sid is a valid.
+ */
+function im_features_questionnaire_webform_menu_submission_load($sid, $nid) {
+  module_load_include('inc', 'im_features_questionnaire', 'includes/im_features_questionnaire.report');
+  $submission = questionnaire_webform_get_submission($nid, $sid);
+  return empty($submission) ? FALSE : $submission;
+}
+//Overriding webform_node_view for UATIM-697
+function im_features_questionnaire_node_view($node, $view_mode) {
+  global $user;
+  if (!in_array($node->type, webform_variable_get('webform_node_types'))) {
+    return;
+  }
+
+  // Set teaser and page variables a la Drupal 6.
+  $teaser = $view_mode == 'teaser';
+  $page = arg(0) == 'node' && arg(1) == $node->nid;
+
+  // If empty, a teaser, or a new node (during preview) do not display.
+  if (empty($node->webform['components']) || ($teaser && !$node->webform['teaser']) || empty($node->nid)) {
+    return;
+  }
+
+  // Do not include the form in the search index if indexing is disabled.
+  if (module_exists('search') && $view_mode == 'search_index' && !variable_get('webform_search_index', 1)) {
+    return;
+  }
+
+  $info = array();
+  $submission = array();
+  $submission_count = 0;
+  $enabled = TRUE;
+  $logging_in = FALSE;
+  $total_limit_exceeded = FALSE;
+  $user_limit_exceeded = FALSE;
+  $closed = FALSE;
+  $allowed_roles = array();
+
+  // If a teaser, tell the form to load subsequent pages on the node page.
+  if ($teaser && !isset($node->webform['action'])) {
+    $query = array_diff_key($_GET, array('q' => ''));
+    $node->webform['action'] = url('node/' . $node->nid, array('query' => $query));
+  }
+
+  // When logging in using a form on the same page as a webform node, suppress
+  // output messages so that they don't show up after the user has logged in.
+  // See http://drupal.org/node/239343.
+  if (isset($_POST['op']) && isset($_POST['name']) && isset($_POST['pass'])) {
+    $logging_in = TRUE;
+  }
+
+  if ($node->webform['status'] == 0) {
+    $closed = TRUE;
+    $enabled = FALSE;
+  }
+  else {
+    // Check if the user's role can submit this webform.
+    if (variable_get('webform_submission_access_control', 1)) {
+      foreach ($node->webform['roles'] as $rid) {
+        $allowed_roles[$rid] = isset($user->roles[$rid]) ? TRUE : FALSE;
+      }
+      if (array_search(TRUE, $allowed_roles) === FALSE && $user->uid != 1) {
+        $enabled = FALSE;
+      }
+    }
+    else {
+      // If not using Webform submission access control, allow for all roles.
+      $allowed_roles = array_keys(user_roles());
+    }
+  }
+
+  // Get a count of previous submissions by this user. Note that the
+  // webform_submission_access() function may disable the page cache for
+  // anonymous users if they are allowed to edit their own submissions!
+  if ($page && webform_submission_access($node, NULL, 'list')) {
+    module_load_include('inc', 'webform', 'includes/webform.submissions');
+    $submission_count = webform_get_submission_count($node->nid, $user->uid);
+  }
+
+  // Check if this page is cached or not.
+  $cached = $user->uid == 0 && (variable_get('cache', 0) || drupal_page_is_cacheable() === FALSE);
+
+  // Check if the user can add another submission.
+  if ($node->webform['submit_limit'] != -1) { // -1: Submissions are never throttled.
+    module_load_include('inc', 'webform', 'includes/webform.submissions');
+
+    // Disable the form if the limit is exceeded and page cache is not active.
+    if (($user_limit_exceeded = _webform_submission_user_limit_check($node)) && !$cached) {
+      $enabled = FALSE;
+    }
+  }
+
+  // Check if the user can add another submission if there is a limit on total
+  // submissions.
+  if ($node->webform['total_submit_limit'] != -1) { // -1: Submissions are never throttled.
+    module_load_include('inc', 'webform', 'includes/webform.submissions');
+
+    // Disable the form if the limit is exceeded and page cache is not active.
+    if (($total_limit_exceeded = _webform_submission_total_limit_check($node)) && !$cached) {
+      $enabled = FALSE;
+    }
+  }
+
+  // Check if this user has a draft for this webform.
+  $is_draft = FALSE;
+  if (($node->webform['allow_draft'] || $node->webform['auto_save']) && $user->uid != 0) {
+    // Draft found - display form with draft data for further editing.
+    if ($draft_sid = questionnaire_webform_fetch_draft_sid($node->nid, $user->uid)) {
+      module_load_include('inc', 'webform', 'includes/webform.submissions');
+      $submission = webform_get_submission($node->nid, $draft_sid);
+      $enabled = TRUE;
+      $is_draft = TRUE;
+    }
+  }
+
+  // Render the form and generate the output.
+  $form = !empty($node->webform['components']) ? drupal_get_form('webform_client_form_' . $node->nid, $node, $submission, $is_draft) : '';
+
+  // Remove the surrounding <form> tag if this is a preview.
+  if (!empty($node->in_preview)) {
+    $form['#type'] = 'markup';
+  }
+
+  // Print out messages for the webform.
+  if (empty($node->in_preview) && !isset($node->webform_block) && !$logging_in) {
+    theme('webform_view_messages', array('node' => $node, 'teaser' => $teaser, 'page' => $page, 'submission_count' => $submission_count, 'user_limit_exceeded' => $user_limit_exceeded, 'total_limit_exceeded' => $total_limit_exceeded, 'allowed_roles' => $allowed_roles, 'closed' => $closed, 'cached' => $cached));
+  }
+
+  // Add the output to the node.
+  $node->content['webform'] = array(
+    '#theme' => 'webform_view',
+    '#node' => $node,
+    '#teaser' => $teaser,
+    '#page' => $page,
+    '#form' => $form,
+    '#enabled' => $enabled,
+    '#weight' => 10,
+  );
+	
+
+}
+//Overriding webform_fetch_draft_sid function for UATIM-697
+function questionnaire_webform_fetch_draft_sid($nid, $uid){ 
+	$user_store = _questionnaire_get_user_profile_store();
+   	if($user_store){
+    	$store_name = $user_store['store'];
+    	if($user_store['store'] != 'Multiple'){    
+	    		$store_name = db_query("SELECT s.ite_lib_value from {store_item_fields} s WHERE s.pve_code IN (:store_id) AND s.dit_cod_item ='magasin' ORDER BY s.ite_lib_value ASC", array(':store_id' => $user_store['store']))->fetchField();
+    	}
+    	$str_value = $store_name;
+    	
+    }else{
+    	$str_value = '';
+    }
+	 $sid_query_result = db_query("SELECT w.sid FROM {webform_submissions} w 
+      INNER JOIN {webform_custom_data} wc ON w.sid=wc.sid
+    	WHERE w.uid = :user_id 
+    	AND w.is_draft = '1' 
+    	AND w.nid = :nid 
+    	AND wc.store = :store_name ORDER BY w.submitted DESC",
+      array(':user_id'=>$uid,'nid'=>$nid,':store_name'=>$store_name))->fetchAssoc();
+  return $sid_query_result['sid'];    
+
+}
+//Implements hook_module_implements_alter for UATIM-697
+function im_features_questionnaire_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'node_view') {
+    $group = $implementations['im_features_questionnaire'];
+    unset($implementations['im_features_questionnaire']);
+    unset($implementations['webform']);
+
+    $implementations = array('im_features_questionnaire' => group) + $implementations;
+  }
+}

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the IM Feature Holiday feature.
+ */
+
+include_once 'im_feature_holiday.features.inc';

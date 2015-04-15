@@ -1,0 +1,42 @@
+<?php
+ /**
+ * @file
+ * im_custom.install
+ */
+
+ /**
+ * Implements hook_install
+ * 
+ */ 
+
+function im_features_permissions_install() {
+	_im_features_permissions_imce_permission();
+}
+
+/**
+ * Implementation of hook_update()
+ * 
+ */
+function im_features_permissions_update_7400(){  
+	_im_features_permissions_imce_permission();
+}
+
+/**
+ * Permissions to set the IMCE profile configurations
+ * Enter description here ...
+ */
+function _im_features_permissions_imce_permission(){
+	$roles_array = array('expert','content_manager_action','contributor_alert','contributor_news','contributor_benchmark','contributor_sales_plan','contributor_om','content_manager_om','contributor_action','administrator','technical_director');
+   	$roles = db_query("SELECT rid,name FROM {role} WHERE name IN (:role_names)",array(':role_names' => $roles_array));
+   	$imce_roles_profiles = array();
+   	if($roles){
+	   	foreach ($roles as $role) {
+	   		$imce_roles_profiles[$role->rid] = array(
+	   				'weight' => 0,
+	   				'public_pid' => 1,
+	   				'private_pid' => 0,
+	   			);
+	   	}
+   	}
+   	variable_set('imce_roles_profiles',$imce_roles_profiles);
+}

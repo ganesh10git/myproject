@@ -1,0 +1,124 @@
+<?php
+ /**
+ * @file
+ * im_blocks.install
+ */
+ /**
+ * Implements hook_install
+ */ 
+function im_blocks_install() {
+//set blocks positions
+  _im_blocks_create_market_portal_menu();
+  $default_theme = variable_get('theme_default', 'im');
+  $blocks = array(
+     array(
+      'module' => 'im_blocks',
+      'delta' => 'im_header_block',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'header',
+      'pages' => '',
+      'cache' => DRUPAL_NO_CACHE,
+      'title' => '<none>',
+    ),
+  );
+  foreach ($blocks as $block) {
+    db_merge('block')
+      ->key(array('module' => $block['module']))
+      ->key(array('delta'  => $block['delta']))
+      ->key(array('theme' => $block['theme']))
+      ->fields(array(
+        'status' => (isset($block['status'])) ? $block['status'] : BLOCK_CUSTOM_DISABLED,
+        'weight' => (isset($block['weight'])) ? $block['weight'] : 0,
+        'region' => (isset($block['region'])) ? $block['region'] : -1,
+        'visibility' => (isset($block['visibility'])) ? $block['visibility'] : 0,
+        'pages'  => (isset($block['pages'])) ? $block['pages'] : '',
+        'cache'  => (isset($block['cache'])) ? $block['cache'] : DRUPAL_NO_CACHE,
+      ))
+      ->execute();
+  }
+  /* Variables setting for nice menus display */
+  $delta = 1;
+  variable_set('nice_menus_menu_' . $delta, 'market-portail:0');
+  variable_set('nice_menus_type_' . $delta, 'down');
+}
+
+/**
+ * Implements hook_update
+ * To set Accueil link path to home page.
+ */ 
+function im_blocks_update_7301() {
+  $query = db_update('menu_links')
+         ->fields(array('link_path' => '<front>'))
+         ->condition('link_path','accueil', '=')
+         ->condition('link_title','Accueil', '=')
+         ->condition('menu_name','market-portail', '=')
+         ->execute();
+}
+function im_blocks_update_7302() {
+  $query = db_update('menu_links')
+         ->fields(array('link_title' => 'Annuaire','link_path' => 'annuaire'))
+         ->condition('link_path','anuaire', '=')
+         ->condition('menu_name','market-portail', '=')
+         ->execute();
+  $query = db_update('menu_links')
+         ->fields(array('link_title' => 'Modèle opérationnel'))
+         ->condition('link_path','modele-operationnel', '=')
+         ->condition('menu_name','market-portail', '=')
+         ->execute();
+}
+
+function im_blocks_update_7401() {
+  $query = db_update('menu_links')
+         ->fields(array('link_title' => 'Plan de ventes'))
+         ->condition('link_path','sales-plan', '=')
+         ->condition('menu_name','market-portail', '=')
+         ->execute();
+  $query = db_update('menu_links')
+         ->fields(array('link_title' => 'Modèle Opérationnel'))
+         ->condition('link_path','modele-operationnel', '=')
+         ->condition('menu_name','market-portail', '=')
+         ->execute();
+  drupal_set_message("Header menu title renamed");
+}
+
+function im_blocks_update_7402(){
+  $query = db_update('menu_links')
+         ->fields(array('link_title' => 'Documentation'))
+         ->condition('link_path','modele-operationnel', '=')
+         ->condition('menu_name','market-portail', '=')
+         ->execute();
+  $query = db_update('menu_links')
+         ->fields(array('link_title' => 'Agenda'))
+         ->condition('link_path','<front>', '=')
+         ->condition('link_title', 'Accueil', '=')
+         ->condition('menu_name','market-portail', '=')
+         ->execute();
+  drupal_set_message("Header menu title renamed");
+}
+/*
+ * Deleting the user headerblock menu and recreating it.
+ */
+function im_blocks_update_7403() {
+  $menu = array(
+    'menu_name' => 'market-portail',
+    'title' => 'M',
+    'description' => 'Market Portail Menu',
+  );
+  menu_delete($menu);
+  _im_blocks_create_market_portal_menu();
+}
+/**
+ * Removing Product guide from the header menu and renaming the directory url.
+ * version - IM 14.2.3 
+ */
+function im_blocks_update_7710() {
+  $menu = array(
+    'menu_name' => 'market-portail',
+    'title' => 'M',
+    'description' => 'Market Portail Menu',
+  );
+  menu_delete($menu);
+  _im_blocks_create_market_portal_menu();
+}

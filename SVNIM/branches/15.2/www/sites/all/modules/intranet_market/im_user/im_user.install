@@ -1,0 +1,217 @@
+<?php
+/**
+ * @file
+ * im_user_getdynamic.inc
+ */
+function im_user_schema() {
+  $schema = array();
+  $schema['user_getdynamic'] = array(
+    'description' => 'Store the values from getdynamic',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+          'description' => 'serial number',
+        ),
+        'code' => array(
+          'type' => 'varchar',
+          'length' => 255,
+          'default' => '',
+          'description' => 'code field obtained form webservice',
+        ),
+      'description' => array(
+          'type' => 'varchar',
+          'length' => 500,
+          'default' => '',
+          'description' => 'description field obtained form webservice',
+        ),
+      ),
+  'primary key' => array('id'),
+  );
+    
+  $ldap_role_assignment = ldap_role_assignment_db();
+  $schema['ldap_role_assignment'] = $ldap_role_assignment['ldap_role_assignment'];
+  $user_getdms = user_getdms();
+  $schema['user_getdms'] = $user_getdms['user_getdms'];
+  $user_getmms = _user_getmms();
+  $schema['user_getmms'] = $user_getmms['user_getmms'];
+  return $schema;
+}
+
+function user_getdms() {
+	$schema = array();
+	$schema['user_getdms'] = array(
+			'description' => 'Store the values from getdms',
+			'fields' => array(
+					'id' => array(
+							'type' => 'serial',
+							'not null' => TRUE,
+							'description' => 'serial number',
+					),
+					'code' => array(
+							'type' => 'varchar',
+							'length' => 255,
+							'default' => '',
+							'description' => 'code field obtained form webservice',
+					),
+					'description' => array(
+							'type' => 'varchar',
+							'length' => 500,
+							'default' => '',
+							'description' => 'description field obtained form webservice',
+					),
+			),
+			'primary key' => array('id'),
+	);
+	return $schema;
+}
+
+/**
+ * Implements hook_install
+ */
+function im_user_install() {
+  //set blocks positions
+  $default_theme = variable_get('theme_default', '');
+  $blocks = array(
+     array(
+      'module' => 'im_user',
+      'delta' => 'im_user_userheader_bar',
+      'theme' => $default_theme,
+      'status' => BLOCK_CUSTOM_ENABLED,
+      'weight' => 1,
+      'region' => 'header',
+      'pages' => '',
+      'cache' => DRUPAL_NO_CACHE,
+      'title' => '<none>',
+    ),
+  );
+  foreach ($blocks as $block) {
+    db_merge('block')
+      ->key(array('module' => $block['module']))
+      ->key(array('delta'  => $block['delta']))
+      ->key(array('theme' => $block['theme']))
+      ->fields(array(
+        'status' => (isset($block['status'])) ? $block['status'] : BLOCK_CUSTOM_DISABLED,
+        'weight' => (isset($block['weight'])) ? $block['weight'] : 0,
+        'region' => (isset($block['region'])) ? $block['region'] : -1,
+        'visibility' => (isset($block['visibility'])) ? $block['visibility'] : 0,
+        'pages'  => (isset($block['pages'])) ? $block['pages'] : '',
+        'cache'  => (isset($block['cache'])) ? $block['cache'] : DRUPAL_NO_CACHE,
+      ))
+      ->execute();
+  }
+}
+function im_user_update_7000() {
+  $ldap_role_assignment = ldap_role_assignment_db();
+  db_create_table('ldap_role_assignment', $ldap_role_assignment['ldap_role_assignment']);
+}
+function im_user_update_7001() {
+	if(!db_field_exists('ldap_role_assignment', 'employee_number')) {
+	  db_add_field('ldap_role_assignment', 'employee_number',
+	    array(
+	      'type' => 'varchar',
+	      'length' => 60,
+	      'default' => '',
+	      'description' => 'Employee Number'
+	    )
+	  );
+	}
+}
+
+function im_user_update_7002() {
+	$user_getdms = user_getdms();
+	$user_getmms = _user_getmms();
+	db_create_table('user_getdms', $user_getdms['user_getdms']);
+	db_create_table('user_getmms', $user_getmms['user_getmms']);
+}
+
+function ldap_role_assignment_db() {
+  $schema = array();
+  $schema['ldap_role_assignment'] = array(
+    'description' => 'LDAP role assignment table',
+      'fields' => array(
+        'asid' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+          'description' => 'serial number',
+        ),
+        'employee_number' => array(
+          'type' => 'varchar',
+          'length' => 60,
+          'default' => '',
+          'description' => 'Employee Number',
+        ),
+        'email' => array(
+          'type' => 'varchar',
+          'length' => 254,
+          'default' => '',
+          'description' => 'Email id of assigned director',
+        ),
+        'first_name' => array(
+          'type' => 'varchar',
+          'length' => 60,
+          'default' => '',
+          'description' => 'Firstname of assigned director',
+        ),
+        'last_name' => array(
+          'type' => 'varchar',
+          'length' => 60,
+          'default' => '',
+          'description' => 'Lastname of assigned director',
+        ),
+        'email_assigned_by' => array(
+          'type' => 'varchar',
+          'length' => 254,
+          'default' => '',
+          'description' => 'Email assigned by director',
+        ),
+        'assigned_store' => array(
+          'type' => 'varchar',
+          'length' => 4000,
+          'default' => '',
+          'description' => 'Store Id',
+        ),
+        'assignment_begin_date' => array(
+          'description' => 'The Unix timestamp begin_date',
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'assignment_end_date' => array(
+          'description' => 'The Unix timestamp end_date',
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+      ),
+  'primary key' => array('asid'),
+  );
+  return $schema;	
+}
+function _user_getmms() {
+  $schema = array();
+  $schema['user_getmms'] = array(
+    'description' => 'Store the values from getmms',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+          'description' => 'serial number',
+        ),
+        'code' => array(
+          'type' => 'varchar',
+          'length' => 255,
+          'default' => '',
+          'description' => 'code field obtained form webservice',
+        ),
+      'description' => array(
+          'type' => 'varchar',
+          'length' => 500,
+          'default' => '',
+          'description' => 'description field obtained form webservice',
+        ),
+      ),
+  'primary key' => array('id'),
+  );
+  return $schema;	
+}
