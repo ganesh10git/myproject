@@ -1,0 +1,619 @@
+<?php
+/**
+ * @file
+ * Module file for im_user.
+ */
+
+/**
+* Implements hook_menu().
+*/
+function im_user_menu() {
+  $items = array();
+  $items['user_store_preference_form'] = array(
+  'title' => 'Filtering information presented on the portal',
+  'page callback' => '_im_user_store_preference',
+  'access callback' => TRUE,
+  'file' => 'includes/im_user_store_preference_form.inc',
+  'type' => MENU_CALLBACK,
+  );
+  $items['node/%/%/%ctools_js/user_store_preference_form_ctools'] = array(
+  'title' => 'Filtering information presented on the portal',
+  'page callback' => '_im_user_store_preference_ctools',
+  'file' => 'includes/im_user_store_preference_form.inc',
+  'access callback' => TRUE,
+  'type' => MENU_CALLBACK,
+  'page arguments' => array(3),
+  );
+  $items['uspautocomplete'] = array(
+  'page callback' => '_usp_item_autocompletes',
+  'file' => 'includes/im_user_store_preference_form.inc',
+  'access callback' => TRUE,
+  'type' => MENU_CALLBACK
+  );
+  $items['uspautocomplete_filter'] = array(
+  'page callback' => '_im_user_get_filter_values',
+  'file' => 'includes/im_user_store_preference_form.inc',
+  'access callback' => TRUE,
+  'type' => MENU_CALLBACK
+  );
+  $items['personal-space/login-validate'] = array(
+    'title' => 'Login Validate',
+    'page callback' => '_im_user_login_validate',
+    'access callback' => '_im_user_login_access',
+    'file' => 'includes/im_user_homepage.inc',
+    'file path' => drupal_get_path('module', 'im_user'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['personal-space/home'] = array(
+  'title' => 'Home Page',
+  'page callback' => 'im_user_homepage',
+  'access callback' => 'im_user_homepage_access',
+  'file' => 'includes/im_user_homepage.inc',
+  'file path' => drupal_get_path('module', 'im_user'),
+  'type' => MENU_CALLBACK,
+  );
+  $items['agenda/list/all/%ctools_js/user_store_preference_form'] = array(
+  'title' => 'Filtering information presented on the portal',
+  'page callback' => '_im_user_store_preference_ctools',
+  'file' => 'includes/im_user_store_preference_form.inc',
+  'access callback' => TRUE,
+  'type' => MENU_CALLBACK,
+  'page arguments' => array(3),
+  );
+  $items['admin/im/getdynamics'] = array(
+    'title' => 'getDynamics',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('im_user_getDynamics_form'),
+    'file' => 'includes/im_user_getdynamic.inc',
+    'type' => MENU_CALLBACK,
+    'access callback' => '_im_user_admin_access',
+  );
+  $items['admin/im/getdynamics/%'] = array(
+    'title' => 'getDynamics',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('im_user_getDynamics_form'),
+    'file' => 'includes/im_user_getdynamic.inc',
+    'type' => MENU_CALLBACK,
+    'access callback' => '_im_user_admin_access',
+  );
+    $items['admin/im/getdynamics/%/ajax'] = array(
+    'title' => 'getdynamics',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_im_user_getdynamics_saveresult_callback'),
+    'file' => 'includes/im_user_getdynamic.inc',
+    'type' => MENU_CALLBACK,
+    'access callback' => '_im_user_admin_access',
+  );
+    
+  $items['admin/im/getdms'] = array(
+  	'title' => t('getTraineeDirector'),
+  	'page callback' => 'drupal_get_form',
+  	'page arguments' => array('im_user_getDms_form'),
+   	'file' => 'includes/im_user_getdms.inc',
+   	'type' => MENU_CALLBACK,
+   	'access callback' => '_im_user_admin_access',
+  );
+  $items['admin/im/getdms/%'] = array(
+   	'title' => t('getTraineeDirector'),
+   	'page callback' => 'drupal_get_form',
+   	'page arguments' => array('im_user_getDms_form'),
+   	'file' => 'includes/im_user_getdms.inc',
+   	'type' => MENU_CALLBACK,
+   	'access callback' => '_im_user_admin_access',
+  );
+  $items['admin/im/getdms/%/ajax'] = array(
+   	'title' => t('getTraineeDirector'),
+   	'page callback' => 'drupal_get_form',
+   	'page arguments' => array('_im_user_getdms_saveresult_callback'),
+   	'file' => 'includes/im_user_getdms.inc',
+   	'type' => MENU_CALLBACK,
+   	'access callback' => '_im_user_admin_access',
+  );
+
+  $items['admin/im/user/add'] = array(
+  'title' => t('User Management'),
+  'page callback' => 'im_user_management',
+  'access callback' => TRUE,
+  'file' => 'includes/im_user_management.inc',
+  'file path' => drupal_get_path('module', 'im_user'),
+  'type' => MENU_CALLBACK,
+  );
+
+   $items['accueil'] = array(
+    'title' => 'Agenda',
+    'page callback' => '_page_under_construction',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['sales-plan/%/%'] = array(
+    'title' => 'Sales plan',
+    'page callback' => 'im_sales_plan_page',
+    'file' => 'includes/im_sales_plan_page.inc',
+    'file path' => drupal_get_path('module', 'im_sales_plan'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['guide-produits'] = array(
+    //'title' => 'Guide produits',
+    'page callback' => '_im_product_guide_landing_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['applications'] = array(
+    'title' => 'Applications',
+    'page callback' => '_no_content_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/im/user/dashboard'] = array(
+    'title' => t('People'),
+    'page callback' => 'im_user_dashboard',
+    'access callback' => TRUE,
+    'file' => 'includes/im_user_dashboard.inc',
+    'file path' => drupal_get_path('module', 'im_user'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/im/user/dmd-assignment'] = array(
+    'title' => t('Assign Director'),
+    'page callback' => 'im_user_dmd_assignment',
+    'access callback' => '_im_user_director_access',
+    'file' => 'includes/im_user_dmd_assignment.inc',
+    'file path' => drupal_get_path('module', 'im_user'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/im/user-add/regional'] = array(
+    'title' => '',
+    'page callback' => 'im_user_get_user_details',
+    'access callback' => TRUE,     
+    'type' => MENU_CALLBACK,
+  );
+  $items['store-selection/%'] = array(
+    'title' => '',
+    'page callback' => '_im_user_store_selection',
+    'access callback' => TRUE,
+    'file' => 'includes/im_user_userheader_block.inc',
+    'file path' => drupal_get_path('module', 'im_user'),
+    'type' => MENU_CALLBACK,
+  );
+    $items['admin/im/getmms'] = array(
+    'title' => 'getmms',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('im_user_getmms_form'),
+    'file' => 'includes/im_user_getmms.inc',
+    'type' => MENU_CALLBACK,
+    'access callback' => '_im_user_admin_access',
+  );
+    $items['admin/im/getmms/%'] = array(
+    'title' => 'getmms',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('im_user_getmms_form'),
+    'file' => 'includes/im_user_getmms.inc',
+    'type' => MENU_CALLBACK,
+    'access callback' => '_im_user_admin_access',
+  );
+    $items['admin/im/getmms/%/ajax'] = array(
+    'title' => 'getmms',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_im_user_getmms_saveresult_callback'),
+    'file' => 'includes/im_user_getmms.inc',
+    'type' => MENU_CALLBACK,
+    'access callback' => '_im_user_admin_access',
+  );
+  return $items;
+}
+
+function _no_content_page(){
+  $output = t("No content is created");
+  return $output;
+}
+function _page_under_construction() {
+  $output = "THIS PAGE IS UNDER CONSTRUCTION";
+  return $output;
+}
+function im_user_init() {
+ /*
+ * UAT IM - 717:Security issue -Access deined for non Carrefour market usesr.
+ */
+ if(isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && (arg(0) == 'sales-plan' || arg(0) == 'agenda' || arg(0) == 'modele-operationnel' || arg(0) == 'applications' || arg(0) == 'annuaire' || arg(0) == 'search')) {
+    drupal_goto('access-denied');
+    return false;       
+   } else if(isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && request_uri() == '/user/logout') {
+    unset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']);
+   }	
+/*
+ * UAT IM - 628 & 607 defect ids has resolved. Login destination issue.
+ */
+   if(!(arg(0) == 'personal-space') && !(arg(0) == 'agenda-detail') && !(arg(0) == 'user_session_info') && !(arg(0) == 'user')) { 
+    $currentrequesturl = '';
+    $currentrequesturl = ltrim(request_uri(), '/');
+    if($_SESSION['enter_menu_destination'] != $currentrequesturl){
+     $_SESSION['enter_menu_destination'] = $currentrequesturl;
+    } 
+   }	
+   static $init_count = 0; //Run the code only once
+  //Exclude requests drush/cron/multile-init calls
+  $logout = (arg(0) == 'user' && arg(1) == 'logout') ? TRUE : FALSE; 
+  if (!$logout && !function_exists('drush_main') && !(isset($_SERVER['SCRIPT_NAME']) && $_SERVER['SCRIPT_NAME'] == '/cron.php') && !$init_count) {
+    global $user;
+    global $base_url;
+    //Third Parameter only for DEV(exclude super admin login)
+    $dev_exclude = ((arg(0) == 'user' | arg(0) == 'personal-space') && arg(1) == '') ? TRUE : FALSE;
+    //user logged in - but receives second request from annudi login
+    if(isset($_REQUEST['CSIF_SessionId']) && isset($_SESSION['ldap_login_key'])) {
+      unset($_SESSION['ldap_login_key']);
+    }
+    //user not logged in, not a request from annudi
+    if(!isset($_REQUEST['CSIF_SessionId']) && !$user->uid && !$dev_exclude) {
+      drupal_goto(im_user_get_login_url());
+    }
+    //if ldap token exist check validity.
+    if(isset($_SESSION['ldap_login_key'])) {
+      $obj = new imldapSoapService();
+      $response = $obj->soapRequest('isAlive', array('id' => $_SESSION['ldap_login_key']));
+      if(!isset($response->data)) {
+        drupal_goto(im_user_get_login_url());
+      }
+      if(!isset($response->data) | !$response->data) {
+        drupal_goto(im_user_get_login_url());
+      }
+    }
+  }
+  $init_count++;
+}
+function im_user_homepage_access() {
+  /*
+  global $user;
+  $homepage_role = arg(1);
+  if(in_array($homepage_role, $user->roles)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+  */
+  return TRUE;
+}
+function _im_user_login_access() {
+  return TRUE;
+}
+
+function _im_user_director_access() {
+  global $user;
+  //$_SESSION['ldap_user_role'] = 'store_director';
+  if(isset($_SESSION['ldap_user_role']) && ($_SESSION['ldap_user_role'] == 'store_director')) {
+    return TRUE;
+  }
+  return FALSE;
+}
+/**
+ * Implementation of _im_user_admin_access
+ * This takes care the user access for the getDynamics page ...
+ */
+function _im_user_admin_access() {
+	global $user;
+		
+  if(in_array('administrator',$user->roles) || in_array('technical_director',$user->roles)){
+  	return TRUE;
+  }
+  return FALSE;  
+}
+
+/**
+ * Implement hook_form_FORM_ID_alter()
+ */
+function im_user_form_user_login_alter(&$form, &$form_state, $form_id) {
+  $form['#validate'] = array('im_user_login_validate');
+  $form['#submit']['0'] = 'im_user_login_submit';
+}
+
+function im_user_login_validate($form, &$form_state){
+  global $user;
+  global $base_url;
+  $username = trim($form_state['values']['name']);
+  $password = trim($form_state['values']['pass']);
+
+  if (!$username) {
+    form_set_error('name', t('Username is required.'));
+  }
+  if (!$password) {
+    form_set_error('pass', t('Password is required.'));
+  }
+  else {
+    if(user_authenticate($username, $password) == 1) {
+    $user = user_load(1);
+    user_login_finalize($form_state);
+  }
+  else {
+    //drupal_goto(im_user_get_login_url());
+  }
+  }
+}
+
+function im_user_login_submit(&$form, &$form_state){
+
+}
+function im_user_get_login_url() {
+  global $base_url;
+  if($login_url = variable_get('annuuddi_login_url', '')) {
+    $login_url = str_replace('{current_domain}', $base_url, $login_url);
+  }
+  
+  return $login_url;
+}
+/**
+* Function to prepare the pager items for the Table
+*/
+function pager_array_splice($data, $limit = 9, $element = 0) {
+  global $pager_page_array, $pager_total, $pager_total_items;
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+
+  // Convert comma-separated $page to an array, used by other functions.
+  $pager_page_array = explode(',', $page);
+
+  // We calculate the total of pages as ceil(items / limit).
+  $pager_total_items[$element] = count($data);
+  $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) - 1));
+  return array_slice($data, $pager_page_array[$element] * $limit, $limit, TRUE);
+}
+
+function _im_user_getdynamics() {	
+  $query = db_select('user_getdynamic','u')
+    ->fields('u',array('code','description'));
+  $result = $query->execute();
+  $rows = array();
+  while($data = $result->fetchObject()) {
+    $rows[] = array('data' => array('code' => trim($data->code), 'description' => trim($data->description)));
+  }
+    
+  $rows = array_map("unserialize", array_unique(array_map("serialize", $rows)));
+  return $rows;
+}
+
+function _im_user_getdms() {
+	$query = db_select('user_getdms','u')
+	->fields('u',array('code','description'));
+	$result = $query->execute();
+	$rows = array();
+	while($data = $result->fetchObject()) {
+		$rows[] = array('data' => array('code' => trim($data->code), 'description' => trim($data->description)));
+	}
+
+	$rows = array_map("unserialize", array_unique(array_map("serialize", $rows)));
+	return $rows;
+}
+
+function _im_user_getmms() {	
+  $query = db_select('user_getmms','u')
+    ->fields('u',array('code','description'));
+  $result = $query->execute();
+  $rows = array();
+  while($data = $result->fetchObject()) {
+    $rows[] = array('data' => array('code' => trim($data->code), 'description' => trim($data->description)));
+  }
+    
+  $rows = array_map("unserialize", array_unique(array_map("serialize", $rows)));
+  return $rows;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function im_user_block_info() {
+  $blocks['im_user_userheader_bar'] = array(
+    'info' => t('user header block'),
+    'cache' => DRUPAL_NO_CACHE,
+    'weight' => 1,
+    'module' => 'im_user',
+  );
+  $blocks['im_user_dmd_assigned'] = array(
+    'info' => t('DMD assigned block'),
+    'cache' => DRUPAL_NO_CACHE,
+    'weight' => 1,
+    'module' => 'im_user',
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function im_user_block_view($delta = '') {
+  $block = array();
+  global $user;
+  //if ($user->uid && $user->uid !='1') {
+  if ($user->uid) {
+  switch ($delta) {
+    case 'im_user_userheader_bar':
+      //$block['subject'] = t('User header block');
+      $block['content'] = _im_user_userheader();
+    break;
+    case 'im_user_dmd_assigned':
+      //$block['subject'] = t('User header block');
+      $block['content'] = im_user_dmd_assigned_block();
+    break;
+    default:
+      break;
+  }
+  return $block;
+  }
+
+}
+
+function _im_user_userheader() {
+  module_load_include('inc', 'im_user', '/includes/im_user_userheader_block');
+  $result = _im_user_userheader_bar();
+  return $result;
+}
+function _im_user_store_preference() {
+  $build['store_form'] = drupal_get_form('_user_store_preference_form');
+  $build['store_result'] = drupal_get_form('_im_user_store_preference_result_form');
+  return $build;
+}
+
+function _im_user_store_preference_ctools_form($form, &$form_state) {
+  $form = array();
+  $form = _user_store_preference_form($form, $form_state);
+  $form = _im_user_store_preference_result_form($form, $form_state);
+  $form['#validate'] = array();
+  $form['#submit'] = array();
+  //$form['#submit'][] = '_im_user_store_preference_result_form_submit_setvalue';
+  return $form;
+}
+/**
+ * 
+ * Function to display the Preferred store in the Ctools pop-up ...
+ */
+function _im_user_store_preference_ctools($js = FALSE) {
+  global $user;
+  drupal_add_js(drupal_get_path('module', 'im_features_stores') . '/js/im_features_stores.js');
+  ctools_include('node.pages', 'node', '');
+//  module_load_include('inc', 'node', 'node.pages');
+  $node = (object) array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => 'preferred_store', 'language' => LANGUAGE_NONE);  
+  if (!$js) {
+    return drupal_get_form('preferred_store_node_form', $node);
+  }
+  ctools_include('modal');
+  ctools_include('ajax');
+  $form_state = array(
+    'title' => t('Preferred_store'),
+    'ajax' => TRUE,
+  );
+//  node_object_prepare($node);
+  $form_state['build_info']['args'] = array($node);
+/*  $form = drupal_retrieve_form('preferred_store_node_form', $form_state);
+  drupal_prepare_form('preferred_store_node_form', $form, $form_state);*/
+  $output = ctools_modal_form_wrapper('preferred_store_node_form', $form_state);
+  if (!empty($form_state['executed'])) {
+  	$output = array();
+    // Close the modal
+    $output[] = ctools_modal_command_dismiss();
+    $output[] = ctools_ajax_command_reload();        
+  }
+  print ajax_render($output);
+  exit;
+}
+/*function _im_user_store_preference_ctools($js=NULL) {
+  drupal_add_css(drupal_get_path('theme', 'im') . '/css/styles_im.css');
+  drupal_add_css(drupal_get_path('module', 'im_agenda') . '/css/im_agenda.css');
+  
+	$form_a = render(drupal_get_form('_user_store_preference_form'));
+  $form_a = $form_a . render(drupal_get_form('_im_user_store_preference_result_form'));  
+  if (!$js) {
+  	return $form_a;
+  }
+   if ($js) {
+      ctools_include('modal');
+      ctools_include('ajax');
+     // ctools_add_js('ajax-responder');
+      $form_state = array(
+        'title' => t(''),
+        'ajax' => TRUE,
+      );
+      $output = array();     
+      $output[] = ctools_modal_command_display(t('information'), $form_a);    
+    if(isset($_SESSION['popup_status']) && $_SESSION['popup_status']) {
+    	$output[] = ctools_modal_command_dismiss();
+    	unset($_SESSION['popup_status']);
+    }
+    
+      if (!$output[0]['output']) {
+      	
+          $output[] = ctools_modal_command_dismiss();
+      }
+    }
+    print ajax_render($output);
+}*/
+/*
+* Implementation of hook_theme
+*
+*/
+function im_user_theme() {
+  return array(
+    'im_userheader_output'=>array(
+      'template' => 'theme/im_user_userheaderblock_template',
+      'variables' => array('output' => NULL,),
+      ),
+    '_user_store_preference_form' => array(
+      'template' => 'theme/im_user_store_preference_form',
+      'render element' => 'form',
+      ),
+    '_im_user_store_preference_result_form' => array(
+      'template' => 'theme/im_user_store_preference_form',
+      'render element' => 'form',
+      ),
+    'im_user_dmd_assignment_form' => array(
+      'template' => 'theme/im_user_dmd_assignment_template',
+      'render element' => 'form',
+      ),
+  );
+
+}
+
+
+/**
+ * Function to fetch the Full name of the user from drupal database.
+ */
+function _im_user_get_data($uid){
+  $user_load = user_load($uid);
+  $user_data = array();
+  $user_data['full_name'] = '';
+  if (isset($user_load->field_full_name[LANGUAGE_NONE][0]['value'])) {
+  	$user_data['full_name'] = $user_load->field_full_name[LANGUAGE_NONE][0]['value'];
+  }
+  return $user_data;
+}
+/**
+ * 
+ * Function to invoke the getUserAttributs webservice method ...
+ * @param int $user_id : User ID of LDAP
+ */
+function _getUserAttributs($user_id) {
+  $ladp_id = $_SESSION['ldap_login_key'];
+  $obj = new imldapSoapService();
+  $user_details = array();
+  $response = $obj->soapRequest('getUserAttributs', array('id' => $ladp_id, 'login' => $user_id, 'attributsType'=> array('givenName', 'cn', 'mail', 'eduPersonOrgUnitDn', 'employeeNumber','uid'),  'pad' => ' '));
+  if ($response->status == "success") {
+    $user_details['givenName'] = trim($response->data[0]);
+    $user_details['cn'] = ($response->data[1]);
+    //$user_details['mail'] = ($response->data[2]);
+    $user_details['mail'] = current(explode(' ', trim($response->data[2])));
+    //current(explode(' ', trim($response->data[2])));      
+    $user_details['eduPersonOrgUnitDn'] = ($response->data[3]);
+    $user_details['matricule'] = ($response->data[4]);
+    $user_details['employeeNumber'] = ($response->data[4]);
+    $user_details['uid'] = ($response->data[5]);
+  }
+  return $user_details;	
+}
+/**
+ * 
+ * Function get the user details while adding the Regional role user..
+ */
+function im_user_get_user_details() {
+  $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : '';
+  $role = isset($_POST['role']) ? $_POST['role'] : '';
+  $user_details = _getUserAttributs($user_id);  
+  $register_id = !empty($user_details['employeeNumber']) ? trim($user_details['employeeNumber']):trim($user_details['uid']);
+  $rid = db_query("SELECT rid FROM {role} WHERE name = :role_name", array(':role_name' => $role))->fetchField();
+  if ($rid) {
+  	$_SESSION["regional_user_rid"] = $rid;
+  }
+  $register_details = array('register_id' => $register_id,'cn'=>$user_details['cn'],'mail'=>$user_details['mail']);
+  $_SESSION["regional_user_details"] = $register_details;  
+  $query = db_select('users','users');
+  $query->join('users_roles','roles','users.uid=roles.uid');
+  $result = $query->fields('users', array('uid'))
+              ->condition('name', db_like($register_id), '=')
+              ->condition('rid', $rid, '=')
+              ->range(0, 1)
+              ->execute()
+              ->fetchField();
+    if ((bool)$result){
+      echo "USER EXITS";
+    }else{
+      echo "SUCCESS";
+    }
+}
