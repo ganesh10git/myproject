@@ -96,13 +96,14 @@ function _im_user_login_validate(){
            //STORE Manager TRAINEEE
            elseif ($is_carrefour_market_user && !im_stores_is_store_exist($user_store) && _is_store_manager_trainee_category($profile)) {
             $_SESSION['ldap_user_role'] = 'store_manager_trainee';
-           } 
-          //SALARIE SIEGE
+           }
+        //SALARIE SIEGE
           elseif ($is_carrefour_market_user && !im_stores_is_store_exist($user_store)) {
             $_SESSION['ldap_user_role'] = 'salarie_siege';
              //Removing salarie_siege role according to UATIM-343.
             //_im_user_create_user_salarie_siege_role($account, $profile_name);
-          }               
+          }
+                       
           //STORE DIRECTOR-DM
           //work on 4 -DM Identifiers: Creating LDAP Functions list
           if ($is_carrefour_market_user && im_stores_is_store_exist($user_store) && _is_store_director_dynamic($profile)) {
@@ -112,10 +113,14 @@ function _im_user_login_validate(){
           elseif ($is_carrefour_market_user && im_stores_is_store_exist($user_store) && _is_store_manager_category($profile)) {
             $_SESSION['ldap_user_role'] = 'store_manager';
            }
+           //Identify the foreman role
+          elseif ($is_carrefour_market_user &&_is_user_foreman($profile) && im_stores_is_store_exist($user_store)) {
+            $_SESSION['ldap_user_role'] = 'foreman';            
+          }  
          //STORE EMPLOYEE
           elseif ($is_carrefour_market_user && im_stores_is_store_exist($user_store) && !_is_store_manager_category($profile) && !in_array('administrator', $account->roles)) {
             $_SESSION['ldap_user_role'] = 'store_employee';
-          }
+          }          
           /*
            * Implemented to resolve the Login Redirection to the previously accessed page.
            */ 
@@ -163,7 +168,7 @@ function _im_user_login_validate(){
     }else {
       drupal_goto(im_user_get_login_url());  
     }
-  }
+  }  
   return '';
 }
 function _im_access_denied($message = 'please contact admin for the portal access', $status = 'warning') {
