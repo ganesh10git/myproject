@@ -291,3 +291,29 @@ function _is_store_manager_trainee_category($profile) {
   }
   return FALSE;
 }
+/**
+ * This method idenify the foreman role in the LDAP
+ * returns - TRUE, if the Foreman role is identified.
+ * returns - FALSE, if the user is not a Foreman role.
+ */
+function _is_user_foreman($profile) {
+  if(!isset($profile->grp)) return FALSE;
+  foreach ($profile->grp as $grp){
+    $counter = 0;
+    $classification   = '';
+    $a      = ''; 
+    foreach($grp->attr as $attr){
+  	  if((string)$grp->attr[$counter] == 'classification') {
+  		$classification = 'classification';
+  	  }
+      if((string)$grp->attr[$counter] == 'A') {
+  		$a = 'A';
+  	  }
+  	  if($classification == 'classification' && $a == 'A') {
+  		return TRUE;
+  	  } 
+  	  $counter++;
+    }
+  }
+  return FALSE;
+}
