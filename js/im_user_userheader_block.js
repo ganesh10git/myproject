@@ -66,7 +66,7 @@
     //UATIM-533 to show the selected store on the top- (Set the selected store value on all pages except annuaire,homepage and agenda for the day) ...
     var pathname = window.location.pathname;
     var pathname_split = pathname.split('/');
-    if (pathname_split[1] != 'agenda' && pathname_split[1] != 'agenda-day' && pathname_split[1] != 'annuaire' && pathname_split[1] != '') {
+    if (pathname_split[1] != 'agenda' && pathname_split[1] != 'agenda-day' && pathname_split[1] != 'annuaire' && pathname_split[1] != '' && pathname_split[1] != 'sales-plan') {
     //UATIM-533 fixes [The top link is not made clickable]
       $('.im_stores_list_menu div a').click(function(e){
         return false;
@@ -76,7 +76,7 @@
         if (url_link != '') {
           url_split = url_link.split('/');	
           var store_id = url_split.length-2; 
-          var data = "data=" +url_split[store_id];        
+          var data = "data=" +url_split[store_id];    
           $.ajax({
               url: '/store-selection/"'+url_split[store_id]+'"',
               type: 'POST',
