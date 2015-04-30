@@ -285,7 +285,7 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
     }
   }
     //for the other pages expect agenda home page, agenda for the day and annuaire.
-  if ($count > 1 && arg(0)!='agenda' && arg(0)!= 'agenda-day' && arg(0) != 'annuaire'){
+  if ($count > 1 && arg(0)!='agenda' && arg(0)!= 'agenda-day' && arg(0) != 'annuaire' && arg(0) != 'sales-plan'){
   	$current_date= date('Ymd');
     $att = array('class' => 'menu-categories', 'id' => 'sub_menu1');
     $store_id = '';
@@ -407,6 +407,174 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
       $item_display[] = l($str_value, 'annuaire/'.$store_value, array('attributes' => array('class' => array('single-store'))), array('html' => TRUE));
     }
   }
+  //Sales-plan page store link generation - UATIM-801
+  if (arg(0) == 'sales-plan') {
+    //If user has more than one store
+    $currentyear = date("Y");
+    if ($count > 1) {
+      //user will multiple store and if user select any one store
+      if (is_numeric(arg(1))) {
+      	$att = array('class' => 'menu-categories', 'id' => 'sub_menu1');
+        $first_store = $_SESSION['storeid'];
+        $store_id = '';
+        $stores_result = db_query("SELECT s.pve_code,s.ite_lib_value from {store_item_fields} s WHERE s.pve_code IN (:store_id) AND s.dit_cod_item ='magasin' ORDER BY s.ite_lib_value ASC", array(':store_id' => $prefered_store))->fetchAll();
+
+        $stores = array();
+          foreach ($stores_result as $store){
+            $stores[$store->pve_code] = $store->ite_lib_value;
+          }
+
+        $i = 0;
+        foreach ($stores as $key => $value) {
+        	$url_value = $value;
+          $store_id_value = $key;
+          if ($first_store != $key){            
+            if (!empty($url_value) && (!empty($store_id_value))) {
+              $item_var = 'item' . $i;
+			        $storeType = 'region-commerciale';
+			        $storeToken = $store_id_value;
+			        $fetchRegion = db_select('store_item_fields','s')
+			              ->fields('s',array('ite_lib_value'))
+			              ->distinct()
+			              ->condition('s.dit_cod_item',$storeType, '=')
+			              ->condition('s.pve_code',$storeToken, '=')
+			              ->execute();
+			             
+					    $storeRegion = $fetchRegion->fetchfield();		   
+					    $regionOptions = _im_sales_plan_get_taxonomy_tid();
+					    $regionCode = array_search($storeRegion, $regionOptions);
+					     
+					    $fetchRegionCode = db_select('field_data_field_taxo_sp_region_code','s')
+			              ->fields('s',array('entity_id'))
+			              ->condition('s.field_taxo_sp_region_code_value',$regionCode, '=')
+			              ->execute();			             
+					    $storeRegionId = $fetchRegionCode->fetchfield();	
+					    $prefered_stores[2] = array('title' => t('Tous les magasins'), 'href' => 'sales-plan/'.$currentyear.'/all');
+	              if($storeRegionId==''){
+						    	$store_regionurl = 'now/all';
+						    	$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl);
+						    }
+						    else{
+						    	$store_regionurl = $currentyear .'/'.$storeRegionId;
+						    	$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl, 'query' => array('storeid' => $store_id_value,'region'=>selected));
+						    }              
+              //$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl);
+            }
+            $i++;
+          }else{
+            if (!empty($url_value) && (!empty($store_id_value))) {        	
+			        $storeType = 'region-commerciale';
+			        $first_storeToken = $store_id_value;
+			        $fetchRegion = db_select('store_item_fields','s')
+			              ->fields('s',array('ite_lib_value'))
+			              ->distinct()
+			              ->condition('s.dit_cod_item',$storeType, '=')
+			              ->condition('s.pve_code',$first_storeToken, '=')
+			              ->execute();
+			             
+					    $storeRegion = $fetchRegion->fetchfield();		   
+					    $regionOptions = _im_sales_plan_get_taxonomy_tid();
+					    $regionCode = array_search($storeRegion, $regionOptions);
+					     
+					    $fetchRegionCode = db_select('field_data_field_taxo_sp_region_code','s')
+			              ->fields('s',array('entity_id'))
+			              ->condition('s.field_taxo_sp_region_code_value',$regionCode, '=')
+			              ->execute();			             
+					    $storeRegionId = $fetchRegionCode->fetchfield();					    
+              if($storeRegionId!=''){						    	
+					    	$first_store_regionurl = $currentyear .'/'.$storeRegionId;    	
+					    }   
+            }
+          }
+        }
+         $fetch_sel_store = db_select('store_item_fields','s') 
+                    ->fields('s',array('ite_lib_value'))
+                    ->condition('s.pve_code' ,$first_store, '=')
+                    ->condition('s.dit_cod_item', 'magasin', '=')
+                    ->execute();
+          $url_value = $fetch_sel_store->fetchfield();	;	
+
+          if($url_value!=''){ 
+             $item_display[] = array(html_entity_decode(theme('links', array('links' => $prefered_stores, 'attributes' => $att, 'heading' => array('text' => l(t($url_value), 'sales-plan/'.$first_store_regionurl, array('query' => array('storeid' => $first_storeToken,'region'=>selected)), array('html' => TRUE)), 'level' => 'div', 'class' => '')))),'class' => 'im_stores_list_menu');
+          }else{ 
+          	 unset($prefered_stores[2]);
+          	$item_display[] = array(
+          html_entity_decode(
+          theme('links', 
+          array('links' => $prefered_stores, 'attributes' => $att,
+          'heading' => array('text' => l(t('Tous les magasins'), 'sales-plan/now/all', array('html' => TRUE)), 
+          'level' => 'div', 'class' => '')))),'class' => 'im_stores_list_menu');           
+          }
+        }
+        //user have multiple store and 'all store' at top.
+      else if (arg(2) == 'all') {
+        $att = array('class' => 'menu-categories', 'id' => 'sub_menu1');
+        $store_id = '';
+        $stores_result = db_query("SELECT s.pve_code, s.ite_lib_value from {store_item_fields} s WHERE s.pve_code IN (:store_id) AND s.dit_cod_item ='magasin' ORDER BY s.ite_lib_value ASC", array(':store_id' => $prefered_store))->fetchAll();
+        $stores = array();
+        foreach ($stores_result as $store){
+          $stores[$store->pve_code] = $store->ite_lib_value;
+        }
+        $i = 0;
+        foreach ($stores as $key => $value) {
+          $url_value = $value;
+          $store_id_value = $key;
+          if (!empty($url_value) && (!empty($store_id_value))) {
+            $item_var = 'item' . $i;
+          }
+        $storeType = 'region-commerciale';
+        $storeToken = $store_id_value;
+        $fetchRegion = db_select('store_item_fields','s')
+              ->fields('s',array('ite_lib_value'))
+              ->distinct()
+              ->condition('s.dit_cod_item',$storeType, '=')
+              ->condition('s.pve_code',$storeToken, '=')
+              ->execute();
+             
+		    $storeRegion = $fetchRegion->fetchfield();		   
+		    $regionOptions = _im_sales_plan_get_taxonomy_tid();
+		    $regionCode = array_search($storeRegion, $regionOptions);
+		     
+		    $fetchRegionCode = db_select('field_data_field_taxo_sp_region_code','s')
+              ->fields('s',array('entity_id'))
+              ->condition('s.field_taxo_sp_region_code_value',$regionCode, '=')
+              ->execute();
+             
+		    $storeRegionId = $fetchRegionCode->fetchfield();	
+		    
+		    if($storeRegionId==''){
+		    	$store_regionurl = 'now/all';
+		    	$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl);
+		    }
+		    else{
+		    	$store_regionurl = $currentyear .'/'.$storeRegionId;
+		      $prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl, 'query' => array('storeid' => $store_id_value,'region'=>selected));
+		    } 
+          //$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl);
+          $i++;
+        }
+          $item_display[] = array(
+          html_entity_decode(
+          theme('links', 
+          array('links' => $prefered_stores, 'attributes' => $att,
+          'heading' => array('text' => l(t('Tous les magasins'), 'sales-plan/now/all', array('html' => TRUE)), 
+          'level' => 'div', 'class' => '')))),'class' => 'im_stores_list_menu');          
+      }
+    }
+    //if user has only one store.
+    else if ($count == 1) {
+    $store_value = $user_fields->field_user_stores['und'][0]['value'];
+    $str_value = db_select('store_item_fields','s') 
+           ->fields('s',array('ite_lib_value'))
+           ->condition('s.pve_code',$store_value,'=')
+           ->condition('s.dit_cod_item', 'magasin', '=')
+           ->execute()->fetchField();
+    $current_date = date('Ymd');
+
+      $item_display[] = l($str_value, 'sales-plan/'.$store_value, array('attributes' => array('class' => array('single-store'))), array('html' => TRUE));
+    }
+  }
+ 
   $img_path = drupal_get_path('module','im_user').'/images/logout.png';
   $logout_img ='';
   $logout_path = array('path' => $img_path, 'attributes' => array('class' => 'logout', 'id' => 'logout-img'));
