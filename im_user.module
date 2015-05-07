@@ -617,6 +617,10 @@ function im_user_get_user_details() {
       echo "SUCCESS";
     }
 }
+/**
+ * 
+ * Sales plan : prefilter commercial region -UATIM-801 // to fetch the region code of the specific store
+ */
 function fetch_region_code($storeID){
 	      $storeType  = 'region-commerciale';
         $storeToken = $storeID;
