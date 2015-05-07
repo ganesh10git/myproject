@@ -617,3 +617,25 @@ function im_user_get_user_details() {
       echo "SUCCESS";
     }
 }
+function fetch_region_code($storeID){
+	      $storeType  = 'region-commerciale';
+        $storeToken = $storeID;
+        $fetchRegion = db_select('store_item_fields','s')
+              ->fields('s',array('ite_lib_value'))
+              ->distinct()
+              ->condition('s.dit_cod_item',$storeType, '=')
+              ->condition('s.pve_code',$storeToken, '=')
+              ->execute();
+             
+		    $storeRegion = $fetchRegion->fetchfield();		   
+		    $regionOptions = _im_sales_plan_get_taxonomy_tid();
+		    $regionCode = array_search($storeRegion, $regionOptions);
+		     
+		    $fetchRegionCode = db_select('field_data_field_taxo_sp_region_code','s')
+	              ->fields('s',array('entity_id'))
+	              ->condition('s.field_taxo_sp_region_code_value',$regionCode, '=')
+	              ->execute();
+	             
+		    $storeRegionId = $fetchRegionCode->fetchfield();	
+		    return $storeRegionId;
+}
