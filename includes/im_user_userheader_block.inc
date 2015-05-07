@@ -263,7 +263,7 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
     }
   }
   //User has only one store.
-  elseif($count == 1 && arg(0) != 'annuaire'){
+  elseif($count == 1 && arg(0) != 'annuaire' && arg(0) != 'sales-plan'){
     $store_value = $user_fields->field_user_stores['und'][0]['value'];
     $str_value = db_select('store_item_fields','s') 
            ->fields('s',array('ite_lib_value'))
@@ -449,10 +449,10 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
 			              ->condition('s.field_taxo_sp_region_code_value',$regionCode, '=')
 			              ->execute();			             
 					    $storeRegionId = $fetchRegionCode->fetchfield();	
-					    $prefered_stores[2] = array('title' => t('Tous les magasins'), 'href' => 'sales-plan/'.$currentyear.'/all');
+					    $prefered_stores[2] = array('title' => t('Tous les magasins'), 'href' => 'sales-plan/now/all');
 	              if($storeRegionId==''){
 						    	$store_regionurl = 'now/all';
-						    	$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl);
+						    	$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl, 'query' => array('storeid' => $store_id_value,'region'=>selected));
 						    }
 						    else{
 						    	$store_regionurl = $currentyear .'/'.$storeRegionId;
@@ -480,9 +480,12 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
 			              ->fields('s',array('entity_id'))
 			              ->condition('s.field_taxo_sp_region_code_value',$regionCode, '=')
 			              ->execute();			             
-					    $storeRegionId = $fetchRegionCode->fetchfield();					    
-              if($storeRegionId!=''){						    	
-					    	$first_store_regionurl = $currentyear .'/'.$storeRegionId;    	
+					    $storeRegionId = $fetchRegionCode->fetchfield();	
+					    if($storeRegionId==''){
+						     $first_store_regionurl = 'now/all';
+					    }				    
+              else{						    	
+					    	 $first_store_regionurl = $currentyear .'/'.$storeRegionId;    	
 					    }   
             }
           }
@@ -494,9 +497,9 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
                     ->execute();
           $url_value = $fetch_sel_store->fetchfield();	;	
 
-          if($url_value!=''){ 
+          if($url_value!=''){
              $item_display[] = array(html_entity_decode(theme('links', array('links' => $prefered_stores, 'attributes' => $att, 'heading' => array('text' => l(t($url_value), 'sales-plan/'.$first_store_regionurl, array('query' => array('storeid' => $first_storeToken,'region'=>selected)), array('html' => TRUE)), 'level' => 'div', 'class' => '')))),'class' => 'im_stores_list_menu');
-          }else{ 
+          }else{
           	 unset($prefered_stores[2]);
           	$item_display[] = array(
           html_entity_decode(
@@ -544,7 +547,7 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
 		    
 		    if($storeRegionId==''){
 		    	$store_regionurl = 'now/all';
-		    	$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl);
+		    	$prefered_stores[$item_var] = array('title' => t($url_value), 'href' => 'sales-plan/'.$store_regionurl, 'query' => array('storeid' => $store_id_value,'region'=>selected));
 		    }
 		    else{
 		    	$store_regionurl = $currentyear .'/'.$storeRegionId;
@@ -563,15 +566,40 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
     }
     //if user has only one store.
     else if ($count == 1) {
-    $store_value = $user_fields->field_user_stores['und'][0]['value'];
-    $str_value = db_select('store_item_fields','s') 
+        $store_id_value = $user_fields->field_user_stores['und'][0]['value'];
+        $str_value = db_select('store_item_fields','s') 
            ->fields('s',array('ite_lib_value'))
-           ->condition('s.pve_code',$store_value,'=')
+           ->condition('s.pve_code',$store_id_value,'=')
            ->condition('s.dit_cod_item', 'magasin', '=')
            ->execute()->fetchField();
-    $current_date = date('Ymd');
-
-      $item_display[] = l($str_value, 'sales-plan/'.$store_value, array('attributes' => array('class' => array('single-store'))), array('html' => TRUE));
+        $storeType  = 'region-commerciale';
+        $storeToken = $store_id_value;
+        $fetchRegion = db_select('store_item_fields','s')
+              ->fields('s',array('ite_lib_value'))
+              ->distinct()
+              ->condition('s.dit_cod_item',$storeType, '=')
+              ->condition('s.pve_code',$storeToken, '=')
+              ->execute();
+             
+	    $storeRegion = $fetchRegion->fetchfield();		   
+	    $regionOptions = _im_sales_plan_get_taxonomy_tid();
+	    $regionCode = array_search($storeRegion, $regionOptions);
+	     
+	    $fetchRegionCode = db_select('field_data_field_taxo_sp_region_code','s')
+              ->fields('s',array('entity_id'))
+              ->condition('s.field_taxo_sp_region_code_value',$regionCode, '=')
+              ->execute();
+             
+	    $storeRegionId = $fetchRegionCode->fetchfield();	
+	    
+	    if($storeRegionId==''){
+	    	$store_regionurl = 'now/all';		    	
+	    	$item_display[] = l($str_value, 'sales-plan/'.$store_regionurl, array('attributes' => array('class' => array('single-store'))), array('html' => TRUE));
+	    }
+	    else{
+	    	$store_regionurl = $currentyear .'/'.$storeRegionId;
+	      $item_display[] = l($str_value, 'sales-plan/'.$store_regionurl, array('attributes' => array('class' => array('single-store'))), array('html' => TRUE));
+	    }
     }
   }
  
