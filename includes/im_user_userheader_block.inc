@@ -409,8 +409,7 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
   }
   //Sales-plan page store link generation - UATIM-801
   if (arg(0) == 'sales-plan') {
-    //If user has more than one store
-    unset($_SESSION['single_store_count']);
+    //If user has more than one store    
     $currentyear = date("Y");
     if ($count > 1) {
       //user will multiple store and if user select any one store
