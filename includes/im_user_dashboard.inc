@@ -273,8 +273,6 @@ function im_user_dashboard_process_action($form_state, $action) {
         $user->field_user_regional_profile_stor = '';
         $user->field_user_regional_profile_nids = '';
       }
-
-      
       if (empty($updated_user_roles)) {
         _im_user_dashboard_delete($user->uid);
         unset($user->uid);
@@ -396,13 +394,6 @@ function comp_sort_criteria($a, $b) {
  * Function to delete the user having no roles from dashboard.
  */
 function _im_user_dashboard_delete($user_id){
-	$user_details = user_load($user_id);
-	if($user_details->field_user_regional_profile_nids['und'][0]['value']!=NULL) {
-		node_delete($user_details->field_user_regional_profile_nids['und'][0]['value']);
-	}
-	else {
-		node_delete($user_details->field_user_regional_profile_nids['und'][0]['safe_value']);
-	}
 	//Fix for UATIM-670
 	user_cancel(array(), $user_id, 'user_cancel_reassign');
 	$batch =& batch_get();
