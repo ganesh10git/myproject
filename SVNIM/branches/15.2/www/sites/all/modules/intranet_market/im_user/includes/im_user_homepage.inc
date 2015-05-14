@@ -115,7 +115,7 @@ function _im_user_login_validate(){
            }
            //Identify the foreman role
           elseif ($is_carrefour_market_user &&_is_user_foreman($profile) && im_stores_is_store_exist($user_store)) {
-            $_SESSION['ldap_user_role'] = 'foreman';            
+            $_SESSION['ldap_user_role'] = 'store_foreman';            
           }  
          //STORE EMPLOYEE
           elseif ($is_carrefour_market_user && im_stores_is_store_exist($user_store) && !_is_store_manager_category($profile) && !in_array('administrator', $account->roles)) {
