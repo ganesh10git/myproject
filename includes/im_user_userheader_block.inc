@@ -413,7 +413,8 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
     $currentyear = date("Y");
     if ($count > 1) {
       //user will multiple store and if user select any one store
-      if (is_numeric(arg(1))) {
+      if (is_numeric(arg(1)) || $_SESSION['store_flag']==1) {
+      	$_SESSION['store_flag']=0;
       	$att = array('class' => 'menu-categories', 'id' => 'sub_menu1');
         $first_store = $_SESSION['storeid'];
         $store_id = '';
