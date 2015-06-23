@@ -415,6 +415,7 @@ if(!empty ($user_fields->field_user_stores['und'][0]['value'])) {
       //user will multiple store and if user select any one store
       if (is_numeric(arg(1)) || $_SESSION['store_flag']==1) {
       	$_SESSION['store_flag']=0;
+      	$_SESSION['single_store_count'] = 0;
       	$att = array('class' => 'menu-categories', 'id' => 'sub_menu1');
         $first_store = $_SESSION['storeid'];
         $store_id = '';
