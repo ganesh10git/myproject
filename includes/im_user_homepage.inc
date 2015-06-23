@@ -98,7 +98,7 @@ function _im_user_login_validate(){
             $_SESSION['ldap_user_role'] = 'store_manager_trainee';
            }
         //SALARIE SIEGE
-          elseif ($is_carrefour_market_user && !im_stores_is_store_exist($user_store)) {
+          elseif ($is_carrefour_market_user && !im_stores_is_store_exist($user_store) && !(_is_erteco_market($profile))) {
             $_SESSION['ldap_user_role'] = 'salarie_siege';
              //Removing salarie_siege role according to UATIM-343.
             //_im_user_create_user_salarie_siege_role($account, $profile_name);
@@ -158,6 +158,7 @@ function _im_user_login_validate(){
           }
           else{
             _im_access_denied();
+            return;
           }
         } else {
           drupal_goto(im_user_get_login_url());
