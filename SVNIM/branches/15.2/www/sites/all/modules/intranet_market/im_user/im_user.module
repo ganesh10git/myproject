@@ -217,7 +217,13 @@ function im_user_init() {
  if(isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && (arg(0) == 'sales-plan' || arg(0) == 'agenda' || arg(0) == 'modele-operationnel' || arg(0) == 'applications' || arg(0) == 'annuaire' || arg(0) == 'search')) {
     drupal_goto('access-denied');
     return false;       
-   } else if(isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && request_uri() == '/user/logout') {
+   }
+   //UATIM-852: Prevent the proxy user to access the page
+  else if(isset($_SESSION['proxi_user']) && (arg(0) == 'sales-plan' || arg(0) == 'agenda' || arg(0) == 'modele-operationnel' || arg(0) == 'applications' || arg(0) == 'annuaire' || arg(0) == 'search')) {
+    drupal_goto('access-denied');
+    return false;       
+   }
+    else if(isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && request_uri() == '/user/logout') {
     unset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']);
    }	
 /*

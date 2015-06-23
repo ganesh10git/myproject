@@ -33,7 +33,7 @@ function _get_profile_name($profile) {
  * returns - TRUE/FALSE, as per carrefour market user status. 
  * @param XML response of WS:getProfil 
  */
-function _is_carrefour_market($profile) {
+function _is_carrefour_market($profile) {  
   if(!isset($profile->grp)) return FALSE;
   foreach ($profile->grp as $grp){
     $counter = 0;
@@ -46,9 +46,16 @@ function _is_carrefour_market($profile) {
       if((string)$grp->attr[$counter]['name'] == 'cn' && (string)$grp->attr[$counter] == '0002') {
   		$cn = '0002';
   	  }
-  	  if($level == 'GRPOPE' && $cn == '0002') {
+      if((string)$grp->attr[$counter]['name'] == 'cn' && (string)$grp->attr[$counter] == '0029') {
+  		$cn = '0029';
+  	  }
+  	  if($level == 'GRPOPE' && $cn == '0002') {  	  	
   		return TRUE;
-  	  } 
+  	  }
+  	  else if($level == 'GRPOPE' && $cn == '0029') {
+  	  	$_SESSION['franchised_store_user'] = 'FRANCHISE';
+  		return TRUE;
+  	  }  
   	  $counter++;
     }
   }
@@ -102,6 +109,10 @@ function _get_user_store($profile) {
  * returns - FALSE, if the user not attached with store statut.
  */
 function _get_user_store_status() {
+  //UATIM-852:Addtional check to ensure the user is from the group 0029 , then the user is considered as FRANCHISE user
+  if(isset($_SESSION['franchised_store_user']) && $_SESSION['franchised_store_user'] == 'FRANCHISE') {
+  	return 'FRANCHISE';
+  }
   if(isset($_SESSION['profil']['store']) && $_SESSION['profil']['store']) {
     $result = db_query("SELECT ite_lib_value
 	                    FROM {store_item_fields} sif 
@@ -312,6 +323,34 @@ function _is_user_foreman($profile) {
   	  if($classification == 'classification' && $a == 'A') {
   		return TRUE;
   	  } 
+  	  $counter++;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * This method decides whether user is erteco market user or not.
+ * returns - TRUE/FALSE, as per erteco market proxi user status. 
+ * @param XML response of WS:getProfil 
+ */
+function _is_erteco_market($profile) {  
+  if(!isset($profile->grp)) return FALSE;
+  foreach ($profile->grp as $grp){
+    $counter = 0;
+    $level   = '';
+    $cn      = ''; 
+    foreach($grp->attr as $attr){
+  	  if((string)$grp->attr[$counter]['type'] == 'level' && (string)$grp->attr[$counter] == 'GRPOPE') {
+  		$level = 'GRPOPE';
+  	  }      
+      if((string)$grp->attr[$counter]['name'] == 'cn' && (string)$grp->attr[$counter] == '0029') {
+  		$cn = '0029';
+  	  }  	  
+  	  if($level == 'GRPOPE' && $cn == '0029') {
+  	  	$_SESSION['proxi_user'] = 'proxi_user';	
+  		return TRUE;
+  	  }  
   	  $counter++;
     }
   }
