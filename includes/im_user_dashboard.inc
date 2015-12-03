@@ -227,14 +227,14 @@ function im_user_dashboard_process_action($form_state, $action) {
  	  	    	foreach ($rmp_nodes as $rmp_node_ids) {
  	  	    		$rmp_store_details = node_load($rmp_node_ids);
  	  	    		if (!empty($rmp_store_details->field_rmp_store['LANGUAGE_NONE'][0]['value'])) {
- 	  	    			$rmp_node_stores.= $rmp_store_details->field_rmp_store['LANGUAGE_NONE'][0]['value'] . ',';
+ 	  	    			$rmp_node_stores.= $rmp_store_details->field_rmp_store[LANGUAGE_NONE][0]['value'] . ',';
  	  	    		}
  	  	    	} 	  	    	
  	  	    	$rmp_node_stores = rtrim($rmp_node_stores, ',');
- 	  	    	$user->field_user_regional_profile_stor['LANGUAGE_NONE'][0]['value'] = $rmp_node_stores;
- 	  	    	$user->field_user_regional_profile_stor['LANGUAGE_NONE'][0]['safe_value'] = $rmp_node_stores;
- 	  	    	$user->field_user_regional_profile_nids['LANGUAGE_NONE'][0]['value'] = $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_user_nid'];
- 	  	    	$user->field_user_regional_profile_nids['LANGUAGE_NONE'][0]['safe_value'] = $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_user_nid'];  	    	
+ 	  	    	$user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['value'] = $rmp_node_stores;
+ 	  	    	$user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['safe_value'] = $rmp_node_stores;
+ 	  	    	$user->field_user_regional_profile_nids[LANGUAGE_NONE][0]['value'] = $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_user_nid'];
+ 	  	    	$user->field_user_regional_profile_nids[LANGUAGE_NONE][0]['safe_value'] = $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_user_nid'];  	    	
 		        $updated_user_roles[$rid] = $role;
 		        unset($_SESSION["dashboard_regional_moderator_users"][$uid]);
  	  	    }
