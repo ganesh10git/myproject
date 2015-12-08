@@ -1,23 +1,26 @@
 <?php
-
-function _im_user_login_validate(){
+/**
+ * @file
+ *  Function to bulid the search user and add/remove user Form.
+ */
+function _im_user_login_validate() {
   global $user, $base_url;
  
-  if(isset($_REQUEST['CSIF_SessionId'])) {
+  if (isset($_REQUEST['CSIF_SessionId'])) {
     $ldap_login_key = base64_decode($_REQUEST['CSIF_SessionId']);
     //web service Integration
     $obj = new imldapSoapService();
     $response = $obj->soapRequest('isAlive', array('id' => $ldap_login_key));
-    if($response->status == 'success'){
+    if ($response->status == 'success') {
       //Remove cached services.
       include drupal_get_path('module', 'im_service') . '/im_service.methods.inc';
-      foreach($cachable_methods as $method) {
-        if(isset($_SESSION[$method])) $_SESSION[$method] = ''; 
+      foreach ($cachable_methods as $method) {
+        if (isset($_SESSION[$method])) $_SESSION[$method] = ''; 
       }
       $_SESSION['ldap_login_key'] = $ldap_login_key;
-      if(isset($response->data) && $response->data == 1) {
+      if (isset($response->data) && $response->data == 1) {
         $profile = $obj->soapRequest('getProfil', array('id' => $ldap_login_key));        
-        if($profile->status == 'success') {
+        if ($profile->status == 'success') {
           $profile = simplexml_load_string($profile->data);
           include_once drupal_get_path('module', 'im_user') . '/im_user.profile.inc';
           //Fetch User Info:
@@ -33,17 +36,17 @@ function _im_user_login_validate(){
           watchdog('im_user', 'Profile details  %profile_name', array('%profile_name' => var_export($profile_name, TRUE)), WATCHDOG_NOTICE, $link = NULL);
           watchdog('im_user', 'Register ID  %register_id', array('%register_id' => $register_id), WATCHDOG_NOTICE, $link = NULL);
           //Redirect Users to respective Home Page(VISITOR/ADMINISTRATOR/SALARIE SIEGE/STORE DIRECTOR-DM/STORE MANAGER-MM/STORE EMPLOYEE).
-         if(!$is_carrefour_market_user){
+         if (!$is_carrefour_market_user){
           //Non carrefour - whether user exist in the database
            _im_user_external_login_register($profile_name,$register_id, $module='im_user');
            $account_validate = user_external_load($register_id);
            watchdog('im_user', 'Non carrefour  %account_validate', array('%account_validate' => var_export($account_validate, TRUE)), WATCHDOG_NOTICE, $link = NULL);
-           if(!is_object($account_validate) || !isset($account_validate->uid) || !isset($account_validate->status) || !$account_validate->uid || !$account_validate->status) {
-             if(!isset($account_validate->roles) || (count($account_validate->roles) < 2)){
+           if (!is_object($account_validate) || !isset($account_validate->uid) || !isset($account_validate->status) || !$account_validate->uid || !$account_validate->status) {
+             if (!isset($account_validate->roles) || (count($account_validate->roles) < 2)) {
                _im_access_denied();
                return;
               }
-             } else if(!isset($account_validate->roles) || (count($account_validate->roles) < 2)){
+             } else if(!isset($account_validate->roles) || (count($account_validate->roles) < 2)) {
                /*
                 * UAT IM - 717:Security issue -Access deined for non Carrefour market usesr.
                 */
@@ -59,30 +62,31 @@ function _im_user_login_validate(){
           //Maps stores with - User Profile.
           $user_stores = _get_user_stores($profile);
           watchdog('im_user', 'user_stores %user_stores', array('%user_stores'=>var_export($user_stores, TRUE)), WATCHDOG_NOTICE, $link = NULL);
-          if(sizeof($user_stores) > 0) {
+          if (sizeof($user_stores) > 0) {
             map_stores_profile($user_stores, $account);
           }
            //Assign Users email to profile.
-          if(isset($profile_name['mail']) && $profile_name['mail']) {
+          if (isset($profile_name['mail']) && $profile_name['mail']) {
             $account->mail = trim($profile_name['mail']);
             user_save($account);
            }
           //Assign Users full name to profile.
-          if(isset($profile_name['givenName']) && $profile_name['sn']) {
+          if (isset($profile_name['givenName']) && $profile_name['sn']) {
             $account->field_full_name[LANGUAGE_NONE][0]['value'] = trim($profile_name['givenName']) . ' ' . trim($profile_name['sn']);
             user_save($account);
           }
           //Assign DMD role to User Object.
           // Assign DMD role - if already mapped.
-          if(_is_dmd_assigned_now($account)) {
+          if (_is_dmd_assigned_now($account)) {
             $_SESSION['ldap_user_role_assigned'] = 'store_director';
-          }else {
+          }
+          else {
             $_SESSION['ldap_user_role_assigned'] = '';
           }
          //Mapping User ID to Session
             $_SESSION['ldap_user_id'] = $profile_name['uid'];
          //VISITOR 
-          if(!$is_carrefour_market_user && in_array('visitor', $account->roles)) {
+          if (!$is_carrefour_market_user && in_array('visitor', $account->roles)) {
             $_SESSION['ldap_user_role'] = 'visitor';
            }
           //ADMINISTRATOR
@@ -124,20 +128,20 @@ function _im_user_login_validate(){
           /*
            * Implemented to resolve the Login Redirection to the previously accessed page.
            */ 
-          if(isset($_SESSION['enter_menu_destination'])) {
+          if (isset($_SESSION['enter_menu_destination'])) {
           	$errorurl = '';$stringquery = ''; 
-            if(preg_match('/MSIE/i',$_SERVER['HTTP_USER_AGENT']) && (strpos($_SESSION['enter_menu_destination'], "all/") == TRUE) && (strpos($_SESSION['enter_menu_destination'], "list") == TRUE)) {
+            if (preg_match('/MSIE/i',$_SERVER['HTTP_USER_AGENT']) && (strpos($_SESSION['enter_menu_destination'], "all/") == TRUE) && (strpos($_SESSION['enter_menu_destination'], "list") == TRUE)) {
                $_SESSION['enter_menu_destination'] = trim($_SESSION['enter_menu_destination']).'all';
              }
              $stringquery = strpos($_SESSION['enter_menu_destination'], '?'); 
              $appendalterambersonstring = '';
-             if(is_numeric($stringquery) == TRUE) {
+             if (is_numeric($stringquery) == TRUE) {
               $alterquerystringurl  = explode('?', $_SESSION['enter_menu_destination']);
               $arguurl = explode('=', $alterquerystringurl[1]);
               $firstargument = urldecode($arguurl[0]); 
               $firstargumentvalue = urldecode($arguurl[1]);
               $stringamber = strpos($arguurl[1], '&');
-              if(is_numeric($stringamber) == TRUE) {
+              if (is_numeric($stringamber) == TRUE) {
                $alterambersonurl  = explode('&', $arguurl[1]);  
                $firstargumentvalue = urldecode($alterambersonurl[0]);
                drupal_goto($alterquerystringurl[0], array('query' => array($firstargument => $firstargumentvalue, $alterambersonurl[1] => $arguurl[2])));
@@ -149,7 +153,7 @@ function _im_user_login_validate(){
              unset($_SESSION['enter_menu_destination']);
            }
           //Allow All LDAP Users
-          if(isset($_SESSION['ldap_user_role']) && ($_SESSION['ldap_user_role'])) {
+          if (isset($_SESSION['ldap_user_role']) && ($_SESSION['ldap_user_role'])) {
             drupal_goto('agenda/list/today/all/all');
           }
            //Allow All Portal Roles

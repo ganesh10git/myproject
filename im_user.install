@@ -39,31 +39,30 @@ function im_user_schema() {
 }
 
 function user_getdms() {
-	$schema = array();
-	$schema['user_getdms'] = array(
-			'description' => 'Store the values from getdms',
-			'fields' => array(
-					'id' => array(
-							'type' => 'serial',
-							'not null' => TRUE,
-							'description' => 'serial number',
-					),
-					'code' => array(
-							'type' => 'varchar',
-							'length' => 255,
-							'default' => '',
-							'description' => 'code field obtained form webservice',
-					),
-					'description' => array(
-							'type' => 'varchar',
-							'length' => 500,
-							'default' => '',
-							'description' => 'description field obtained form webservice',
-					),
-			),
-			'primary key' => array('id'),
-	);
-	return $schema;
+  $schema = array();
+  $schema['user_getdms'] = array(
+    'description' => 'Store the values from getdms',
+	'fields' => array(
+	'id' => array(
+	'type' => 'serial',
+	'not null' => TRUE,
+	'description' => 'serial number',
+  ),
+    'code' => array(
+    'type' => 'varchar',
+	'length' => 255,
+	'default' => '',
+	'description' => 'code field obtained form webservice',
+  ),
+  'description' => array(
+  'type' => 'varchar',
+  'length' => 500,
+  'default' => '',
+  'description' => 'description field obtained form webservice',),
+  ),
+  'primary key' => array('id'),
+  );
+  return $schema;
 }
 
 /**
@@ -101,28 +100,32 @@ function im_user_install() {
       ->execute();
   }
 }
+/**
+ * Implements hook_install
+ */
 function im_user_update_7000() {
   $ldap_role_assignment = ldap_role_assignment_db();
   db_create_table('ldap_role_assignment', $ldap_role_assignment['ldap_role_assignment']);
 }
 function im_user_update_7001() {
-	if(!db_field_exists('ldap_role_assignment', 'employee_number')) {
-	  db_add_field('ldap_role_assignment', 'employee_number',
-	    array(
-	      'type' => 'varchar',
-	      'length' => 60,
-	      'default' => '',
-	      'description' => 'Employee Number'
-	    )
-	  );
-	}
+  if(!db_field_exists('ldap_role_assignment', 'employee_number')) {
+  db_add_field('ldap_role_assignment', 'employee_number',
+  array(
+    'type' => 'varchar',
+	'length' => 60,
+	'default' => '',
+	'description' => 'Employee Number')
+  );
+  }
 }
-
+/**
+ * Implements hook_install
+ */
 function im_user_update_7002() {
-	$user_getdms = user_getdms();
-	$user_getmms = _user_getmms();
-	db_create_table('user_getdms', $user_getdms['user_getdms']);
-	db_create_table('user_getmms', $user_getmms['user_getmms']);
+  $user_getdms = user_getdms(); 
+  $user_getmms = _user_getmms();
+  db_create_table('user_getdms', $user_getdms['user_getdms']);
+  db_create_table('user_getmms', $user_getmms['user_getmms']);
 }
 
 function ldap_role_assignment_db() {

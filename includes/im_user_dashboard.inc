@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ * @file
  *  Function to bulid the search user and add/remove user Form.
  */
 function im_user_dashboard() {
@@ -89,14 +89,14 @@ function im_user_search_users_by_role_reset($form, $form_state) {
 function im_user_modify_user_role($form, $form_state) {
 //  unset($_SESSION["dashboard_regional_users"]);
   if (!empty($_SESSION['user_dashboard']['rid']) || !empty($_SESSION['user_dashboard']['name'])) {
-  	$rid = $_SESSION['user_dashboard']['rid'];
+    $rid = $_SESSION['user_dashboard']['rid'];
   	$name = $_SESSION['user_dashboard']['name'];
   	$user_names = _get_search_users($rid, $name); 
-  	unset($_SESSION['user_dashboard']['rid']);	
+    unset($_SESSION['user_dashboard']['rid']);	
   	unset($_SESSION['user_dashboard']['name']);
   }
   else {
-  	$user_names = _get_search_users();
+    $user_names = _get_search_users();
   }
   $role_names = _get_all_roles();
   $options = array();
@@ -109,14 +109,14 @@ function im_user_modify_user_role($form, $form_state) {
   $table_select = array();
   $header_data['users'] = array('data' => t("Users"));
   $js_user = array();
-  foreach($user_names as $uid => $name) {
-  	  $js_user[$uid] = $name['full_name'];
+  foreach ($user_names as $uid => $name) {
+    $js_user[$uid] = $name['full_name'];
     foreach ($role_names As $rid => $value) {
-      if (isset($name['rn_name'][$rid])){
+      if (isset($name['rn_name'][$rid])) {
         $status[$uid][$rid] = 1;        
       }
       $header_data[$rid] = array('data' => $value);
-      if($value == 'content_manager_action_regional'){
+      if ($value == 'content_manager_action_regional') {
         $regional_rid = $rid;
       }
     }    
@@ -125,17 +125,16 @@ function im_user_modify_user_role($form, $form_state) {
   regional_profile_popup_settings();
   //Create the checkbox and assign the default values.
   foreach ($user_names as $uid => $value) {
-  	$table_select[$uid] = array('users' => $value['full_name']);
-     foreach ($role_names as $rid => $name) {
-       if ($rid == $regional_rid) {       	
-       	$regional_user_nid = isset($value['regional_nid']) ?  $value['regional_nid'] : '';        
+    $table_select[$uid] = array('users' => $value['full_name']);
+    foreach ($role_names as $rid => $name) {
+      if ($rid == $regional_rid) {       	
+        $regional_user_nid = isset($value['regional_nid']) ?  $value['regional_nid'] : '';        
        	if (!empty($regional_user_nid)) {       		
           $ctools_url = '<div class="usp_regional_user_ctools"><span class="dashboard_regional_link_active dashbaord_active_id_' . $uid . '">' . ctools_modal_text_button(t('Profils Régionaux<span class="plus">+</span>'), 'rmp/nojs/regional_moderator_profile_form/add-rmp/' . $uid . '/edit/' . $regional_user_nid, t('Profils Régionaux<span class="plus">+</span>'),  'ctools-modal-ctools-sample-style') . '</span></span><span class="dashboard_regional_link_deactive dashbaord_deactive_id_' . $uid . '">' . t('Profils Régionaux') . '<span class="plus">+</span></span></div>';
        	} 
        	else {
        	  $ctools_url = '<div class="usp_regional_user_ctools"><span class="dashboard_regional_link_active dashbaord_active_id_' . $uid . '">' . ctools_modal_text_button(t('Profils Régionaux<span class="plus">+</span>'), 'rmp/nojs/regional_moderator_profile_form/add-rmp/' . $uid, t('Profils Régionaux<span class="plus">+</span>'),  'ctools-modal-ctools-sample-style') . '</span></span><span class="dashboard_regional_link_deactive dashbaord_deactive_id_' . $uid . '">' . t('Profils Régionaux') . '<span class="plus">+</span></span></div>';	
-       	}   	
-       	       	
+       	}      	
        	$table_select[$uid][$rid] = array(
         'data' => array(
           '#type' => 'checkbox',
@@ -183,8 +182,7 @@ function im_user_modify_user_role($form, $form_state) {
  * Submit  handler to the add user roles.
  */
 function im_user_modify_user_role_submit($form, &$form_state) {
-//	echo "<pre>"; print_r($form_state['input']);
-	im_user_dashboard_process_action($form_state, "add");
+  im_user_dashboard_process_action($form_state, "add");
 }
 /**
  * 
@@ -224,24 +222,24 @@ function im_user_dashboard_process_action($form_state, $action) {
 	      /*Add the Regional user and save the Regional nid and regional stores to the user profile*/
  	      if ($role == "content_manager_action_regional") {
  	      	if (!empty($_SESSION["dashboard_regional_moderator_users"][$uid]['profile_nids'])) {
-		      $rmp_nodes = explode(',',$_SESSION["dashboard_regional_moderator_users"][$uid]['profile_nids']);
+		      $rmp_nodes = explode(',', $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_nids']);
  	  	    	$rmp_node_stores = '';
- 	  	    	foreach($rmp_nodes as $rmp_node_ids) {
+ 	  	    	foreach ($rmp_nodes as $rmp_node_ids) {
  	  	    		$rmp_store_details = node_load($rmp_node_ids);
- 	  	    		if(!empty($rmp_store_details->field_rmp_store['und'][0]['value'])) {
- 	  	    			$rmp_node_stores.= $rmp_store_details->field_rmp_store['und'][0]['value'].',';
+ 	  	    		if (!empty($rmp_store_details->field_rmp_store['LANGUAGE_NONE'][0]['value'])) {
+ 	  	    			$rmp_node_stores.= $rmp_store_details->field_rmp_store[LANGUAGE_NONE][0]['value'] . ',';
  	  	    		}
  	  	    	} 	  	    	
- 	  	    	$rmp_node_stores = rtrim($rmp_node_stores,',');
- 	  	    	$user->field_user_regional_profile_stor['und'][0]['value'] = $rmp_node_stores;
- 	  	    	$user->field_user_regional_profile_stor['und'][0]['safe_value'] = $rmp_node_stores;
- 	  	    	$user->field_user_regional_profile_nids['und'][0]['value'] = $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_user_nid'];
- 	  	    	$user->field_user_regional_profile_nids['und'][0]['safe_value'] = $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_user_nid'];  	    	
-		      $updated_user_roles[$rid] = $role;
-		      unset($_SESSION["dashboard_regional_moderator_users"][$uid]);
+ 	  	    	$rmp_node_stores = rtrim($rmp_node_stores, ',');
+ 	  	    	$user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['value'] = $rmp_node_stores;
+ 	  	    	$user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['safe_value'] = $rmp_node_stores;
+ 	  	    	$user->field_user_regional_profile_nids[LANGUAGE_NONE][0]['value'] = $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_user_nid'];
+ 	  	    	$user->field_user_regional_profile_nids[LANGUAGE_NONE][0]['safe_value'] = $_SESSION["dashboard_regional_moderator_users"][$uid]['profile_user_nid'];  	    	
+		        $updated_user_roles[$rid] = $role;
+		        unset($_SESSION["dashboard_regional_moderator_users"][$uid]);
  	  	    }
  	  	    else {
- 	  	      if(isset($user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['value']) && ($user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['value'])) {
+ 	  	      if (isset($user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['value']) && ($user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['value'])) {
  	  	   	    $updated_user_roles[$rid] = $role;
  	  	   	  }
  	  	   	  else {
@@ -255,7 +253,7 @@ function im_user_dashboard_process_action($form_state, $action) {
  	      }
 	  	 }
 	  	  else if (isset($user_roles[$rid]) && $action == "remove") {
-	  	  	if (in_array("content_manager_action_regional", $user_roles)) {
+	  	    if (in_array("content_manager_action_regional", $user_roles)) {
 	  	  	  //Delete the Regional stores if the user role is removed.
 	  	  	  $user->field_user_regional_profile_stor[LANGUAGE_NONE][0]['value'] = '';
 	  	  	  $user->field_user_regional_profile_nids[LANGUAGE_NONE][0]['value'] = '';
@@ -267,9 +265,9 @@ function im_user_dashboard_process_action($form_state, $action) {
   	unset($user->roles);  	
     if ($action == "add") {
       $user->roles = $updated_user_roles;
-    $content_regional_manager_is_present = array_diff($present_role, $updated_user_roles);
-    //Remove the Regional store form the user, if content_manager_action_regional role is removed
-      if(in_array("content_manager_action_regional", $content_regional_manager_is_present)) {
+      $content_regional_manager_is_present = array_diff($present_role, $updated_user_roles);
+      //Remove the Regional store form the user, if content_manager_action_regional role is removed
+      if (in_array("content_manager_action_regional", $content_regional_manager_is_present)) {
         $user->field_user_regional_profile_stor = '';
         $user->field_user_regional_profile_nids = '';
       }
@@ -285,14 +283,11 @@ function im_user_dashboard_process_action($form_state, $action) {
         unset($user->uid);
       }
     }
-    if(!empty($user->uid) && isset($user->uid)) {
+    if (!empty($user->uid) && isset($user->uid)) {
       user_save($user);
     }
   }
-
-  //unset($_SESSION['selected_store_preference_nid']);
   drupal_set_message(t('The changes have been saved.'));
-
   // Clear the cached pages and blocks.
   cache_clear_all();
 }
@@ -339,10 +334,10 @@ function _get_search_users($rid = NULL, $name = NULL) {
   $user_names = array();
   //Query to get all the Users who have already roles.
   $query = db_select('users', 'u');
-  $query->join('users_roles','r','r.uid = u.uid');
-  $query->join('role','rn','r.rid = rn.rid');
-  $query->join('field_data_field_full_name','ud','ud.entity_id = u.uid');
-  $query->leftJoin('field_data_field_user_regional_profile_nids','r_nid','r_nid.entity_id = u.uid');
+  $query->join('users_roles', 'r', 'r.uid = u.uid');
+  $query->join('role', 'rn', 'r.rid = rn.rid');
+  $query->join('field_data_field_full_name', 'ud', 'ud.entity_id = u.uid');
+  $query->leftJoin('field_data_field_user_regional_profile_nids', 'r_nid', 'r_nid.entity_id = u.uid');
   $query->fields('u', array('name', 'uid'));
   $query->fields('rn', array('name'));
   $query->fields('r', array('rid'));
@@ -353,13 +348,12 @@ function _get_search_users($rid = NULL, $name = NULL) {
     $query->condition('ud.field_full_name_value', "%" . $name . "%", 'LIKE');
   }
   $query->condition('u.status', '1', '=');  
-  if(!empty($rid)){
+  if(!empty($rid)) {
     //sub query to get UID based on rid and filter users based resulting uid.
     $subquery = db_select('users_roles', 'urs')
                 ->fields('urs', array('uid'))
                 ->condition('urs.rid', $rid, '=');
     $query->condition('u.uid', $subquery, 'IN');
-    //$query->condition('r.rid', $rid, '=');
   }
   $result = $query->execute(); 
   while($record = $result->fetchAssoc()) {
@@ -368,9 +362,7 @@ function _get_search_users($rid = NULL, $name = NULL) {
     $user_names[$record['uid']]['rn_name'][$record['rid']] = $record['rn_name'];
     $user_names[$record['uid']]['rid'][$record['rid']] = $record['rid'];
     $user_names[$record['uid']]['regional_nid'] = $record['field_user_regional_profile_nids_value'];
-  }  
-  //To sort the users list.
-//  uasort($user_names, 'comp_sort_criteria');
+  }
   return $user_names;
 }
 
@@ -382,10 +374,10 @@ function comp_sort_criteria($a, $b) {
     return 0;
   }
   //return ($a['full_name'] < $b['full_name']) ? -1 : 1;
-  elseif(strcasecmp($a['full_name'], $b['full_name']) < 0){
+  elseif(strcasecmp($a['full_name'], $b['full_name']) < 0) {
     return -1;
   }
-  elseif(strcasecmp($a['full_name'], $b['full_name']) > 0){
+  elseif(strcasecmp($a['full_name'], $b['full_name']) > 0) {
     return 1;
   }
 }
@@ -394,24 +386,10 @@ function comp_sort_criteria($a, $b) {
  * Function to delete the user having no roles from dashboard.
  */
 function _im_user_dashboard_delete($user_id){
-	//Fix for UATIM-670
-	user_cancel(array(), $user_id, 'user_cancel_reassign');
-	$batch =& batch_get();
-	$batch['progressive'] = FALSE;
-	batch_process();
-	user_delete($user_id);
-	//@to-do Uncomment the below code for 14.2.10. Fix for UATIM - 670 
-	/*
-  // Anonymize nodes (current revisions).
-  module_load_include('inc', 'node', 'node.admin');
-  $nodes = db_select('node', 'n')->fields('n', array('nid'))->condition('uid', $user_id)->execute()->fetchCol();
-  node_mass_update($nodes, array('uid' => 0));
-  // Anonymize old revisions.
-  db_update('node_revision')->fields(array('uid' => 0))->condition('uid', $user_id)->execute();
-  // Clean history.
-  db_delete('history')->condition('uid', $user_id)->execute();
-  db_delete('users')->condition('uid', $user_id, '=')->execute();
-  db_delete('users_roles')->condition('uid', $user_id, '=')->execute();
-  db_delete('authmap')->condition('uid', $user_id, '=')->execute();
-  watchdog('user', 'Deleted user ID: %id.', array('%id' => $user_id), WATCHDOG_NOTICE);*/
+  //Fix for UATIM-670
+  user_cancel(array(), $user_id, 'user_cancel_reassign');
+  $batch =& batch_get();
+  $batch['progressive'] = FALSE;
+  batch_process();
+  user_delete($user_id);
 }

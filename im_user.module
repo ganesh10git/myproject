@@ -86,7 +86,7 @@ function im_user_menu() {
   );
     
   $items['admin/im/getdms'] = array(
-  	'title' => t('getTraineeDirector'),
+    'title' => t('getTraineeDirector'),
   	'page callback' => 'drupal_get_form',
   	'page arguments' => array('im_user_getDms_form'),
    	'file' => 'includes/im_user_getdms.inc',
@@ -139,12 +139,12 @@ function im_user_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  $items['applications'] = array(
+  /*$items['applications'] = array(
     'title' => 'Applications',
     'page callback' => '_no_content_page',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
-  );
+  );*/
   $items['admin/im/user/dashboard'] = array(
     'title' => t('People'),
     'page callback' => 'im_user_dashboard',
@@ -202,7 +202,7 @@ function im_user_menu() {
   return $items;
 }
 
-function _no_content_page(){
+function _no_content_page() {
   $output = t("No content is created");
   return $output;
 }
@@ -214,28 +214,23 @@ function im_user_init() {
  /*
  * UAT IM - 717:Security issue -Access deined for non Carrefour market usesr.
  */
- if(isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && (arg(0) == 'sales-plan' || arg(0) == 'agenda' || arg(0) == 'modele-operationnel' || arg(0) == 'applications' || arg(0) == 'annuaire' || arg(0) == 'search')) {
+ if (isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && (arg(0) == 'sales-plan' || arg(0) == 'agenda' || arg(0) == 'modele-operationnel' || arg(0) == 'applications' || arg(0) == 'annuaire' || arg(0) == 'search')) {
     drupal_goto('access-denied');
-    return false;       
+    return FALSE;       
    }
-   //UATIM-852: Prevent the proxy user to access the page
-  else if(isset($_SESSION['proxi_user']) && (arg(0) == 'sales-plan' || arg(0) == 'agenda' || arg(0) == 'modele-operationnel' || arg(0) == 'applications' || arg(0) == 'annuaire' || arg(0) == 'search')) {
-    drupal_goto('access-denied');
-    return false;       
-   }
-    else if(isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && request_uri() == '/user/logout') {
+    elseif(isset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']) && request_uri() == '/user/logout') {
     unset($_SESSION['NON_CARREFOUR_USER_ACCESS_DENIED']);
-   }	
+    }	
 /*
  * UAT IM - 628 & 607 defect ids has resolved. Login destination issue.
  */
-   if(!(arg(0) == 'personal-space') && !(arg(0) == 'agenda-detail') && !(arg(0) == 'user_session_info') && !(arg(0) == 'user')) { 
+   if (!(arg(0) == 'personal-space') && !(arg(0) == 'agenda-detail') && !(arg(0) == 'user_session_info') && !(arg(0) == 'user')) { 
     $currentrequesturl = '';
     $currentrequesturl = ltrim(request_uri(), '/');
-    if($_SESSION['enter_menu_destination'] != $currentrequesturl){
+    if ($_SESSION['enter_menu_destination'] != $currentrequesturl) {
      $_SESSION['enter_menu_destination'] = $currentrequesturl;
     } 
-   }	
+  }	
    static $init_count = 0; //Run the code only once
   //Exclude requests drush/cron/multile-init calls
   $logout = (arg(0) == 'user' && arg(1) == 'logout') ? TRUE : FALSE; 
@@ -245,21 +240,21 @@ function im_user_init() {
     //Third Parameter only for DEV(exclude super admin login)
     $dev_exclude = ((arg(0) == 'user' | arg(0) == 'personal-space') && arg(1) == '') ? TRUE : FALSE;
     //user logged in - but receives second request from annudi login
-    if(isset($_REQUEST['CSIF_SessionId']) && isset($_SESSION['ldap_login_key'])) {
+    if (isset($_REQUEST['CSIF_SessionId']) && isset($_SESSION['ldap_login_key'])) {
       unset($_SESSION['ldap_login_key']);
     }
     //user not logged in, not a request from annudi
-    if(!isset($_REQUEST['CSIF_SessionId']) && !$user->uid && !$dev_exclude) {
+    if (!isset($_REQUEST['CSIF_SessionId']) && !$user->uid && !$dev_exclude) {
       drupal_goto(im_user_get_login_url());
     }
     //if ldap token exist check validity.
-    if(isset($_SESSION['ldap_login_key'])) {
+    if (isset($_SESSION['ldap_login_key'])) {
       $obj = new imldapSoapService();
       $response = $obj->soapRequest('isAlive', array('id' => $_SESSION['ldap_login_key']));
-      if(!isset($response->data)) {
+      if (!isset($response->data)) {
         drupal_goto(im_user_get_login_url());
       }
-      if(!isset($response->data) | !$response->data) {
+      if (!isset($response->data) | !$response->data) {
         drupal_goto(im_user_get_login_url());
       }
     }
@@ -286,7 +281,7 @@ function _im_user_login_access() {
 function _im_user_director_access() {
   global $user;
   //$_SESSION['ldap_user_role'] = 'store_director';
-  if(isset($_SESSION['ldap_user_role']) && ($_SESSION['ldap_user_role'] == 'store_director')) {
+  if (isset($_SESSION['ldap_user_role']) && ($_SESSION['ldap_user_role'] == 'store_director')) {
     return TRUE;
   }
   return FALSE;
@@ -296,10 +291,9 @@ function _im_user_director_access() {
  * This takes care the user access for the getDynamics page ...
  */
 function _im_user_admin_access() {
-	global $user;
-		
-  if(in_array('administrator',$user->roles) || in_array('technical_director',$user->roles)){
-  	return TRUE;
+  global $user;		
+  if (in_array('administrator',$user->roles) || in_array('technical_director',$user->roles)) {
+    return TRUE;
   }
   return FALSE;  
 }
@@ -312,7 +306,7 @@ function im_user_form_user_login_alter(&$form, &$form_state, $form_id) {
   $form['#submit']['0'] = 'im_user_login_submit';
 }
 
-function im_user_login_validate($form, &$form_state){
+function im_user_login_validate($form, &$form_state) {
   global $user;
   global $base_url;
   $username = trim($form_state['values']['name']);
@@ -325,7 +319,7 @@ function im_user_login_validate($form, &$form_state){
     form_set_error('pass', t('Password is required.'));
   }
   else {
-    if(user_authenticate($username, $password) == 1) {
+    if (user_authenticate($username, $password) == 1) {
     $user = user_load(1);
     user_login_finalize($form_state);
   }
@@ -335,12 +329,12 @@ function im_user_login_validate($form, &$form_state){
   }
 }
 
-function im_user_login_submit(&$form, &$form_state){
+function im_user_login_submit(&$form, &$form_state) {
 
 }
 function im_user_get_login_url() {
   global $base_url;
-  if($login_url = variable_get('annuuddi_login_url', '')) {
+  if ($login_url = variable_get('annuuddi_login_url', '')) {
     $login_url = str_replace('{current_domain}', $base_url, $login_url);
   }
   
@@ -365,7 +359,7 @@ function pager_array_splice($data, $limit = 9, $element = 0) {
 
 function _im_user_getdynamics() {	
   $query = db_select('user_getdynamic','u')
-    ->fields('u',array('code','description'));
+    ->fields('u',array('code', 'description'));
   $result = $query->execute();
   $rows = array();
   while($data = $result->fetchObject()) {
@@ -377,27 +371,25 @@ function _im_user_getdynamics() {
 }
 
 function _im_user_getdms() {
-	$query = db_select('user_getdms','u')
-	->fields('u',array('code','description'));
-	$result = $query->execute();
-	$rows = array();
-	while($data = $result->fetchObject()) {
-		$rows[] = array('data' => array('code' => trim($data->code), 'description' => trim($data->description)));
-	}
-
-	$rows = array_map("unserialize", array_unique(array_map("serialize", $rows)));
-	return $rows;
+  $query = db_select('user_getdms', 'u')
+  ->fields('u',array('code', 'description'));
+  $result = $query->execute();
+  $rows = array();
+  while ($data = $result->fetchObject()) {
+    $rows[] = array('data' => array('code' => trim($data->code), 'description' => trim($data->description)));
+  }
+  $rows = array_map("unserialize", array_unique(array_map("serialize", $rows)));
+  return $rows;
 }
 
 function _im_user_getmms() {	
-  $query = db_select('user_getmms','u')
+  $query = db_select('user_getmms', 'u')
     ->fields('u',array('code','description'));
   $result = $query->execute();
   $rows = array();
-  while($data = $result->fetchObject()) {
+  while ($data = $result->fetchObject()) {
     $rows[] = array('data' => array('code' => trim($data->code), 'description' => trim($data->description)));
-  }
-    
+  }    
   $rows = array_map("unserialize", array_unique(array_map("serialize", $rows)));
   return $rows;
 }
@@ -493,7 +485,7 @@ function _im_user_store_preference_ctools($js = FALSE) {
   drupal_prepare_form('preferred_store_node_form', $form, $form_state);*/
   $output = ctools_modal_form_wrapper('preferred_store_node_form', $form_state);
   if (!empty($form_state['executed'])) {
-  	$output = array();
+    $output = array();
     // Close the modal
     $output[] = ctools_modal_command_dismiss();
     $output[] = ctools_ajax_command_reload();        
@@ -538,9 +530,9 @@ function _im_user_store_preference_ctools($js = FALSE) {
 */
 function im_user_theme() {
   return array(
-    'im_userheader_output'=>array(
+    'im_userheader_output' => array(
       'template' => 'theme/im_user_userheaderblock_template',
-      'variables' => array('output' => NULL,),
+      'variables' => array('output' => NULL),
       ),
     '_user_store_preference_form' => array(
       'template' => 'theme/im_user_store_preference_form',
@@ -562,15 +554,15 @@ function im_user_theme() {
 /**
  * Function to fetch the Full name of the user from drupal database.
  */
-function _im_user_get_data($uid){
+function _im_user_get_data($uid) {
   $user_load = user_load($uid);
   $user_data = array();
   $user_data['full_name'] = '';
   if (isset($user_load->field_full_name[LANGUAGE_NONE][0]['value'])) {
-  	$user_data['full_name'] = $user_load->field_full_name[LANGUAGE_NONE][0]['value'];
+    $user_data['full_name'] = $user_load->field_full_name[LANGUAGE_NONE][0]['value'];
   }
-  return $user_data;
 }
+  return $user_data;
 /**
  * 
  * Function to invoke the getUserAttributs webservice method ...
@@ -580,7 +572,7 @@ function _getUserAttributs($user_id) {
   $ladp_id = $_SESSION['ldap_login_key'];
   $obj = new imldapSoapService();
   $user_details = array();
-  $response = $obj->soapRequest('getUserAttributs', array('id' => $ladp_id, 'login' => $user_id, 'attributsType'=> array('givenName', 'cn', 'mail', 'eduPersonOrgUnitDn', 'employeeNumber','uid'),  'pad' => ' '));
+  $response = $obj->soapRequest('getUserAttributs', array('id' => $ladp_id, 'login' => $user_id, 'attributsType' => array('givenName', 'cn', 'mail', 'eduPersonOrgUnitDn', 'employeeNumber','uid'),  'pad' => ' '));
   if ($response->status == "success") {
     $user_details['givenName'] = trim($response->data[0]);
     $user_details['cn'] = ($response->data[1]);
@@ -605,21 +597,22 @@ function im_user_get_user_details() {
   $register_id = !empty($user_details['employeeNumber']) ? trim($user_details['employeeNumber']):trim($user_details['uid']);
   $rid = db_query("SELECT rid FROM {role} WHERE name = :role_name", array(':role_name' => $role))->fetchField();
   if ($rid) {
-  	$_SESSION["regional_user_rid"] = $rid;
+    $_SESSION["regional_user_rid"] = $rid;
   }
-  $register_details = array('register_id' => $register_id,'cn'=>$user_details['cn'],'mail'=>$user_details['mail']);
+  $register_details = array('register_id' => $register_id, 'cn'=>$user_details['cn'], 'mail'=>$user_details['mail']);
   $_SESSION["regional_user_details"] = $register_details;  
-  $query = db_select('users','users');
-  $query->join('users_roles','roles','users.uid=roles.uid');
+  $query = db_select('users', 'users');
+  $query->join('users_roles', 'roles', 'users.uid=roles.uid');
   $result = $query->fields('users', array('uid'))
               ->condition('name', db_like($register_id), '=')
               ->condition('rid', $rid, '=')
               ->range(0, 1)
               ->execute()
               ->fetchField();
-    if ((bool)$result){
+    if ((bool)$result) {
       echo "USER EXITS";
-    }else{
+    } 
+    else{
       echo "SUCCESS";
     }
 }
@@ -627,25 +620,22 @@ function im_user_get_user_details() {
  * 
  * Sales plan : prefilter commercial region -UATIM-801 // to fetch the region code of the specific store
  */
-function fetch_region_code($storeID){
-	      $storeType  = 'region-commerciale';
-        $storeToken = $storeID;
-        $fetchRegion = db_select('store_item_fields','s')
-              ->fields('s',array('ite_lib_value'))
-              ->distinct()
-              ->condition('s.dit_cod_item',$storeType, '=')
-              ->condition('s.pve_code',$storeToken, '=')
-              ->execute();
-             
-		    $storeRegion = $fetchRegion->fetchfield();		   
-		    $regionOptions = _im_sales_plan_get_taxonomy_tid();
-		    $regionCode = array_search($storeRegion, $regionOptions);
-		     
-		    $fetchRegionCode = db_select('field_data_field_taxo_sp_region_code','s')
-	              ->fields('s',array('entity_id'))
-	              ->condition('s.field_taxo_sp_region_code_value',$regionCode, '=')
-	              ->execute();
-	             
-		    $storeRegionId = $fetchRegionCode->fetchfield();	
-		    return $storeRegionId;
+function fetch_region_code($storeID) {
+  $storeType  = 'region-commerciale';
+  $storeToken = $storeID;
+  $fetchRegion = db_select('store_item_fields', 's')
+    ->fields('s',array('ite_lib_value'))
+    ->distinct()
+    ->condition('s.dit_cod_item', $storeType, '=')
+    ->condition('s.pve_code', $storeToken, '=')
+    ->execute();             
+  $storeRegion = $fetchRegion->fetchfield();		   
+  $regionOptions = _im_sales_plan_get_taxonomy_tid();
+  $regionCode = array_search($storeRegion, $regionOptions);
+  $fetchRegionCode = db_select('field_data_field_taxo_sp_region_code', 's')
+  ->fields('s',array('entity_id'))
+  ->condition('s.field_taxo_sp_region_code_value', $regionCode, '=')
+  ->execute();
+  $storeRegionId = $fetchRegionCode->fetchfield();	
+  return $storeRegionId;
 }

@@ -5,24 +5,18 @@
  */
 
 /**
- * This method returns below profile names
- * givenName
- * sn
- * mail
- * inetUserStatus
- * uid
- * cn
- * title
- * @param XML response of WS:getProfil 
+ * 
+ * Enter description here ...
+ * @param XML response: $profile
  */
 function _get_profile_name($profile) {
   $profile_name = array();	
   $counter      = 0;
-  if(!isset($profile->attribut)) return $profile_name;
-  foreach ($profile->attribut as $value){
-  	if(!isset($profile_name[(string)$profile->attribut[$counter]['name']])) {
+  if (!isset($profile->attribut)) return $profile_name;
+  foreach ($profile->attribut as $value) {
+  	if (!isset($profile_name[(string)$profile->attribut[$counter]['name']])) {
       $profile_name[(string)$profile->attribut[$counter]['name']] = (string)$profile->attribut[$counter];
-  	}
+    }
     $counter++;
   }
   return $profile_name;
@@ -34,12 +28,12 @@ function _get_profile_name($profile) {
  * @param XML response of WS:getProfil 
  */
 function _is_carrefour_market($profile) {  
-  if(!isset($profile->grp)) return FALSE;
-  foreach ($profile->grp as $grp){
+  if (!isset($profile->grp)) return FALSE;
+  foreach ($profile->grp as $grp) {
     $counter = 0;
     $level   = '';
     $cn      = ''; 
-    foreach($grp->attr as $attr){
+    foreach ($grp->attr as $attr) {
   	  if((string)$grp->attr[$counter]['type'] == 'level' && (string)$grp->attr[$counter] == 'GRPOPE') {
   		$level = 'GRPOPE';
   	  }
@@ -70,32 +64,27 @@ function _is_carrefour_market($profile) {
  */
 function _get_user_store($profile) {
   if(!isset($profile->grp)) return FALSE;
-  foreach ($profile->grp as $grp){
+  foreach ($profile->grp as $grp) {
     $counter = 0;
     $level   = '';
     $cn      = ''; 
     foreach($grp->attr as $attr){
-  	  if((string)$grp->attr[$counter]['type'] == 'level' && (string)$grp->attr[$counter] == 'AL') {
+  	  if ((string)$grp->attr[$counter]['type'] == 'level' && (string)$grp->attr[$counter] == 'AL') {
   		$level = 'AL';
   	  }
-      if((string)$grp->attr[$counter]['name'] == 'cn') {
+      if ((string)$grp->attr[$counter]['name'] == 'cn') {
   		$cn = (string)$grp->attr[$counter];
   	  }
-  	  if($level == 'AL' && $cn) {
+  	  if ($level == 'AL' && $cn) {
   	  	//assign if DATABASE table is present.
-	  	$result = db_query("SELECT pve_code
-		                        FROM {store_item_fields} sif 
-		                        WHERE sif.dit_cod_item = 'thales'
-		                        AND sif.ite_lib_value = :lib_value",
-		                        array(':lib_value' => $cn)
-		                       );
+	    $result = db_query("SELECT pve_code FROM {store_item_fields} sif WHERE sif.dit_cod_item = 'thales' AND sif.ite_lib_value = :lib_value", array(':lib_value' => $cn));
 		if($result) {
-			$store = $result->fetchObject();
-			if(!empty($store)){
-			  $_SESSION['profil']['store'] = $store->pve_code;
-			}
+		  $store = $result->fetchObject();
+		  if(!empty($store)){
+		    $_SESSION['profil']['store'] = $store->pve_code;
+		  }
 		}
-  	  	return $cn;
+		return $cn;
   	  } 
   	  $counter++;
     }
@@ -110,10 +99,10 @@ function _get_user_store($profile) {
  */
 function _get_user_store_status() {
   //UATIM-852:Addtional check to ensure the user is from the group 0029 , then the user is considered as FRANCHISE user
-  if(isset($_SESSION['franchised_store_user']) && $_SESSION['franchised_store_user'] == 'FRANCHISE') {
+  if (isset($_SESSION['franchised_store_user']) && $_SESSION['franchised_store_user'] == 'FRANCHISE') {
   	return 'FRANCHISE';
   }
-  if(isset($_SESSION['profil']['store']) && $_SESSION['profil']['store']) {
+  if (isset($_SESSION['profil']['store']) && $_SESSION['profil']['store']) {
     $result = db_query("SELECT ite_lib_value
 	                    FROM {store_item_fields} sif 
 	                    WHERE sif.dit_cod_item = 'statut'
@@ -137,19 +126,19 @@ function _get_user_store_status() {
  */
 function _get_user_cadre_status() {
   $profile = simplexml_load_string($_SESSION['getProfil']);
-  if(!isset($profile->grp)) return FALSE;
-  foreach ($profile->grp as $grp){
+  if (!isset($profile->grp)) return FALSE;
+  foreach ($profile->grp as $grp) {
   	$counter = 0;
   	$description = '';
     $cn = ''; 
-    foreach($grp->attr as $attr){
-      if((string)$grp->attr[$counter]['name'] == 'description') {
+    foreach ($grp->attr as $attr) {
+      if ((string)$grp->attr[$counter]['name'] == 'description') {
   		$description = (string)$grp->attr[$counter];
   	  }
-  	  if((string)$grp->attr[$counter]['name'] == 'cn') {
+  	  if ((string)$grp->attr[$counter]['name'] == 'cn') {
   		$cn = (string)$grp->attr[$counter];
   	  }
-  	  if($cn == 'C' && $description == 'cadre') {
+  	  if ($cn == 'C' && $description == 'cadre') {
   	  	return 'cadre';
   	  }
   	  $counter++;
@@ -164,19 +153,19 @@ function _get_user_cadre_status() {
  */
 function _get_user_stores($profile) {
   $stores = array();
-  if(!isset($profile->grp)) return FALSE;
+  if (!isset($profile->grp)) return FALSE;
   foreach ($profile->grp as $grp){
     $counter = 0;
     $level   = '';
     $cn      = ''; 
-    foreach($grp->attr as $attr){
-  	  if((string)$grp->attr[$counter]['type'] == 'level' && (string)$grp->attr[$counter] == 'AL') {
+    foreach ($grp->attr as $attr){
+  	  if ((string)$grp->attr[$counter]['type'] == 'level' && (string)$grp->attr[$counter] == 'AL') {
   		$level = 'AL';
   	  }
-      if((string)$grp->attr[$counter]['name'] == 'cn') {
+      if ((string)$grp->attr[$counter]['name'] == 'cn') {
   		$cn = (string)$grp->attr[$counter];
   	  }
-  	  if($level == 'AL' && $cn) {
+  	  if ($level == 'AL' && $cn) {
   	  	//assign if DATABASE table is present.
 	  	$result = db_query("SELECT pve_code
 		                        FROM {store_item_fields} sif 
@@ -308,19 +297,19 @@ function _is_store_manager_trainee_category($profile) {
  * returns - FALSE, if the user is not a Foreman role.
  */
 function _is_user_foreman($profile) {
-  if(!isset($profile->grp)) return FALSE;
-  foreach ($profile->grp as $grp){
+  if (!isset($profile->grp)) return FALSE;
+  foreach ($profile->grp as $grp) {
     $counter = 0;
     $classification   = '';
     $a      = ''; 
-    foreach($grp->attr as $attr){
+    foreach ($grp->attr as $attr) {
   	  if((string)$grp->attr[$counter] == 'classification') {
   		$classification = 'classification';
   	  }
-      if((string)$grp->attr[$counter] == 'A') {
+      if ((string)$grp->attr[$counter] == 'A') {
   		$a = 'A';
   	  }
-  	  if($classification == 'classification' && $a == 'A') {
+  	  if ($classification == 'classification' && $a == 'A') {
   		return TRUE;
   	  } 
   	  $counter++;
@@ -331,24 +320,23 @@ function _is_user_foreman($profile) {
 
 /**
  * This method decides whether user is erteco market user or not.
- * returns - TRUE/FALSE, as per erteco market proxi user status. 
+ * returns - TRUE/FALSE, as per erteco market user status. 
  * @param XML response of WS:getProfil 
  */
 function _is_erteco_market($profile) {  
-  if(!isset($profile->grp)) return FALSE;
+  if (!isset($profile->grp)) return FALSE;
   foreach ($profile->grp as $grp){
     $counter = 0;
     $level   = '';
     $cn      = ''; 
     foreach($grp->attr as $attr){
-  	  if((string)$grp->attr[$counter]['type'] == 'level' && (string)$grp->attr[$counter] == 'GRPOPE') {
+  	  if ((string)$grp->attr[$counter]['type'] == 'level' && (string)$grp->attr[$counter] == 'GRPOPE') {
   		$level = 'GRPOPE';
   	  }      
       if((string)$grp->attr[$counter]['name'] == 'cn' && (string)$grp->attr[$counter] == '0029') {
   		$cn = '0029';
   	  }  	  
-  	  if($level == 'GRPOPE' && $cn == '0029') {
-  	  	$_SESSION['proxi_user'] = 'proxi_user';	
+  	  if ($level == 'GRPOPE' && $cn == '0029') {
   		return TRUE;
   	  }  
   	  $counter++;
